@@ -16,7 +16,9 @@ function saveState(){
     const data = {
       theme: document.documentElement.getAttribute('data-theme'),
       script, accent, slow, activeLesson, filterMode, mode, learnedFilter,
-      learnedWords: Array.from(learnedWordsSet)
+      learnedWords: Array.from(learnedWordsSet),
+      // Training setup preferences
+      tsSource, tsCustomKey, tsCount, tsDir, tsOrder, tsStatus
     };
     localStorage.setItem(STORE_KEY, JSON.stringify(data));
   } catch(e){}
@@ -36,6 +38,14 @@ let playing = null, queue = [], qIndex = -1;
 
 const learnedWordsSet = new Set(saved?.learnedWords || []);
 
+// Training Setup State
+let tsSource = saved?.tsSource || 'current'; // current | all | custom
+let tsCustomKey = saved?.tsCustomKey || 'all';
+let tsCount = saved?.tsCount || '20';        // 10 | 20 | 50 | all
+let tsDir = saved?.tsDir || 'eng_uzb';       // eng_uzb | uzb_eng | mix
+let tsOrder = saved?.tsOrder || 'shuffle';    // shuffle | seq
+let tsStatus = saved?.tsStatus || 'unlearned'; // unlearned | all | learned
+
 function getWordKey(g, w) {
   return `${g.topic}::${g.date}::${w[0]}`;
 }
@@ -53,12 +63,20 @@ function setTheme(t) {
   document.documentElement.setAttribute('data-theme', t);
   const btn = document.getElementById('themeBtn');
   const span = btn.querySelector('span');
+  const icon = document.getElementById('themeIcon');
+  
   if (t === 'dark') {
     span.textContent = 'Oq rejim';
     btn.setAttribute('aria-label', 'Oq rejimga o\'tish');
+    if(icon) {
+      icon.innerHTML = `<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>`;
+    }
   } else {
     span.textContent = 'Qora rejim';
     btn.setAttribute('aria-label', 'Qora rejimga o\'tish');
+    if(icon) {
+      icon.innerHTML = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`;
+    }
   }
   saveState();
 }
@@ -285,8 +303,8 @@ function updateSegs() {
 
 function seg(id, initialVal, cb){
   const wrap = document.getElementById(id);
+  if(!wrap) return;
   
-  // set initial button state
   const btn = wrap.querySelector(`button[data-v="${initialVal}"]`) || wrap.querySelector('button');
   if(btn) {
     [...wrap.children].forEach(x => { if(x.tagName==='BUTTON') { x.classList.remove('on'); x.setAttribute('aria-checked','false'); } });
@@ -349,6 +367,21 @@ function buildLessons(){
   secs.forEach(L => {
     const lCount = L.w.filter(i => learnedWordsSet.has(i.key)).length;
     mk(filterMode === 'date' ? fmt(L.date) : L.topic, L.key, L.w.length + ' ta', lCount);
+  });
+
+  populateTsSelect(secs);
+}
+
+function populateTsSelect(secs) {
+  const tsSelect = document.getElementById('tsSelect');
+  if(!tsSelect) return;
+  tsSelect.innerHTML = '<option value="all">Barcha darslar (212 ta)</option>';
+  secs.forEach(L => {
+    const opt = document.createElement('option');
+    opt.value = L.key;
+    opt.textContent = `${filterMode === 'date' ? fmt(L.date) : L.topic} (${L.w.length} ta so'z)`;
+    if(L.key === tsCustomKey) opt.selected = true;
+    tsSelect.appendChild(opt);
   });
 }
 
@@ -425,39 +458,102 @@ playBtn.addEventListener('click', () => {
   step();
 });
 
-/* ---------- FLASHCARD TRAINING MODE ---------- */
+/* ---------- TRAINING SETUP & FLASHCARD SYSTEM ---------- */
+const trainSetupModal = document.getElementById('trainSetupModal');
 const trainModal = document.getElementById('trainModal');
 const trainBtn = document.getElementById('trainBtn');
+const closeSetup = document.getElementById('closeSetup');
 const closeTrain = document.getElementById('closeTrain');
+const tsStartBtn = document.getElementById('tsStartBtn');
+const tsSelectWrap = document.getElementById('tsSelectWrap');
+const tsSelect = document.getElementById('tsSelect');
+
+// Setup Segments
+seg('tsSourceSeg', tsSource, v => {
+  tsSource = v;
+  tsSelectWrap.style.display = (v === 'custom') ? 'flex' : 'none';
+  saveState();
+});
+
+seg('tsCountSeg', tsCount, v => { tsCount = v; saveState(); });
+seg('tsDirSeg', tsDir, v => { tsDir = v; saveState(); });
+seg('tsOrderSeg', tsOrder, v => { tsOrder = v; saveState(); });
+seg('tsStatusSeg', tsStatus, v => { tsStatus = v; saveState(); });
+
+tsSelect.addEventListener('change', e => {
+  tsCustomKey = e.target.value;
+  saveState();
+});
+
+function openTrainSetup() {
+  trainSetupModal.classList.add('open');
+  updateSegs();
+}
+
+trainBtn.addEventListener('click', openTrainSetup);
+closeSetup.addEventListener('click', () => trainSetupModal.classList.remove('open'));
+closeTrain.addEventListener('click', () => trainModal.classList.remove('open'));
 
 let trainList = [];
 let trainIdx = 0;
 let trainFlipped = false;
+let currentCardDir = 'eng_uzb'; // eng_uzb | uzb_eng for current card
 
-function startTraining() {
-  trainList = [];
-  sections().forEach(L => {
-    if(activeLesson !== 'all' && activeLesson !== L.key) return;
-    L.w.forEach(item => {
-      const isLearned = learnedWordsSet.has(item.key);
-      if(learnedFilter === 'unlearned' && isLearned) return;
-      if(learnedFilter === 'learned' && !isLearned) return;
-      const w = item.w;
-      if(query && !(w[0]+' '+(w[1]||'')+' '+w[8]+' '+w[9]).toLowerCase().includes(query)) return;
-      trainList.push(item);
+function startCustomTraining() {
+  trainSetupModal.classList.remove('open');
+  
+  // 1. Gather Words by Source
+  let pool = [];
+  const secs = sections();
+
+  if (tsSource === 'current') {
+    secs.forEach(L => {
+      if(activeLesson !== 'all' && activeLesson !== L.key) return;
+      L.w.forEach(item => pool.push(item));
     });
+  } else if (tsSource === 'custom') {
+    secs.forEach(L => {
+      if(tsCustomKey !== 'all' && L.key !== tsCustomKey) return;
+      L.w.forEach(item => pool.push(item));
+    });
+  } else {
+    // all words
+    secs.forEach(L => L.w.forEach(item => pool.push(item)));
+  }
+
+  // 2. Filter by Status
+  pool = pool.filter(item => {
+    const isLearned = learnedWordsSet.has(item.key);
+    if(tsStatus === 'unlearned' && isLearned) return false;
+    if(tsStatus === 'learned' && !isLearned) return false;
+    return true;
   });
 
-  if(!trainList.length) {
-    alert("Mashg'ulot o'tkazish uchun so'zlar topilmadi!");
+  if(!pool.length) {
+    alert("Tanlangan sozlamalar bo'yicha mashg'ulot o'tkazish uchun so'zlar topilmadi!");
     return;
   }
 
-  trainList.sort(() => Math.random() - 0.5);
+  // 3. Order (Shuffle vs Sequential)
+  if (tsOrder === 'shuffle') {
+    pool.sort(() => Math.random() - 0.5);
+  }
+
+  // 4. Count Limit
+  if (tsCount !== 'all') {
+    const limit = parseInt(tsCount, 10);
+    if (!isNaN(limit) && limit > 0) {
+      pool = pool.slice(0, limit);
+    }
+  }
+
+  trainList = pool;
   trainIdx = 0;
   trainModal.classList.add('open');
   showTrainCard();
 }
+
+tsStartBtn.addEventListener('click', startCustomTraining);
 
 function showTrainCard() {
   if(trainIdx >= trainList.length) {
@@ -469,16 +565,43 @@ function showTrainCard() {
   const item = trainList[trainIdx];
   const w = item.w;
 
+  // Determine Direction for Card
+  if (tsDir === 'mix') {
+    currentCardDir = Math.random() > 0.5 ? 'eng_uzb' : 'uzb_eng';
+  } else {
+    currentCardDir = tsDir;
+  }
+
   document.getElementById('trainProgress').textContent = `${trainIdx + 1} / ${trainList.length}`;
   document.getElementById('trainBarFill').style.width = `${((trainIdx + 1) / trainList.length) * 100}%`;
 
-  document.getElementById('tPrompt').textContent = wordOf(w);
-  document.getElementById('tIpa').textContent = ipaOf(w);
-  document.getElementById('tPron').textContent = pronOf(w);
-  document.getElementById('tRu').textContent = w[8];
-  document.getElementById('tUz').textContent = w[9];
+  const promptEl = document.getElementById('tPrompt');
+  const ipaEl = document.getElementById('tIpa');
+  const pronEl = document.getElementById('tPron');
+  const ruEl = document.getElementById('tRu');
+  const uzEl = document.getElementById('tUz');
+  const answerBox = document.getElementById('tAnswerBox');
 
-  document.getElementById('tAnswerBox').classList.remove('show');
+  if (currentCardDir === 'eng_uzb') {
+    promptEl.textContent = wordOf(w);
+    promptEl.setAttribute('lang', 'en');
+    ipaEl.textContent = ipaOf(w);
+    ipaEl.style.display = 'block';
+    pronEl.textContent = pronOf(w);
+    pronEl.style.display = 'block';
+    ruEl.textContent = 'RU: ' + w[8];
+    uzEl.textContent = 'UZ: ' + w[9];
+  } else {
+    // UZB -> ENG
+    promptEl.textContent = w[9]; // Uzbek
+    promptEl.setAttribute('lang', 'uz');
+    ipaEl.style.display = 'none';
+    pronEl.style.display = 'none';
+    ruEl.textContent = 'RU: ' + w[8];
+    uzEl.textContent = 'ENG: ' + wordOf(w) + ' (' + ipaOf(w) + ')';
+  }
+
+  answerBox.classList.remove('show');
   document.getElementById('tShowBtn').style.display = 'block';
   document.getElementById('tHardBtn').style.display = 'none';
   document.getElementById('tEasyBtn').style.display = 'none';
@@ -486,11 +609,19 @@ function showTrainCard() {
 
 function revealTrainAnswer() {
   trainFlipped = true;
+  const item = trainList[trainIdx];
+  const w = item.w;
+
+  if (currentCardDir === 'uzb_eng') {
+    document.getElementById('tIpa').style.display = 'block';
+    document.getElementById('tPron').style.display = 'block';
+  }
+
   document.getElementById('tAnswerBox').classList.add('show');
   document.getElementById('tShowBtn').style.display = 'none';
   document.getElementById('tHardBtn').style.display = 'block';
   document.getElementById('tEasyBtn').style.display = 'block';
-  speak(wordOf(trainList[trainIdx].w));
+  speak(wordOf(w));
 }
 
 function finishTraining() {
@@ -502,9 +633,6 @@ function finishTraining() {
   document.getElementById('tHardBtn').style.display = 'none';
   document.getElementById('tEasyBtn').style.display = 'none';
 }
-
-trainBtn.addEventListener('click', startTraining);
-closeTrain.addEventListener('click', () => trainModal.classList.remove('open'));
 
 document.getElementById('tListenBtn').addEventListener('click', () => {
   if(trainList[trainIdx]) speak(wordOf(trainList[trainIdx].w));
@@ -529,6 +657,12 @@ document.getElementById('tEasyBtn').addEventListener('click', () => {
 
 /* ---------- KEYBOARD SHORTCUTS ---------- */
 window.addEventListener('keydown', e => {
+  if(trainSetupModal.classList.contains('open')) {
+    if(e.key === 'Escape') trainSetupModal.classList.remove('open');
+    else if(e.key === 'Enter') startCustomTraining();
+    return;
+  }
+
   if(trainModal.classList.contains('open')) {
     if(e.key === 'Escape') {
       trainModal.classList.remove('open');

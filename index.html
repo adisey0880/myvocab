@@ -22,7 +22,7 @@
     </h1>
     <span class="count" id="count" aria-live="polite">0 ta so'z</span>
     <button id="themeBtn" aria-label="Mavzuni o'zgartirish" title="Rejimni almashtirish">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      <svg id="themeIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
       <span>Oq rejim</span>
     </button>
   </div>
@@ -103,7 +103,89 @@
   • Imlo farqi: <b>Realise/Traveller</b> (BrE) → <b>Realize/Traveler</b> (AmE) — aksentni almashtirsangiz o'zgaradi.
 </footer>
 
-<!-- Training Mode Modal -->
+<!-- Training Setup Modal -->
+<div class="modal-overlay" id="trainSetupModal" role="dialog" aria-modal="true" aria-label="Mashg'ulot sozlamalari">
+  <div class="setup-card-wrap">
+    <div class="train-header">
+      <h3 class="setup-title">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" style="color:var(--accent)"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        🎯 Mashg'ulot Sozlamalari
+      </h3>
+      <button class="close-modal" id="closeSetup" aria-label="Yopish">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="setup-grid">
+      <!-- 1. Manba -->
+      <div class="ts-group">
+        <span class="ts-label">1. So'zlar Manbasi</span>
+        <div class="seg" id="tsSourceSeg" role="radiogroup">
+          <div class="seg-pill"></div>
+          <button data-v="current" role="radio" aria-checked="true" class="on">Joriy filtr</button>
+          <button data-v="all" role="radio" aria-checked="false">Hammasi (212)</button>
+          <button data-v="custom" role="radio" aria-checked="false">Tanlangan dars</button>
+        </div>
+      </div>
+
+      <!-- Custom Lesson Select -->
+      <div class="ts-group" id="tsSelectWrap" style="display:none;">
+        <span class="ts-label">Darsni tanlang</span>
+        <select class="ts-select" id="tsSelect"></select>
+      </div>
+
+      <!-- 2. Nechta so'z -->
+      <div class="ts-group">
+        <span class="ts-label">2. So'zlar soni</span>
+        <div class="seg" id="tsCountSeg" role="radiogroup">
+          <div class="seg-pill"></div>
+          <button data-v="10" role="radio" aria-checked="false">10 ta</button>
+          <button data-v="20" role="radio" aria-checked="true" class="on">20 ta</button>
+          <button data-v="50" role="radio" aria-checked="false">50 ta</button>
+          <button data-v="all" role="radio" aria-checked="false">Barchasi</button>
+        </div>
+      </div>
+
+      <!-- 3. Yo'nalish -->
+      <div class="ts-group">
+        <span class="ts-label">3. Yo'nalish</span>
+        <div class="seg" id="tsDirSeg" role="radiogroup">
+          <div class="seg-pill"></div>
+          <button data-v="eng_uzb" role="radio" aria-checked="true" class="on">ENG → UZB</button>
+          <button data-v="uzb_eng" role="radio" aria-checked="false">UZB → ENG</button>
+          <button data-v="mix" role="radio" aria-checked="false">Aralash 🔀</button>
+        </div>
+      </div>
+
+      <!-- 4. Tartib -->
+      <div class="ts-group">
+        <span class="ts-label">4. Tartib</span>
+        <div class="seg" id="tsOrderSeg" role="radiogroup">
+          <div class="seg-pill"></div>
+          <button data-v="shuffle" role="radio" aria-checked="true" class="on">Tasodifiy (Shuffle)</button>
+          <button data-v="seq" role="radio" aria-checked="false">Ketma-ket</button>
+        </div>
+      </div>
+
+      <!-- 5. Status -->
+      <div class="ts-group">
+        <span class="ts-label">5. Status</span>
+        <div class="seg" id="tsStatusSeg" role="radiogroup">
+          <div class="seg-pill"></div>
+          <button data-v="unlearned" role="radio" aria-checked="true" class="on">Faqat yangi</button>
+          <button data-v="all" role="radio" aria-checked="false">Barchasi</button>
+          <button data-v="learned" role="radio" aria-checked="false">Yodlangan</button>
+        </div>
+      </div>
+
+      <button class="ts-start-btn" id="tsStartBtn">
+        ▶ Mashg'ulotni boshlash
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Active Training Flashcard Modal -->
 <div class="modal-overlay" id="trainModal" role="dialog" aria-modal="true" aria-label="Mashg'ulot rejimida takrorlash">
   <div class="train-card-wrap">
     <div class="train-header">
