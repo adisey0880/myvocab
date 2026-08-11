@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="uz" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lug'at — mening so'zlarim</title>
+<meta name="apple-mobile-web-app-title" content="Lug'at">
+<meta name="application-name" content="Lug'at">
+<meta name="theme-color" content="#0d1014">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230d1014'/><text x='32' y='45' font-size='36' font-family='Arial' font-weight='bold' fill='%238fa2ff' text-anchor='middle'>L</text></svg>">
+<style>
+  :root{
+    --r:12px;
+    --shadow:0 1px 2px rgba(0,0,0,.06), 0 4px 14px rgba(0,0,0,.05);
+  }
+  [data-theme="dark"]{
+    --bg:#0d1014; --panel:#161b22; --panel-2:#1c222c; --line:#262d38;
+    --ink:#e7ebf0; --ink-2:#c3cad6; --muted:#828d9d;
+    --accent:#8fa2ff; --accent-soft:#1d2440; --accent-ink:#0d1014;
+    --ipa:#d2707a; --cyr:#57b6a4;
+    --shadow:none;
+  }
+  [data-theme="light"]{
+    --bg:#f4f6fa; --panel:#ffffff; --panel-2:#eef1f7; --line:#e2e6ee;
+    --ink:#131722; --ink-2:#3d4557; --muted:#6b7488;
+    --accent:#3d4fd4; --accent-soft:#e8ebfd; --accent-ink:#ffffff;
+    --ipa:#b8434f; --cyr:#1f7a68;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+    font-size:16px;line-height:1.5;padding-bottom:70px;
+    transition:background .2s,color .2s;
+  }
+  header{
+    position:sticky;top:0;z-index:30;background:var(--bg);
+    border-bottom:1px solid var(--line);padding:12px 18px 10px;
+  }
+  .hrow{max-width:1240px;margin:0 auto;}
+  .titlebar{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+  h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.2px;flex:1;}
+  h1 em{font-style:normal;color:var(--accent);}
+  .count{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums;}
+
+  .bar{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-bottom:8px;}
+  input[type=search]{
+    flex:1 1 190px;min-width:0;background:var(--panel);border:1px solid var(--line);
+    color:var(--ink);padding:9px 13px;border-radius:var(--r);font-size:15px;outline:none;
+    font-family:inherit;
+  }
+  input[type=search]:focus{border-color:var(--accent);}
+  button{
+    background:var(--panel);border:1px solid var(--line);color:var(--ink-2);
+    padding:8px 13px;border-radius:var(--r);font-size:13.5px;cursor:pointer;
+    font-family:inherit;transition:.15s;white-space:nowrap;
+  }
+  button:hover{border-color:var(--accent);color:var(--ink);}
+  button:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  button.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600;}
+  button.on:hover{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);}
+
+  .segwrap{display:inline-flex;align-items:center;gap:7px;}
+  .segwrap > .cap{font-size:11px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);}
+  .seg{display:inline-flex;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;}
+  .seg button{border:0;border-radius:0;background:transparent;color:var(--muted);padding:8px 13px;}
+  .seg button + button{border-left:1px solid var(--line);}
+  .seg button:hover{background:var(--panel-2);color:var(--ink);}
+  .seg button.on{
+    background:var(--accent);color:var(--accent-ink);font-weight:700;border-radius:0;
+  }
+  .seg button.on:hover{background:var(--accent);color:var(--accent-ink);}
+
+  .lessons{display:flex;gap:6px;overflow-x:auto;padding:2px 0;scrollbar-width:thin;}
+  .lessons::-webkit-scrollbar{height:0;}
+  .lessons button{border-radius:22px;padding:6px 13px;font-size:13px;}
+  .lessons button .d{opacity:.65;font-size:11.5px;margin-left:5px;font-variant-numeric:tabular-nums;}
+
+  main{max-width:1240px;margin:0 auto;padding:16px 18px 0;}
+  .lhead{
+    display:flex;align-items:baseline;gap:10px;margin:20px 0 10px;
+    padding-bottom:7px;border-bottom:1px solid var(--line);
+  }
+  .lhead h2{margin:0;font-size:13px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--ink-2);}
+  .lhead .date{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(275px,1fr));gap:11px;}
+  .card{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--r);
+    padding:14px 15px 13px;box-shadow:var(--shadow);cursor:pointer;
+    transition:border-color .15s,transform .1s;
+  }
+  .card:hover{border-color:var(--accent);}
+  .card:active{transform:scale(.995);}
+  .card.playing{border-color:var(--accent);background:var(--accent-soft);}
+  .top{display:flex;align-items:flex-start;gap:10px;justify-content:space-between;}
+  .en{font-size:20px;font-weight:700;letter-spacing:-.3px;line-height:1.2;}
+  .listen{
+    display:inline-flex;align-items:center;gap:5px;background:var(--accent-soft);
+    color:var(--accent);border:0;border-radius:8px;padding:6px 10px;font-size:12.5px;
+    font-weight:600;flex-shrink:0;
+  }
+  .card.playing .listen{background:var(--accent);color:var(--accent-ink);}
+  .ipa{color:var(--ipa);font-size:14px;margin-top:3px;}
+  .pron{font-size:14.5px;margin-top:6px;font-style:italic;color:var(--accent);}
+  .pron.cyr{color:var(--cyr);}
+  .meta{margin-top:11px;display:grid;grid-template-columns:26px 1fr;gap:3px 9px;font-size:14px;}
+  .lbl{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px;padding-top:3px;}
+  .val{color:var(--ink-2);}
+  .val.uz{color:var(--ink);font-weight:500;}
+
+  /* 1-rejim: ENG → UZB (tarjima yashirilgan) */
+  body.hide-tr .meta,body.hide-tr .pron{filter:blur(5px);transition:filter .12s;}
+  /* 2-rejim: UZB → ENG (inglizcha yashirilgan) */
+  body.hide-en .en,body.hide-en .ipa,body.hide-en .pron{filter:blur(6px);transition:filter .12s;}
+  /* javobni ochish: kartani bosing (yoki kursor tegsa) */
+  .card:hover .meta,.card:hover .pron,.card:hover .en,.card:hover .ipa,
+  .card.revealed .meta,.card.revealed .pron,.card.revealed .en,.card.revealed .ipa,
+  .card.playing .meta,.card.playing .pron,.card.playing .en,.card.playing .ipa{filter:none;}
+
+  .empty{color:var(--muted);text-align:center;padding:50px 0;font-size:14px;}
+  .warn{
+    display:none;background:var(--accent-soft);border:1px solid var(--accent);
+    color:var(--ink);padding:9px 13px;border-radius:var(--r);font-size:13px;margin-top:8px;
+  }
+  footer{
+    max-width:1240px;margin:34px auto 0;padding:18px;border-top:1px solid var(--line);
+    color:var(--muted);font-size:12.5px;line-height:1.8;
+  }
+  footer b{color:var(--ink-2);}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;}}
+  @media (max-width:520px){
+    header{padding:10px 12px 8px;} main{padding:12px 12px 0;}
+    .grid{grid-template-columns:1fr;}
+    h1{font-size:16px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+ <div class="hrow">
+  <div class="titlebar">
+    <h1>Mening <em>lug'atim</em></h1>
+    <span class="count" id="count"></span>
+    <button id="theme" title="Rejimni almashtirish">☀︎ Oq rejim</button>
+  </div>
+
+  <div class="bar">
+    <input type="search" id="q" placeholder="So'z qidirish…" autocomplete="off">
+    <span class="segwrap">
+      <span class="cap">Yozuv</span>
+      <span class="seg" id="scriptSeg">
+        <button data-v="lat" class="on">Lotin</button>
+        <button data-v="cyr">Кирилл</button>
+      </span>
+    </span>
+    <span class="segwrap">
+      <span class="cap">Aksent</span>
+      <span class="seg" id="accentSeg">
+        <button data-v="us" class="on">🇺🇸 American</button>
+        <button data-v="uk">🇬🇧 British</button>
+      </span>
+    </span>
+  </div>
+
+  <div class="bar">
+    <button id="slow">Sekin</button>
+    <button id="hideTr">Yashirish: yo‘q</button>
+    <button id="playAll">▶ Hammasi</button>
+  </div>
+
+  <div class="bar">
+    <span class="segwrap">
+      <span class="cap">Filtr</span>
+      <span class="seg" id="modeSeg">
+        <button data-v="date" class="on">Sana</button>
+        <button data-v="topic">Mavzu</button>
+      </span>
+    </span>
+  </div>
+
+  <div class="lessons" id="lessons"></div>
+  <div class="warn" id="warn">Ovoz ishlamayapti — sahifada bir marta bosing yoki Chrome/Safari'da oching.</div>
+ </div>
+</header>
+
+<main id="list"></main>
+
+<footer>
+  <b>Talaffuz belgilari:</b><br>
+  • <b>th</b> (θ/ð) o'zbekchada yo'q — til uchi tishlar orasida. "с"/"з" faqat eng yaqin variant.<br>
+  • <b>ё / yo</b> = /ɜː/ tovushi (work, surface, research). Amerikanchada "r" bilan, britanchada "r"siz.<br>
+  • Amerikanchada so'z oxiridagi <b>r</b> aytiladi (sailor → сэйла<b>р</b>), britanchada aytilmaydi (сэйла).<br>
+  • Amerikanchada unlilar orasidagi <b>t</b> yumshoq <b>d</b> kabi: later → лэй<b>д</b>ар.<br>
+  • Imlo farqi: <b>Realise/Traveller</b> (BrE) → <b>Realize/Traveler</b> (AmE) — aksentni almashtirsangiz o'zgaradi.
+</footer>
+
+<script>
+/* ============================================================
+   YANGI DARS QO'SHISH:
+   GROUPS ro'yxatiga yangi obyekt qo'shing:
+   {date:"YYYY-MM-DD", topic:"6 X", w:[ ... ]}
+   So'z formati:
+   [en_BR, en_US(yoki null), ipaBR, latBR, cyrBR, ipaUS, latUS, cyrUS, RU, UZ]
+   ============================================================ */
+const GROUPS = [
+ {date:"2026-08-11", topic:"7 C / 7 D", w:[
+  ["Instruction",null,"/ɪnˈstrʌkʃn/","instrakshn","инстракшн","/ɪnˈstrʌkʃən/","instrakshn","инстракшн","Инструкция","Ko‘rsatma"],
+  ["Experience",null,"/ɪkˈspɪəriəns/","ikspiarians","икспиарианс","/ɪkˈspɪriəns/","ikspirians","икспирианс","Опыт; пережить","Tajriba; boshdan kechirmoq"],
+  ["Slow",null,"/sləʊ/","slou","слоу","/sloʊ/","slou","слоу","Медленный","Sekin"],
+  ["Access",null,"/ˈækses/","ekses","эксэс","/ˈækses/","ekses","эксэс","Иметь доступ к чему-л.","Kirish (kompyuterga)"],
+  ["Crash",null,"/kræʃ/","kresh","крэш","/kræʃ/","kresh","крэш","Разбиться, сломаться","Buzilmoq (kompyuter)"],
+  ["Lose",null,"/luːz/","luuz","луз","/luːz/","luuz","луз","Терять","Yo‘qotmoq"],
+  ["Set up",null,"/ˌset ˈʌp/","set ap","сэт ап","/ˌset ˈʌp/","sed ap","сэд ап","Устанавливать, настроить","Sozlamoq, o‘rnatmoq"],
+  ["Remove",null,"/rɪˈmuːv/","rimuuv","римув","/rɪˈmuːv/","rimuuv","римув","Убирать, удалять","Olib tashlamoq"],
+  ["Install",null,"/ɪnˈstɔːl/","instool","инстоол","/ɪnˈstɑːl/","instaal","инстаал","Устанавливать","O‘rnatmoq"],
+  ["Turn on",null,"/ˌtɜːn ˈɒn/","tyon on","тён он","/ˌtɝːn ˈɑːn/","tyorn aan","тёрн аан","Включать","Yoqmoq"],
+  ["Cable",null,"/ˈkeɪbl/","keybl","кэйбл","/ˈkeɪbl/","keybl","кэйбл","Кабель","Kabel"],
+  ["Follow",null,"/ˈfɒləʊ/","folou","фолоу","/ˈfɑːloʊ/","faalou","фаалоу","Соблюдать, следовать","Amal qilmoq, ergashmoq"],
+  ["Restart",null,"/ˌriːˈstɑːt/","riistaat","риистаат","/ˌriːˈstɑːrt/","riistaart","риистаарт","Перезапускать","Qayta ishga tushirmoq"],
+  ["Identify",null,"/aɪˈdentɪfaɪ/","aydentifay","айдэнтифай","/aɪˈdenəfaɪ/","aydenafay","айдэнафай","Определять","Aniqlamoq"],
+  ["Sequence",null,"/ˈsiːkwəns/","siikwans","сииквaнс","/ˈsiːkwəns/","siikwans","сииквaнс","Последовательность","Ketma-ketlik"],
+  ["Order",null,"/ˈɔːdə(r)/","ooda","оода","/ˈɔːrdɚ/","oordar","оордар","Порядок","Tartib"],
+  ["Mark",null,"/mɑːk/","maak","маак","/mɑːrk/","maark","маарк","Отмечать, оценивать","Belgilamoq, baholamoq"],
+  ["Stage",null,"/steɪdʒ/","steyj","стэйж","/steɪdʒ/","steyj","стэйж","Этап (сцена)","Bosqich (sahna)"],
+  ["Power source",null,"/ˈpaʊə sɔːs/","paua soos","пауа соос","/ˈpaʊɚ sɔːrs/","pauar sors","пауар сорс","Источник питания","Quvvat manbai"],
+  ["Miss",null,"/mɪs/","mis","мис","/mɪs/","mis","мис","Пропустить; скучать","O‘tqazib yubormoq; sog‘inmoq"],
+  ["Desktop",null,"/ˈdesktɒp/","desktop","дэсктоп","/ˈdesktɑːp/","desktaap","дэсктаап","Рабочий стол (компьютер)","Ish stoli (kompyuter)"],
+  ["Drag",null,"/dræɡ/","dreg","дрэг","/dræɡ/","dreg","дрэг","Тащить, перетаскивать","Olib o‘tmoq, sudramoq"],
+  ["Folder",null,"/ˈfəʊldə(r)/","foulda","фоулда","/ˈfoʊldɚ/","fouldar","фоулдар","Папка","Papka, jild"],
+  ["Solve",null,"/sɒlv/","solv","солв","/sɑːlv/","saalv","саалв","Решать","Hal qilmoq"],
+  ["Cause",null,"/kɔːz/","kooz","кооз","/kɑːz/","kaaz","кааз","Причинять, вызывать","Sabab bo‘lmoq"],
+  ["Select",null,"/sɪˈlekt/","silekt","силэкт","/sɪˈlekt/","silekt","силэкт","Выбирать","Tanlamoq"],
+  ["Update",null,"/ˌʌpˈdeɪt/","apdeyt","апдэйт","/ˈʌpdeɪt/","apdeyt","апдэйт","Обновлять","Yangilamoq"],
+  ["Film",null,"/fɪlm/","film","филм","/fɪlm/","film","филм","Снимать кинофильм","Kinoga olmoq"],
+  ["Primary school",null,"/ˈpraɪməri skuːl/","praymari skuul","праймари скуул","/ˈpraɪmeri skuːl/","praymeri skuul","праймэри скуул","Начальная школа","Boshlang‘ich maktab"],
+  ["Band",null,"/bænd/","bend","бэнд","/bænd/","bend","бэнд","Группа, оркестр","Guruh, orkestr"],
+  ["Eat out",null,"/ˌiːt ˈaʊt/","iit aut","иит аут","/ˌiːt ˈaʊt/","iid aut","иид аут","Есть вне дома","Tashqarida ovqatlanmoq"],
+  ["Useless",null,"/ˈjuːsləs/","yuuslas","юслас","/ˈjuːsləs/","yuuslas","юслас","Бесполезный","Foydasiz"],
+  ["Write down",null,"/ˌraɪt ˈdaʊn/","rayt daun","райт даун","/ˌraɪt ˈdaʊn/","rayd daun","райд даун","Записывать","Yozib qo‘ymoq"]
+ ]},
+ {date:"2026-08-08", topic:"7 A", w:[
+  ["Digital",null,"/ˈdɪdʒɪtl/","dijitl","дижитл","/ˈdɪdʒətl/","dijatl","дижатл","Цифровой","Raqamli"],
+  ["Equipment",null,"/ɪˈkwɪpmənt/","ikwipmant","иквипмант","/ɪˈkwɪpmənt/","ikwipmant","иквипмант","Оборудование","Jihoz"],
+  ["Modern",null,"/ˈmɒdn/","modn","моди̇н","/ˈmɑːdɚn/","maadarn","маадарн","Современный","Zamonaviy"],
+  ["Item",null,"/ˈaɪtəm/","aytam","айтам","/ˈaɪtəm/","aydam","айдам","Вещь, товар","Buyum"],
+  ["Charger",null,"/ˈtʃɑːdʒə(r)/","chaaja","чаажа","/ˈtʃɑːrdʒɚ/","chaarjar","чааржар","Зарядка","Zaryadka"],
+  ["Headphones",null,"/ˈhedfəʊnz/","hedfounz","хэдфоунз","/ˈhedfoʊnz/","hedfounz","хэдфоунз","Наушники","Quloqchinlar"],
+  ["Keyboard",null,"/ˈkiːbɔːd/","kiibood","киибоод","/ˈkiːbɔːrd/","kiibord","кииборд","Клавиатура","Klaviatura"],
+  ["Memory stick",null,"/ˈmeməri stɪk/","memari stik","мэмари стик","/ˈmeməri stɪk/","memari stik","мэмари стик","Флешка","Fleshka"],
+  ["Router",null,"/ˈruːtə(r)/","ruuta","рута","/ˈraʊtɚ/","raudar","раудар","Роутер","Router (Wi-Fi)"],
+  ["Speakers",null,"/ˈspiːkəz/","spiikaz","спииказ","/ˈspiːkɚz/","spiikarz","спиикарз","Колонки","Kolonka"],
+  ["Tablet",null,"/ˈtæblət/","teblat","тэблат","/ˈtæblət/","teblat","тэблат","Планшет","Planshet"],
+  ["Webcam",null,"/ˈwebkæm/","vebkem","вэбкэм","/ˈwebkæm/","vebkem","вэбкэм","Веб-камера","Veb-kamera"],
+  ["Connect to",null,"/kəˈnekt tə/","kanekt tu","канэкт ту","/kəˈnekt tə/","kanekt tu","канэкт ту","Соединять, связывать","Ulanmoq"],
+  ["Delete",null,"/dɪˈliːt/","diliit","дилиит","/dɪˈliːt/","diliit","дилиит","Удалять","O‘chirmoq"],
+  ["Download",null,"/ˌdaʊnˈləʊd/","daunloud","даунлоуд","/ˈdaʊnloʊd/","daunloud","даунлоуд","Скачивать","Yuklab olmoq"],
+  ["Enter",null,"/ˈentə(r)/","enta","энта","/ˈentɚ/","entar","энтар","Вводить, входить","Kiritmoq"],
+  ["Offer",null,"/ˈɒfə(r)/","ofa","офа","/ˈɔːfɚ/","oofar","оофар","Предлагать","Taklif qilmoq"],
+  ["Scan",null,"/skæn/","sken","скэн","/skæn/","sken","скэн","Сканировать","Skanerlamoq"],
+  ["Surf the web",null,"/sɜːf ðə web/","syof dhe veb","сёф зэ вэб","/sɝːf ðə web/","syorf dhe veb","сёрф зэ вэб","Сидеть в интернете","Internetda yurish"]
+ ]},
+ {date:"2026-08-08", topic:"7 B", w:[
+  ["Upload",null,"/ˌʌpˈləʊd/","aploud","аплоуд","/ˈʌploʊd/","aploud","аплоуд","Загружать","Yuklamoq"],
+  ["Conversation",null,"/ˌkɒnvəˈseɪʃn/","konvaseyshn","конвасэйшн","/ˌkɑːnvɚˈseɪʃn/","kaanvarseyshn","каанварсэйшн","Разговор","Suhbat"],
+  ["Flash drive",null,"/ˈflæʃ draɪv/","flesh drayv","флэш драйв","/ˈflæʃ draɪv/","flesh drayv","флэш драйв","Флешка","Fleshka"],
+  ["Speed",null,"/spiːd/","spiid","спиид","/spiːd/","spiid","спиид","Скорость","Tezlik"],
+  ["Stand for",null,"/ˈstænd fə(r)/","stend fo","стэнд фо","/ˈstænd fɚ/","stend for","стэнд фор","Обозначать","Anglatmoq"],
+  ["Protect",null,"/prəˈtekt/","pratekt","пратэкт","/prəˈtekt/","pratekt","пратэкт","Защищать","Himoya qilmoq"],
+  ["Shape",null,"/ʃeɪp/","sheyp","шэйп","/ʃeɪp/","sheyp","шэйп","Форма, вид","Shakl"],
+  ["Size",null,"/saɪz/","sayz","сайз","/saɪz/","sayz","сайз","Размер","O‘lcham"],
+  ["Get online",null,"/ˌɡet ˈɒnlaɪn/","get onlayn","гэт онлайн","/ˌɡet ˈɑːnlaɪn/","ged aanlayn","гэд аанлайн","Выйти в интернет","Onlayn bo‘lmoq"],
+  ["Click",null,"/klɪk/","klik","клик","/klɪk/","klik","клик","Нажимать","Bosmoq"],
+  ["Button",null,"/ˈbʌtn/","batn","батн","/ˈbʌtn/","batn","батн","Кнопка","Tugma"],
+  ["Press",null,"/pres/","pres","прэс","/pres/","pres","прэс","Нажимать","Bosmoq"],
+  ["Return",null,"/rɪˈtɜːn/","rityon","ритён","/rɪˈtɝːn/","rityorn","ритёрн","Возвращение, возвращаться","Orqaga qaytish"],
+  ["Annoy",null,"/əˈnɔɪ/","anoy","аной","/əˈnɔɪ/","anoy","аной","Раздражать","Jonga tegmoq"],
+  ["Dream",null,"/driːm/","driim","дриим","/driːm/","driim","дриим","Мечта, сон","Orzu, tush"],
+  ["Afford",null,"/əˈfɔːd/","afood","афоод","/əˈfɔːrd/","aford","афорд","Иметь возможность","Qurbi yetmoq"],
+  ["Fall off",null,"/ˌfɔːl ˈɒf/","fool of","фоол оф","/ˌfɑːl ˈɔːf/","faal oof","фаал ооф","Отваливаться, уменьшаться","Yiqilib tushmoq, kamaymoq"],
+  ["Nearly",null,"/ˈnɪəli/","niali","ниали","/ˈnɪrli/","nirli","нирли","Почти, чуть не","Deyarli"],
+  ["Give up",null,"/ˌɡɪv ˈʌp/","giv ap","гив ап","/ˌɡɪv ˈʌp/","giv ap","гив ап","Бросать (привычку)","Tashlamoq, to‘xtatish"],
+  ["Piece",null,"/piːs/","piis","пиис","/piːs/","piis","пиис","Кусок, часть","Parcha"]
+ ]},
+ {date:"2026-08-01", topic:"6 C / 6 D", w:[
+  ["Miss",null,"/mɪs/","mis","мис","/mɪs/","mis","мис","Пропускать","O‘tqazib yubormoq"],
+  ["Grass",null,"/ɡrɑːs/","graas","граас","/ɡræs/","gres","грэс","Трава","O‘t, maysa"],
+  ["Paw",null,"/pɔː/","poo","поо","/pɑː/","paa","паа","Лапа","Panja"],
+  ["Tent",null,"/tent/","tent","тэнт","/tent/","tent","тэнт","Палатка","Chodir"],
+  ["Climb",null,"/klaɪm/","klaym","клайм","/klaɪm/","klaym","клайм","Взбираться, лазить","Tirmashib chiqmoq"],
+  ["Feed",null,"/fiːd/","fiid","фиид","/fiːd/","fiid","фиид","Кормить","Ovqatlantirmoq, boqmoq"],
+  ["Keep",null,"/kiːp/","kiip","киип","/kiːp/","kiip","киип","Хранить","Saqlamoq"],
+  ["Rely",null,"/rɪˈlaɪ/","rilay","рилай","/rɪˈlaɪ/","rilay","рилай","Надеяться, полагаться","Ishonmoq, tayanmoq"],
+  ["Safety",null,"/ˈseɪfti/","seyfti","сэйфти","/ˈseɪfti/","seyfti","сэйфти","Безопасность","Xavfsizlik"],
+  ["Climber",null,"/ˈklaɪmə(r)/","klayma","клайма","/ˈklaɪmɚ/","klaymar","клаймар","Альпинист","Alpinist"],
+  ["Disappear",null,"/ˌdɪsəˈpɪə(r)/","disapia","дисапиа","/ˌdɪsəˈpɪr/","disapir","дисапир","Исчезать","Yo‘qolib ketmoq"],
+  ["Identify",null,"/aɪˈdentɪfaɪ/","aydentifay","айдэнтифай","/aɪˈdenəfaɪ/","aydenafay","айдэнафай","Определять","Aniqlamoq"],
+  ["Vehicle",null,"/ˈviːəkl/","viiakl","виакл","/ˈviːɪkəl/","viikl","виикл","Транспортное средство","Transport vositasi"],
+  ["Camp",null,"/kæmp/","kemp","кэмп","/kæmp/","kemp","кэмп","Лагерь","Oromgoh"],
+  ["Solve",null,"/sɒlv/","solv","солв","/sɑːlv/","saalv","саалв","Решать","Hal qilmoq"],
+  ["Possession",null,"/pəˈzeʃn/","pazeshn","пазэшн","/pəˈzeʃən/","pazeshn","пазэшн","Владение","Egalik qilish"],
+  ["Notice",null,"/ˈnəʊtɪs/","noutis","ноутис","/ˈnoʊtɪs/","noudis","ноудис","Замечать","Bilib qolmoq, sezib qolmoq"],
+  ["Path",null,"/pɑːθ/","paath","паас","/pæθ/","peth","пэс","Путь","Yo‘l"],
+  ["Put up the tent",null,"/ˌpʊt ʌp ðə ˈtent/","put ap dhe tent","пут ап зэ тэнт","/ˌpʊt ʌp ðə ˈtent/","put ap dhe tent","пут ап зэ тэнт","Ставить палатку","Chodir qurmoq"],
+  ["Complain",null,"/kəmˈpleɪn/","kampleyn","камплэйн","/kəmˈpleɪn/","kampleyn","камплэйн","Жаловаться","Shikoyat qilmoq"],
+  ["Nightmare",null,"/ˈnaɪtmeə(r)/","naytmea","найтмэа","/ˈnaɪtmer/","naytmer","найтмэр","Страшный сон","Dahshatli tush"],
+  ["Count",null,"/kaʊnt/","kaunt","каунт","/kaʊnt/","kaunt","каунт","Считать","Sanamoq"],
+  ["Guess",null,"/ɡes/","ges","гэс","/ɡes/","ges","гэс","Предполагать","Taxmin qilmoq"]
+ ]},
+ {date:"2026-08-06", topic:"6 G", w:[
+  ["Relaxing",null,"/rɪˈlæksɪŋ/","rileksing","рилэксинг","/rɪˈlæksɪŋ/","rileksing","рилэксинг","Расслабляющий","Dam oldiradigan"],
+  ["Quiet",null,"/ˈkwaɪət/","kwayat","квайат","/ˈkwaɪət/","kwayat","квайат","Тихий","Tinch"],
+  ["Warm",null,"/wɔːm/","voom","воом","/wɔːrm/","vorm","ворм","Теплый","Issiq, iliq"],
+  ["Beach",null,"/biːtʃ/","biich","биич","/biːtʃ/","biich","биич","Пляж","Sohil bo‘yi"],
+  ["Cloud",null,"/klaʊd/","klaud","клауд","/klaʊd/","klaud","клауд","Облако","Bulut"],
+  ["Flower",null,"/ˈflaʊə(r)/","flaua","флауа","/ˈflaʊɚ/","flauar","флауар","Цветок","Gul"],
+  ["Grass",null,"/ɡrɑːs/","graas","граас","/ɡræs/","gres","грэс","Трава","Maysa"],
+  ["Ground",null,"/ɡraʊnd/","graund","граунд","/ɡraʊnd/","graund","граунд","Почва, земля","Yer"],
+  ["Moon",null,"/muːn/","muun","мун","/muːn/","muun","мун","Луна","Oy"],
+  ["Rock",null,"/rɒk/","rok","рок","/rɑːk/","raak","раак","Скала","Katta tosh"],
+  ["Sand",null,"/sænd/","send","сэнд","/sænd/","send","сэнд","Песок","Qum"],
+  ["Sea",null,"/siː/","sii","сии","/siː/","sii","сии","Море","Dengiz"],
+  ["Sky",null,"/skaɪ/","skay","скай","/skaɪ/","skay","скай","Небо","Osmon"],
+  ["Stars",null,"/stɑːz/","staaz","стааз","/stɑːrz/","staarz","стаарз","Звезды","Yulduzlar"],
+  ["Sunrise",null,"/ˈsʌnraɪz/","sanrayz","санрайз","/ˈsʌnraɪz/","sanrayz","санрайз","Восход солнца","Quyosh chiqishi"],
+  ["Sunset",null,"/ˈsʌnset/","sanset","сансэт","/ˈsʌnset/","sanset","сансэт","Закат","Quyosh botishi"],
+  ["Tree",null,"/triː/","trii","трии","/triː/","trii","трии","Дерево","Daraxt"],
+  ["Cold",null,"/kəʊld/","kould","коулд","/koʊld/","kould","коулд","Холод, холодный","Sovuq"],
+  ["Hot",null,"/hɒt/","hot","хот","/hɑːt/","haat","хаат","Жаркий","Issiq"],
+  ["Rainy",null,"/ˈreɪni/","reyni","рэйни","/ˈreɪni/","reyni","рэйни","Дождливый","Yomg‘irli"],
+  ["Stormy",null,"/ˈstɔːmi/","stoomi","стооми","/ˈstɔːrmi/","stormi","сторми","Бурный, грозовой","Bo‘ronli"],
+  ["Windy",null,"/ˈwɪndi/","vindi","винди","/ˈwɪndi/","vindi","винди","Ветреный","Shamolli"],
+  ["Weather",null,"/ˈweðə(r)/","vetha","вэза","/ˈweðɚ/","vethar","вэзар","Погода","Ob-havo"],
+  ["In general",null,"/ɪn ˈdʒenrəl/","in jenral","ин жэнрал","/ɪn ˈdʒenrəl/","in jenral","ин жэнрал","В общем","Umuman"],
+  ["In the background",null,"/ˈbækɡraʊnd/","in dhe bekgraund","ин зэ бэкграунд","/ˈbækɡraʊnd/","in dhe bekgraund","ин зэ бэкграунд","На заднем фоне","Orqa fonda"],
+  ["In the foreground",null,"/ˈfɔːɡraʊnd/","in dhe foograund","ин зэ фоограунд","/ˈfɔːrɡraʊnd/","in dhe forgraund","ин зэ форграунд","На переднем фоне","Oldingi fonda"],
+  ["In the distance",null,"/ˈdɪstəns/","in dhe distans","ин зэ дистанс","/ˈdɪstəns/","in dhe distans","ин зэ дистанс","Вдали, вдалеке","Uzoqroqda"],
+  ["At the bottom",null,"/ˈbɒtəm/","et dhe botam","эт зэ ботам","/ˈbɑːtəm/","et dhe baadam","эт зэ баадам","На нижней стороне","Pastki tomonda"],
+  ["At the top",null,"/tɒp/","et dhe top","эт зэ топ","/tɑːp/","et dhe taap","эт зэ таап","На верхней стороне","Yuqori tomonda"],
+  ["Face",null,"/feɪs/","feys","фэйс","/feɪs/","feys","фэйс","Быть обращенным к","Qarab turmoq"],
+  ["Look up",null,"/ˌlʊk ˈʌp/","luk ap","лук ап","/ˌlʊk ˈʌp/","luk ap","лук ап","Смотреть наверх","Tepaga qaramoq"],
+  ["Look down",null,"/ˌlʊk ˈdaʊn/","luk daun","лук даун","/ˌlʊk ˈdaʊn/","luk daun","лук даун","Смотреть вниз","Pastga qaramoq"],
+  ["Climb",null,"/klaɪm/","klaym","клайм","/klaɪm/","klaym","клайм","Взбираться, подниматься","Yuqoriga tirmashib chiqmoq"]
+ ]},
+ {date:"2026-08-06", topic:"6 H", w:[
+  ["Postcard",null,"/ˈpəʊstkɑːd/","poustkaad","поусткаад","/ˈpoʊstkɑːrd/","poustkard","поусткард","Почтовая открытка","Pochta varaqasi"],
+  ["Adventure",null,"/ədˈventʃə(r)/","advencha","адвэнча","/ədˈventʃɚ/","advenchar","адвэнчар","Приключение","Sarguzasht"],
+  ["Holiday",null,"/ˈhɒlədeɪ/","holidey","холидэй","/ˈhɑːlədeɪ/","haaliday","хаалидэй","Отпуск, день отдыха","Ta’til"],
+  ["Activity",null,"/ækˈtɪvəti/","ektivati","эктивати","/ækˈtɪvəti/","ektivadi","эктивади","Занятие, деятельность","Mashg‘ulot"],
+  ["Abseil",null,"/ˈæbseɪl/","ebseyl","эбсэйл","/ˈæbseɪl/","ebseyl","эбсэйл","Спускаться на веревке","Arqon bilan pastga tushish"],
+  ["Cycle",null,"/ˈsaɪkl/","saykl","сайкл","/ˈsaɪkl/","saykl","сайкл","Ездить на велосипеде","Velosipedda yurmoq"],
+  ["Explore",null,"/ɪkˈsplɔː(r)/","iksploo","иксплоо","/ɪkˈsplɔːr/","iksplor","иксплор","Исследовать, изучать","O‘rganib chiqmoq"],
+  ["Trek",null,"/trek/","trek","трэк","/trek/","trek","трэк","Поход, переход","Piyoda sayohat qilish"],
+  ["Bungee-jump",null,"/ˈbʌndʒi dʒʌmp/","banji jamp","банжи жамп","/ˈbʌndʒi dʒʌmp/","banji jamp","банжи жамп","Прыжки с веревкой","Arqon bilan sakrash"],
+  ["Go caving",null,"/ɡəʊ ˈkeɪvɪŋ/","gou keyving","гоу кэйвинг","/ɡoʊ ˈkeɪvɪŋ/","gou keyving","гоу кэйвинг","Пойти в пещеру","G‘orga borish"],
+  ["Kite-surfing",null,"/ˈkaɪt sɜːfɪŋ/","kayt syofing","кайт сёфинг","/ˈkaɪt sɝːfɪŋ/","kayt syorfing","кайт сёрфинг","Кайтсёрфинг","Varrak uchurish"],
+  ["Watch wildlife",null,"/wɒtʃ ˈwaɪldlaɪf/","voch vayldlayf","воч вайлдлайф","/wɑːtʃ ˈwaɪldlaɪf/","vaach vayldlayf","ваач вайлдлайф","Наблюдать за дикой природой","Yovvoyi tabiatni tomosha qilmoq"],
+  ["Windsurf",null,"/ˈwɪndsɜːf/","vindsyof","виндсёф","/ˈwɪndsɝːf/","vindsyorf","виндсёрф","Виндсерфинг","Vindsyorfing"],
+  ["Hostel",null,"/ˈhɒstl/","hostl","хостл","/ˈhɑːstl/","haastl","хаастл","Общежитие, хостел","Yotoqxona, kichik mehmonxona"],
+  ["Campsite",null,"/ˈkæmpsaɪt/","kempsayt","кэмпсайт","/ˈkæmpsaɪt/","kempsayt","кэмпсайт","Место разбивки лагеря","Lager joyi"],
+  ["Cliff",null,"/klɪf/","klif","клиф","/klɪf/","klif","клиф","Скала, утес","Qoya"],
+  ["Wish",null,"/wɪʃ/","vish","виш","/wɪʃ/","vish","виш","Желать","Tilamoq, niyat qilmoq"],
+  ["Fabulous",null,"/ˈfæbjələs/","febyalas","фэбьялас","/ˈfæbjələs/","febyalas","фэбьялас","Легендарный, потрясающий","Afsonaviy, ajoyib"],
+  ["Arrangement",null,"/əˈreɪndʒmənt/","areynjmant","арэйнжмант","/əˈreɪndʒmənt/","areynjmant","арэйнжмант","План, договоренность","Kelishuv, tartib"],
+  ["Appropriate",null,"/əˈprəʊpriət/","aproupriat","апроуприат","/əˈproʊpriət/","aproupriat","апроуприат","Соответствующий, подходящий","To‘g‘ri keladigan"]
+ ]},
+ {date:"2026-08-03", topic:"6 E", w:[
+  ["Movement",null,"/ˈmuːvmənt/","muuvment","мувмэнт","/ˈmuːvmənt/","muuvment","мувмэнт","Движение","Harakat"],
+  ["Survival",null,"/səˈvaɪvl/","savayvl","сэвайвл","/sɚˈvaɪvəl/","sarvayval","сарвайвал","Выживание","Omon qolish"],
+  ["Rainforest",null,"/ˈreɪnfɒrɪst/","reynforist","рэйнфорист","/ˈreɪnˌfɔːrɪst/","reynfoorist","рэйнфоорист","Тропический лес","Tropik o'rmon"],
+  ["Camp",null,"/kæmp/","kemp","кэмп","/kæmp/","kemp","кэмп","Лагерь","Oromgoh"],
+  ["Shortcut",null,"/ˈʃɔːtkʌt/","shootkat","шооткат","/ˈʃɔːrtkʌt/","shortkat","шорткат","Кратчайший путь","Qisqa yo'l"],
+  ["Path",null,"/pɑːθ/","paath","паас","/pæθ/","peth","пэс","Тропинка","Yo'l, so'qmoq"],
+  ["Field",null,"/fiːld/","fiild","фиилд","/fiːld/","fiild","фиилд","Поле","Dala"],
+  ["Workmate",null,"/ˈwɜːkmeɪt/","vyokmeyt","вёкмэйт","/ˈwɝːkmeɪt/","vyorkmeyt","вёркмэйт","Коллега","Hamkasb"],
+  ["Tree trunk",null,"/ˈtriː trʌŋk/","trii trank","трии транк","/ˈtriː trʌŋk/","trii trank","трии транк","Ствол дерева","Daraxt tanasi"],
+  ["Crawl",null,"/krɔːl/","krool","кроол","/krɑːl/","kraal","краал","Ползать","Sudralib yurmoq"],
+  ["Bush",null,"/bʊʃ/","bush","буш","/bʊʃ/","bush","буш","Куст","Buta"],
+  ["Rest",null,"/rest/","rest","рэст","/rest/","rest","рэст","Отдыхать","Dam olmoq"],
+  ["Lucky",null,"/ˈlʌki/","laki","лаки","/ˈlʌki/","laki","лаки","Удачный","Omadli"],
+  ["Surface",null,"/ˈsɜːfɪs/","syofis","сёфис","/ˈsɝːfɪs/","syorfis","сёрфис","Поверхность","Yuza, sirt"]
+ ]},
+ {date:"2026-08-03", topic:"6 F", w:[
+  ["Strange",null,"/streɪndʒ/","streynj","стрэйнж","/streɪndʒ/","streynj","стрэйнж","Странный","G'alati"],
+  ["Fiction",null,"/ˈfɪkʃn/","fikshn","фикшн","/ˈfɪkʃən/","fikshn","фикшн","Выдумка","Uydirma"],
+  ["Traveller","Traveler","/ˈtrævələ(r)/","trevala","трэвала","/ˈtrævələr/","trevalar","трэвалар","Путешественник","Sayohatchi"],
+  ["Share",null,"/ʃeə(r)/","shea","шэа","/ʃer/","sher","шэр","Разделять","Bo'lishmoq"],
+  ["Myth",null,"/mɪθ/","mith","мис","/mɪθ/","mith","мис","Миф","Afsona"],
+  ["Case",null,"/keɪs/","keys","кэйс","/keɪs/","keys","кэйс","Случай","Holat"],
+  ["Prove",null,"/pruːv/","pruuv","прув","/pruːv/","pruuv","прув","Доказать","Isbotlamoq"],
+  ["Giant",null,"/ˈdʒaɪənt/","jayant","жайант","/ˈdʒaɪənt/","jayant","жайант","Гигант","Ulkan"],
+  ["Match",null,"/mætʃ/","mech","мэч","/mætʃ/","mech","мэч","Подбирать","Moslashtirmoq"]
+ ]},
+ {date:"2026-08-03", topic:"6 F", w:[
+  ["Squid",null,"/skwɪd/","skvid","сквид","/skwɪd/","skvid","сквид","Кальмар","Kalmar"],
+  ["Ancient",null,"/ˈeɪnʃənt/","eynshant","эйншант","/ˈeɪnʃənt/","eynshant","эйншант","Древний","Qadimiy"],
+  ["Realise","Realize","/ˈrɪəlaɪz/","rialayz","риалайз","/ˈriːəlaɪz/","riilayz","риилайз","Осознавать","Tushunib yetmoq"],
+  ["Discover",null,"/dɪˈskʌvə(r)/","diskava","дискава","/dɪˈskʌvɚ/","diskavar","дискавар","Обнаруживать","Kashf etmoq"],
+  ["Description",null,"/dɪˈskrɪpʃn/","diskripshn","дискрипшн","/dɪˈskrɪpʃən/","diskripshn","дискрипшн","Описание","Tasvir"],
+  ["Receive",null,"/rɪˈsiːv/","risiiv","рисиив","/rɪˈsiːv/","risiiv","рисиив","Получать","Qabul qilmoq"],
+  ["Inform",null,"/ɪnˈfɔːm/","infoom","инфоом","/ɪnˈfɔːrm/","inform","информ","Сообщать","Xabar bermoq"],
+  ["Once",null,"/wʌns/","vans","ванс","/wʌns/","vans","ванс","Однажды","Qachondir, bir marta"],
+  ["Appear",null,"/əˈpɪə(r)/","apia","апиа","/əˈpɪr/","apir","апир","Появляться","Paydo bo'lmoq"],
+  ["Attack",null,"/əˈtæk/","atek","атэк","/əˈtæk/","atek","атэк","Нападать","Hujum qilmoq"],
+  ["Creature",null,"/ˈkriːtʃə(r)/","kriicha","криича","/ˈkriːtʃɚ/","kriichar","криичар","Живое существо","Tirik mavjudot"]
+ ]},
+ {date:"2026-08-03", topic:"6 F", w:[
+  ["Sailor",null,"/ˈseɪlə(r)/","seyla","сэйла","/ˈseɪlɚ/","seylar","сэйлар","Моряк","Dengizchi"],
+  ["Scientist",null,"/ˈsaɪəntɪst/","sayantist","сайантист","/ˈsaɪəntɪst/","sayantist","сайантист","Ученый","Olim"],
+  ["Coast",null,"/kəʊst/","koust","коуст","/koʊst/","koust","коуст","Побережье","Dengiz qirg'og'i"],
+  ["Fisherman",null,"/ˈfɪʃəmən/","fishaman","фишаман","/ˈfɪʃɚmən/","fisharman","фишарман","Рыбак","Baliqchi"],
+  ["Axe",null,"/æks/","eks","экс","/æks/","eks","экс","Топор","Bolta"],
+  ["Amazed",null,"/əˈmeɪzd/","ameyzd","амэйзд","/əˈmeɪzd/","ameyzd","амэйзд","Удивленный","Hayratlangan"],
+  ["Rarely",null,"/ˈreəli/","reali","рэали","/ˈrerli/","rerli","рэрли","Изредка","Kamdan-kam"],
+  ["Exist",null,"/ɪɡˈzɪst/","igzist","игзист","/ɪɡˈzɪst/","igzist","игзист","Существовать","Mavjud bo'lmoq"],
+  ["Habitat",null,"/ˈhæbɪtæt/","hebitet","хэбитэт","/ˈhæbɪtæt/","hebidet","хэбидэт","Среда обитания","Yashash muhiti"],
+  ["Explorer",null,"/ɪkˈsplɔːrə(r)/","iksploora","иксплоора","/ɪkˈsplɔːrɚ/","iksplorar","иксплорар","Исследователь","Tadqiqotchi"],
+  ["Violent",null,"/ˈvaɪələnt/","vayalant","вайалант","/ˈvaɪələnt/","vayalant","вайалант","Жестокий","Shafqatsiz"],
+  ["Bad-tempered",null,"/ˌbæd ˈtempəd/","bed-tempad","бэд-тэмпад","/ˌbæd ˈtempɚd/","bed-tempard","бэд-тэмпард","Раздраженный","Badjahl"],
+  ["Complete",null,"/kəmˈpliːt/","kampliit","камплиит","/kəmˈpliːt/","kampliit","камплиит","Абсолютный","To'liq"],
+  ["Mystery",null,"/ˈmɪstri/","mistri","мистри","/ˈmɪstəri/","mistari","мистари","Тайна","Sir, jumboq"],
+  ["Soldier",null,"/ˈsəʊldʒə(r)/","soulja","соулжа","/ˈsoʊldʒɚ/","souljar","соулжар","Солдат","Askar"],
+  ["To be familiar with",null,"/fəˈmɪliə wɪð/","familia vith","фамилиа виз","/fəˈmɪljɚ wɪð/","familyar vith","фамильяр виз","Быть знакомым","Tanish bo'lmoq"],
+  ["Politician",null,"/ˌpɒləˈtɪʃn/","politishn","политишн","/ˌpɑːləˈtɪʃən/","paalitishn","паалитишн","Политик","Siyosatchi"]
+ ]},
+ {date:"2026-08-03", topic:"6 F", w:[
+  ["Manage",null,"/ˈmænɪdʒ/","menij","мэниж","/ˈmænɪdʒ/","menij","мэниж","Справляться","Uddalamoq"],
+  ["Skin",null,"/skɪn/","skin","скин","/skɪn/","skin","скин","Кожа человека","Odam terisi"],
+  ["Later",null,"/ˈleɪtə(r)/","leyta","лэйта","/ˈleɪtɚ/","leydar","лэйдар","Позже","Keyinroq"]
+ ]},
+ {date:"2026-08-03", topic:"6 F", w:[
+  ["Relative",null,"/ˈrelətɪv/","relativ","рэлатив","/ˈrelətɪv/","reladiv","рэладив","Родственник","Qarindosh"],
+  ["Pilot",null,"/ˈpaɪlət/","paylat","пайлат","/ˈpaɪlət/","paylat","пайлат","Пилот","Uchuvchi"],
+  ["Crash",null,"/kræʃ/","kresh","крэш","/kræʃ/","kresh","крэш","Авария","Avariyaga uchramoq"],
+  ["Island",null,"/ˈaɪlənd/","ayland","айланд","/ˈaɪlənd/","ayland","айланд","Остров","Orol"],
+  ["Horrible",null,"/ˈhɒrəbl/","horibl","хорибл","/ˈhɔːrəbəl/","hoorabl","хоорабл","Страшный","Dahshatli"],
+  ["Tongue",null,"/tʌŋ/","tang","танг","/tʌŋ/","tang","танг","Язык","Til"],
+  ["Lizard",null,"/ˈlɪzəd/","lizad","лизад","/ˈlɪzɚd/","lizard","лизард","Ящерица","Kaltakesak"],
+  ["Include",null,"/ɪnˈkluːd/","inkluud","инклууд","/ɪnˈkluːd/","inkluud","инклууд","Содержать","O'z ichiga olmoq"],
+  ["Research",null,"/rɪˈsɜːtʃ/","risyoch","рисёч","/ˈriːsɝːtʃ/","riisyorch","риисёрч","Исследование","Tadqiqot"],
+  ["Find out",null,"/ˌfaɪnd ˈaʊt/","faynd aut","файнд аут","/ˌfaɪnd ˈaʊt/","faynd aut","файнд аут","Выяснить","Bilib olmoq"]
+ ]}
+];
+
+/* ---------- holat ---------- */
+let script = 'lat';      // lat | cyr
+let accent = 'us';       // us  | uk
+let slow = false;
+let activeLesson = 'all';
+let filterMode = 'date';   // date | topic
+
+function sections(){
+  const map = new Map();
+  GROUPS.forEach(g => {
+    const key = filterMode === 'date' ? g.date : g.topic;
+    if(!map.has(key)) map.set(key, {key:key, date:g.date, topic:g.topic, w:[]});
+    const o = map.get(key);
+    o.w = o.w.concat(g.w);
+    if(g.date > o.date) o.date = g.date;
+  });
+  return [...map.values()].sort((a,b) =>
+    b.date.localeCompare(a.date) || a.topic.localeCompare(b.topic));
+}
+let query = '';
+let playing = null, queue = [], qIndex = -1;
+
+/* ---------- ovoz ---------- */
+const synth = window.speechSynthesis;
+let voices = [];
+function loadVoices(){ if(synth) voices = synth.getVoices() || []; }
+if(synth){ loadVoices(); synth.onvoiceschanged = loadVoices; }
+else document.getElementById('warn').style.display = 'block';
+
+function pickVoice(){
+  const want = accent === 'us' ? 'en-us' : 'en-gb';
+  const norm = v => (v.lang||'').replace('_','-').toLowerCase();
+  const pool = voices.filter(v => norm(v).startsWith(want));
+  const pref = accent === 'us'
+    ? ["Samantha","Google US English","Microsoft Aria","Microsoft Zira","Alex","Ava"]
+    : ["Daniel","Google UK English Female","Google UK English Male","Microsoft Sonia","Kate","Serena"];
+  for(const p of pref){
+    const m = pool.find(v => v.name && v.name.includes(p));
+    if(m) return m;
+  }
+  return pool[0] || voices.find(v => norm(v).startsWith('en')) || null;
+}
+
+function speak(text, card, onEnd){
+  if(!synth){ document.getElementById('warn').style.display='block'; return; }
+  synth.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = accent === 'us' ? 'en-US' : 'en-GB';
+  const v = pickVoice();
+  if(v) u.voice = v;
+  u.rate = slow ? 0.55 : 0.9;
+  if(playing) playing.classList.remove('playing');
+  playing = card || null;
+  if(card){ card.classList.add('playing'); card.scrollIntoView({block:'nearest',behavior:'smooth'}); }
+  const done = () => {
+    if(card) card.classList.remove('playing');
+    if(playing === card) playing = null;
+    if(onEnd) onEnd();
+  };
+  u.onend = done; u.onerror = done;
+  synth.speak(u);
+}
+
+/* ---------- chizish ---------- */
+const list = document.getElementById('list');
+const countEl = document.getElementById('count');
+
+function wordOf(w){ return (accent === 'us' && w[1]) ? w[1] : w[0]; }
+function ipaOf(w){ return accent === 'us' ? w[5] : w[2]; }
+function pronOf(w){
+  if(accent === 'us') return script === 'cyr' ? w[7] : w[6];
+  return script === 'cyr' ? w[4] : w[3];
+}
+
+function render(){
+  list.innerHTML = '';
+  let shown = 0;
+  sections().forEach(L => {
+    if(activeLesson !== 'all' && activeLesson !== L.key) return;
+    const rows = L.w.filter(w => {
+      if(!query) return true;
+      return (w[0]+' '+(w[1]||'')+' '+w[8]+' '+w[9]+' '+w[3]+' '+w[4]+' '+w[6]+' '+w[7])
+             .toLowerCase().includes(query);
+    });
+    if(!rows.length) return;
+
+    const h = document.createElement('div');
+    h.className = 'lhead';
+    h.innerHTML = '<h2></h2><span class="date"></span>';
+    h.querySelector('h2').textContent = (filterMode === 'date') ? fmt(L.date) : L.topic;
+    h.querySelector('.date').textContent = (filterMode === 'date')
+        ? rows.length + ' ta so\'z'
+        : fmt(L.date) + ' \u00b7 ' + rows.length + ' ta so\'z';
+    list.appendChild(h);
+
+    const g = document.createElement('div');
+    g.className = 'grid';
+    rows.forEach(w => {
+      shown++;
+      const c = document.createElement('div');
+      c.className = 'card';
+      c.setAttribute('role','button');
+      c.setAttribute('tabindex','0');
+      c.dataset.word = wordOf(w);
+      c.innerHTML =
+        '<div class="top"><div class="en"></div><span class="listen">\ud83d\udd0a Eshitish</span></div>'+
+        '<div class="ipa"></div>'+
+        '<div class="pron"></div>'+
+        '<div class="meta">'+
+          '<span class="lbl">RU</span><span class="val ru"></span>'+
+          '<span class="lbl">UZ</span><span class="val uz"></span>'+
+        '</div>';
+      c.querySelector('.en').textContent = wordOf(w);
+      c.querySelector('.ipa').textContent = ipaOf(w);
+      const p = c.querySelector('.pron');
+      p.textContent = pronOf(w);
+      p.classList.toggle('cyr', script === 'cyr');
+      c.querySelector('.ru').textContent = w[8];
+      c.querySelector('.uz').textContent = w[9];
+      const go = () => { stopQueue(); c.classList.add('revealed'); speak(wordOf(w), c); };
+      c.addEventListener('click', go);
+      c.addEventListener('keydown', e => {
+        if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); go(); }
+      });
+      g.appendChild(c);
+    });
+    list.appendChild(g);
+  });
+
+  if(!shown){
+    const e = document.createElement('div');
+    e.className = 'empty';
+    e.textContent = 'Hech narsa topilmadi. Boshqa so\'z bilan qidiring.';
+    list.appendChild(e);
+  }
+  countEl.textContent = shown + ' ta so\'z';
+}
+
+function fmt(iso){
+  const [y,m,d] = iso.split('-');
+  return d + '.' + m + '.' + y;
+}
+
+/* ---------- yordamchi ---------- */
+function seg(id, cb){
+  const wrap = document.getElementById(id);
+  wrap.addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if(!b) return;
+    [...wrap.children].forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+    cb(b.dataset.v);
+  });
+}
+
+/* ---------- dars filtri ---------- */
+const lessonsWrap = document.getElementById('lessons');
+function buildLessons(){
+  lessonsWrap.innerHTML = '';
+  const mk = (label, val, sub) => {
+    const b = document.createElement('button');
+    b.textContent = label;
+    if(sub){ const sp = document.createElement('span'); sp.className='d'; sp.textContent = sub; b.appendChild(sp); }
+    if(val === activeLesson) b.classList.add('on');
+    b.addEventListener('click', () => {
+      stopQueue();
+      activeLesson = val;
+      [...lessonsWrap.children].forEach(x => x.classList.remove('on'));
+      b.classList.add('on');
+      render();
+      window.scrollTo({top:0, behavior:'smooth'});
+    });
+    lessonsWrap.appendChild(b);
+  };
+  const secs = sections();
+  mk('Hammasi','all', secs.reduce((s,l) => s + l.w.length, 0) + ' ta');
+  secs.forEach(L => mk(filterMode === 'date' ? fmt(L.date) : L.topic, L.key, L.w.length + ' ta'));
+}
+buildLessons();
+
+seg('modeSeg', v => {
+  filterMode = v;
+  activeLesson = 'all';
+  stopQueue();
+  buildLessons();
+  render();
+});
+
+/* ---------- boshqaruv ---------- */
+document.getElementById('q').addEventListener('input', e => {
+  query = e.target.value.trim().toLowerCase();
+  stopQueue(); render();
+});
+
+seg('scriptSeg', v => { script = v; render(); });
+seg('accentSeg', v => { accent = v; stopQueue(); render(); });
+
+const slowBtn = document.getElementById('slow');
+slowBtn.addEventListener('click', () => { slow = !slow; slowBtn.classList.toggle('on', slow); });
+
+const MODES = [
+  {cls:null,      label:'Yashirish: yo\u2019q', on:false},
+  {cls:'hide-tr', label:'ENG \u2192 UZB',       on:true},
+  {cls:'hide-en', label:'UZB \u2192 ENG',       on:true}
+];
+let mode = 0;
+const hideBtn = document.getElementById('hideTr');
+function applyMode(){
+  document.body.classList.remove('hide-tr','hide-en');
+  const m = MODES[mode];
+  if(m.cls) document.body.classList.add(m.cls);
+  hideBtn.textContent = m.label;
+  hideBtn.classList.toggle('on', m.on);
+  document.querySelectorAll('.card.revealed').forEach(c => c.classList.remove('revealed'));
+}
+hideBtn.addEventListener('click', () => { mode = (mode + 1) % MODES.length; applyMode(); });
+applyMode();
+
+const themeBtn = document.getElementById('theme');
+themeBtn.addEventListener('click', () => {
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
+  themeBtn.textContent = dark ? '☾ Qora rejim' : '☀︎ Oq rejim';
+});
+
+const playBtn = document.getElementById('playAll');
+function stopQueue(){
+  queue = []; qIndex = -1;
+  if(synth) synth.cancel();
+  if(playing){ playing.classList.remove('playing'); playing = null; }
+  playBtn.classList.remove('on');
+  playBtn.textContent = '▶ Hammasi';
+}
+function step(){
+  qIndex++;
+  if(qIndex >= queue.length){ stopQueue(); return; }
+  const card = queue[qIndex];
+  speak(card.dataset.word, card, () => setTimeout(step, slow ? 950 : 600));
+}
+playBtn.addEventListener('click', () => {
+  if(queue.length){ stopQueue(); return; }
+  queue = [...document.querySelectorAll('.card')];
+  if(!queue.length) return;
+  qIndex = -1;
+  playBtn.classList.add('on');
+  playBtn.textContent = '■ To\'xtatish';
+  step();
+});
+
+render();
+</script>
+</body>
+</html>
