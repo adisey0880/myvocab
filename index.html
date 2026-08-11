@@ -69,10 +69,10 @@
     <button id="hideTrBtn">Yashirish: yo‘q</button>
     <button id="playAllBtn">▶ Hammasi</button>
     <button id="slowBtn">Sekin</button>
-  </div>
 
-  <div class="adv" id="advBars">
-    <div class="bar">
+    <!-- display:contents — bu blok layoutda ko'rinmaydi, ichidagilar
+         yuqoridagi tugmalar bilan bitta qatorda turadi -->
+    <div class="adv" id="advBars">
       <div class="segwrap">
         <span class="cap">Yozuv</span>
         <div class="seg" id="scriptSeg" role="radiogroup" aria-label="Yozuv turi">
@@ -90,9 +90,7 @@
           <button data-v="uk" role="radio" aria-checked="false">🇬🇧 British</button>
         </div>
       </div>
-    </div>
 
-    <div class="bar">
       <div class="segwrap">
         <span class="cap">Status</span>
         <div class="seg" id="learnedSeg" role="radiogroup" aria-label="O'rganilganlik holati">

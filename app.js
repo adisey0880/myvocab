@@ -127,10 +127,19 @@ function toast(message, actionLabel, onAction) {
 }
 
 /* ---------- THEME ---------- */
+let themeSwitchTimer = null;
 function setTheme(t) {
-  document.documentElement.setAttribute('data-theme', t);
-  document.documentElement.style.colorScheme = t;
+  /* Barcha o'tish animatsiyalarini bir lahzaga o'chiramiz — aks holda
+     elementlar turli tezlikda rang almashtirib, "chala rang" ko'rinadi */
+  const root = document.documentElement;
+  root.classList.add('theme-switching');
+
+  root.setAttribute('data-theme', t);
+  root.style.colorScheme = t;
   $('themeColor')?.setAttribute('content', t === 'dark' ? '#090d14' : '#f1f5f9');
+
+  clearTimeout(themeSwitchTimer);
+  themeSwitchTimer = setTimeout(() => root.classList.remove('theme-switching'), 60);
 
   const btn  = $('themeBtn');
   const span = btn.querySelector('.btn-label');
