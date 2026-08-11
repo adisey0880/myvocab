@@ -1,9 +1,48 @@
 /* ============================================================
    myvocab — Vocabulary Dataset
-   Contains all 212 vocabulary items across lessons & dates.
+   Contains all 247 vocabulary items across lessons & dates.
    Format: [en_BR, en_US(or null), ipaBR, latBR, cyrBR, ipaUS, latUS, cyrUS, RU, UZ]
    ============================================================ */
 const GROUPS = [
+ {date:"2026-08-13", topic:"7 E", w:[
+  ["Put on",null,"/ˌpʊt ˈɒn/","put on","пут он","/ˌpʊt ˈɑːn/","pud aan","пуд аан","Надевать","Kiyib olmoq"],
+  ["Back up",null,"/ˌbæk ˈʌp/","bek ap","бэк ап","/ˌbæk ˈʌp/","bek ap","бэк ап","Резервное копирование","Zaxiralamoq"],
+  ["Plug in",null,"/ˌplʌɡ ˈɪn/","plag in","плаг ин","/ˌplʌɡ ˈɪn/","plag in","плаг ин","Подключать","Ulamoq"],
+  ["Scan in",null,"/ˌskæn ˈɪn/","sken in","скэн ин","/ˌskæn ˈɪn/","sken in","скэн ин","Сканировать","Skaner qilmoq"],
+  ["Shut down",null,"/ˌʃʌt ˈdaʊn/","shat daun","шат даун","/ˌʃʌt ˈdaʊn/","shat daun","шат даун","Выключить, закрыть (компьютер)","O‘chirmoq, yopmoq (kompyuter)"],
+  ["Turn off",null,"/ˌtɜːn ˈɒf/","tyon of","тён оф","/ˌtɝːn ˈɔːf/","tyorn oof","тёрн ооф","Выключить","O‘chirmoq"],
+  ["Turn on",null,"/ˌtɜːn ˈɒn/","tyon on","тён он","/ˌtɝːn ˈɑːn/","tyorn aan","тёрн аан","Включать","Yoqmoq"],
+  ["Turn up",null,"/ˌtɜːn ˈʌp/","tyon ap","тён ап","/ˌtɝːn ˈʌp/","tyorn ap","тёрн ап","Усиливать звук","Ovozini baland qilmoq"],
+  ["Turn down",null,"/ˌtɜːn ˈdaʊn/","tyon daun","тён даун","/ˌtɝːn ˈdaʊn/","tyorn daun","тёрн даун","Убавить громкость","Ovozini pasaytirmoq"],
+  ["Type in",null,"/ˌtaɪp ˈɪn/","tayp in","тайп ин","/ˌtaɪp ˈɪn/","tayp in","тайп ин","Впечатать, набрать","Kompyuterda yozmoq"],
+  ["Break down",null,"/ˌbreɪk ˈdaʊn/","breyk daun","брэйк даун","/ˌbreɪk ˈdaʊn/","breyk daun","брэйк даун","Сломаться","Buzilib qolmoq"],
+  ["Log off",null,"/ˌlɒɡ ˈɒf/","log of","лог оф","/ˌlɔːɡ ˈɔːf/","loog oof","лоог ооф","Выходить из системы","Tizimdan chiqmoq"],
+  ["Log on",null,"/ˌlɒɡ ˈɒn/","log on","лог он","/ˌlɔːɡ ˈɑːn/","loog aan","лоог аан","Входить в систему","Tizimga kirmoq"],
+  ["Loud",null,"/laʊd/","laud","лауд","/laʊd/","laud","лауд","Громкий","Baland (ovoz)"],
+  ["Application",null,"/ˌæplɪˈkeɪʃn/","eplikeyshn","эпликэйшн","/ˌæpləˈkeɪʃən/","eplakeyshn","эплакэйшн","Заявление","Ariza"]
+ ]},
+ {date:"2026-08-13", topic:"7 F", w:[
+  ["Cyberbullying",null,"/ˈsaɪbəbʊliɪŋ/","saybabuliing","сайбабулиинг","/ˈsaɪbɚbʊliɪŋ/","saybarbuliing","сайбарбулиинг","Кибербуллинг, интернет-травля","Kiber zo‘ravonlik"],
+  ["Mention",null,"/ˈmenʃn/","menshn","мэншн","/ˈmenʃən/","menshn","мэншн","Упоминать","Eslatib o‘tmoq"],
+  ["Fit",null,"/fɪt/","fit","фит","/fɪt/","fit","фит","Подходить, быть впору","Mos kelmoq"],
+  ["Raise money",null,"/ˌreɪz ˈmʌni/","reyz mani","рэйз мани","/ˌreɪz ˈmʌni/","reyz mani","рэйз мани","Собирать деньги","Pul yig‘moq"],
+  ["Gig",null,"/ɡɪɡ/","gig","гиг","/ɡɪɡ/","gig","гиг","Концерт, выступление","Konsert, chiqish"],
+  ["Campaign",null,"/kæmˈpeɪn/","kempeyn","кэмпэйн","/kæmˈpeɪn/","kempeyn","кэмпэйн","Кампания (акция)","Kampaniya, tashviqot"],
+  ["Appear",null,"/əˈpɪə(r)/","apia","апиа","/əˈpɪr/","apir","апир","Появляться","Paydo bo‘lmoq"],
+  ["Viral",null,"/ˈvaɪrəl/","vayral","вайрал","/ˈvaɪrəl/","vayral","вайрал","Вирусный (быстро распространяющийся)","Viral, tez tarqaladigan"],
+  ["Power",null,"/ˈpaʊə(r)/","paua","пауа","/ˈpaʊɚ/","pauar","пауар","Сила, власть","Kuch, qudrat"],
+  ["Well-known",null,"/ˌwel ˈnəʊn/","vel noun","вэл ноун","/ˌwel ˈnoʊn/","vel noun","вэл ноун","Известный","Mashhur, taniqli"],
+  ["Victim",null,"/ˈvɪktɪm/","viktim","виктим","/ˈvɪktəm/","viktam","виктам","Жертва","Qurbon"],
+  ["Huge",null,"/hjuːdʒ/","hyuuj","хьююж","/hjuːdʒ/","hyuuj","хьююж","Огромный","Juda katta, ulkan"],
+  ["Fundraising",null,"/ˈfʌndreɪzɪŋ/","fandreyzing","фандрэйзинг","/ˈfʌndreɪzɪŋ/","fandreyzing","фандрэйзинг","Сбор средств","Mablag‘ yig‘ish"],
+  ["Anti-bullying",null,"/ˌænti ˈbʊliɪŋ/","enti buliing","энти булиинг","/ˌæntaɪ ˈbʊliɪŋ/","entay buliing","энтай булиинг","Против травли","Zo‘ravonlikka qarshi"],
+  ["Charity",null,"/ˈtʃærəti/","cherati","чэрати","/ˈtʃerəti/","cheradi","чэради","Благотворительность","Xayriya"],
+  ["Take place",null,"/ˌteɪk ˈpleɪs/","teyk pleys","тэйк плэйс","/ˌteɪk ˈpleɪs/","teyk pleys","тэйк плэйс","Происходить, состояться","Sodir bo‘lmoq, o‘tkazilmoq"],
+  ["Kindness",null,"/ˈkaɪndnəs/","kayndnas","кайнднас","/ˈkaɪndnəs/","kayndnas","кайнднас","Доброта","Mehribonlik"],
+  ["Half",null,"/hɑːf/","haaf","хааф","/hæf/","hef","хэф","Половина","Yarim"],
+  ["Environment",null,"/ɪnˈvaɪrənmənt/","invayranmant","инвайранмант","/ɪnˈvaɪrənmənt/","invayranmant","инвайранмант","Окружающая среда","Atrof-muhit"],
+  ["Celebrity",null,"/səˈlebrəti/","salebrati","сэлэбрати","/səˈlebrəti/","salebradi","сэлэбради","Знаменитость","Mashhur shaxs, yulduz"]
+ ]},
  {date:"2026-08-11", topic:"7 C / 7 D", w:[
   ["Instruction",null,"/ɪnˈstrʌkʃn/","instrakshn","инстракшн","/ɪnˈstrʌkʃən/","instrakshn","инстракшн","Инструкция","Ko‘rsatma"],
   ["Experience",null,"/ɪkˈspɪəriəns/","ikspiarians","икспиарианс","/ɪkˈspɪriəns/","ikspirians","икспирианс","Опыт; пережить","Tajriba; boshdan kechirmoq"],
@@ -189,9 +228,7 @@ const GROUPS = [
   ["Case",null,"/keɪs/","keys","кэйс","/keɪs/","keys","кэйс","Случай","Holat"],
   ["Prove",null,"/pruːv/","pruuv","прув","/pruːv/","pruuv","прув","Доказать","Isbotlamoq"],
   ["Giant",null,"/ˈdʒaɪənt/","jayant","жайант","/ˈdʒaɪənt/","jayant","жайант","Гигант","Ulkan"],
-  ["Match",null,"/mætʃ/","mech","мэч","/mætʃ/","mech","мэч","Подбирать","Moslashtirmoq"]
- ]},
- {date:"2026-08-03", topic:"6 F", w:[
+  ["Match",null,"/mætʃ/","mech","мэч","/mætʃ/","mech","мэч","Подбирать","Moslashtirmoq"],
   ["Squid",null,"/skwɪd/","skvid","сквид","/skwɪd/","skvid","сквид","Кальмар","Kalmar"],
   ["Ancient",null,"/ˈeɪnʃənt/","eynshant","эйншант","/ˈeɪnʃənt/","eynshant","эйншант","Древний","Qadimiy"],
   ["Realise","Realize","/ˈrɪəlaɪz/","rialayz","риалайз","/ˈriːəlaɪz/","riilayz","риилайз","Осознавать","Tushunib yetmoq"],
@@ -202,9 +239,7 @@ const GROUPS = [
   ["Once",null,"/wʌns/","vans","ванс","/wʌns/","vans","ванс","Однажды","Qachondir, bir marta"],
   ["Appear",null,"/əˈpɪə(r)/","apia","апиа","/əˈpɪr/","apir","апир","Появляться","Paydo bo'lmoq"],
   ["Attack",null,"/əˈtæk/","atek","атэк","/əˈtæk/","atek","атэк","Нападать","Hujum qilmoq"],
-  ["Creature",null,"/ˈkriːtʃə(r)/","kriicha","криича","/ˈkriːtʃɚ/","kriichar","криичар","Живое существо","Tirik mavjudot"]
- ]},
- {date:"2026-08-03", topic:"6 F", w:[
+  ["Creature",null,"/ˈkriːtʃə(r)/","kriicha","криича","/ˈkriːtʃɚ/","kriichar","криичар","Живое существо","Tirik mavjudot"],
   ["Sailor",null,"/ˈseɪlə(r)/","seyla","сэйла","/ˈseɪlɚ/","seylar","сэйлар","Моряк","Dengizchi"],
   ["Scientist",null,"/ˈsaɪəntɪst/","sayantist","сайантист","/ˈsaɪəntɪst/","sayantist","сайантист","Ученый","Olim"],
   ["Coast",null,"/kəʊst/","koust","коуст","/koʊst/","koust","коуст","Побережье","Dengiz qirg'og'i"],
@@ -221,14 +256,10 @@ const GROUPS = [
   ["Mystery",null,"/ˈmɪstri/","mistri","мистри","/ˈmɪstəri/","mistari","мистари","Тайна","Sir, jumboq"],
   ["Soldier",null,"/ˈsəʊldʒə(r)/","soulja","соулжа","/ˈsoʊldʒɚ/","souljar","соулжар","Солдат","Askar"],
   ["To be familiar with",null,"/fəˈmɪliə wɪð/","familia vith","фамилиа виз","/fəˈmɪljɚ wɪð/","familyar vith","фамильяр виз","Быть знакомым","Tanish bo'lmoq"],
-  ["Politician",null,"/ˌpɒləˈtɪʃn/","politishn","политишн","/ˌpɑːləˈtɪʃən/","paalitishn","паалитишн","Политик","Siyosatchi"]
- ]},
- {date:"2026-08-03", topic:"6 F", w:[
+  ["Politician",null,"/ˌpɒləˈtɪʃn/","politishn","политишн","/ˌpɑːləˈtɪʃən/","paalitishn","паалитишн","Политик","Siyosatchi"],
   ["Manage",null,"/ˈmænɪdʒ/","menij","мэниж","/ˈmænɪdʒ/","menij","мэниж","Справляться","Uddalamoq"],
   ["Skin",null,"/skɪn/","skin","скин","/skɪn/","skin","скин","Кожа человека","Odam terisi"],
-  ["Later",null,"/ˈleɪtə(r)/","leyta","лэйта","/ˈleɪtɚ/","leydar","лэйдар","Позже","Keyinroq"]
- ]},
- {date:"2026-08-03", topic:"6 F", w:[
+  ["Later",null,"/ˈleɪtə(r)/","leyta","лэйта","/ˈleɪtɚ/","leydar","лэйдар","Позже","Keyinroq"],
   ["Relative",null,"/ˈrelətɪv/","relativ","рэлатив","/ˈrelətɪv/","reladiv","рэладив","Родственник","Qarindosh"],
   ["Pilot",null,"/ˈpaɪlət/","paylat","пайлат","/ˈpaɪlət/","paylat","пайлат","Пилот","Uchuvchi"],
   ["Crash",null,"/kræʃ/","kresh","крэш","/kræʃ/","kresh","крэш","Авария","Avariyaga uchramoq"],

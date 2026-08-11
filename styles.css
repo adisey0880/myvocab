@@ -64,6 +64,11 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* [hidden] muallif qoidalaridan (masalan button{display:inline-flex}) ustun turishi shart */
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   background: var(--bg);
@@ -71,10 +76,15 @@ body {
   font-family: var(--font);
   font-size: 16px;
   line-height: 1.5;
-  padding-bottom: 80px;
+  padding-bottom: calc(80px + env(safe-area-inset-bottom));
   transition: background 0.3s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   overflow-x: hidden;
   position: relative;
+}
+
+/* Modal ochiq turganda fon scroll bo'lmasin */
+body.modal-open {
+  overflow: hidden;
 }
 
 /* Ambient Glow Orbs in Background */
@@ -120,7 +130,7 @@ header {
   z-index: 30;
   background: rgba(9, 13, 20, 0.85);
   border-bottom: 1px solid var(--border);
-  padding: 14px 22px 12px;
+  padding: calc(14px + env(safe-area-inset-top)) 22px 12px;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   transition: border-color 0.25s ease, background 0.25s ease;
@@ -147,16 +157,29 @@ h1 {
   font-size: 21px;
   font-weight: 800;
   letter-spacing: -0.03em;
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+h1 svg {
+  flex-shrink: 0;
+}
+
+.h1-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 h1 em {
   font-style: normal;
   background: linear-gradient(135deg, var(--accent), #c084fc);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -170,6 +193,8 @@ h1 em {
   padding: 4px 12px;
   border-radius: 20px;
   box-shadow: var(--shadow-sm);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* Control Bars */
@@ -218,7 +243,8 @@ input[type=search]:focus {
   transition: fill 0.2s ease;
 }
 
-input[type=search]:focus + .search-icon {
+/* Ikonka DOM'da inputdan oldin turadi — shuning uchun :focus-within ishlatamiz */
+.search-wrap:focus-within .search-icon {
   fill: var(--accent);
 }
 
@@ -276,6 +302,12 @@ button:active {
 button:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
 }
 
 button.on {
@@ -342,12 +374,14 @@ button.btn-train:hover {
 .seg {
   position: relative;
   display: inline-flex;
+  flex-wrap: wrap;
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: var(--r);
   padding: 3px;
   gap: 2px;
   box-shadow: var(--shadow-sm);
+  max-width: 100%;
 }
 
 .seg button {
@@ -377,15 +411,25 @@ button.btn-train:hover {
   box-shadow: none;
 }
 
+/* Pozitsiya JS'dan transform orqali beriladi — shuning uchun silliq sirg'anadi
+   va segment ikki qatorga o'ralganda ham to'g'ri joylashadi. */
 .seg-pill {
   position: absolute;
-  top: 3px;
-  bottom: 3px;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
   z-index: 1;
+  opacity: 0;
   background: var(--accent);
   border-radius: calc(var(--r) - 4px);
-  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
+              width 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
+              height 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
+              opacity 0.2s ease;
   box-shadow: 0 2px 8px var(--accent-glow);
+  will-change: transform, width;
+  pointer-events: none;
 }
 
 /* Horizontal Lessons Chips */
@@ -496,6 +540,10 @@ main {
               background 0.25s ease;
   outline: none;
   overflow: hidden;
+}
+
+/* Animatsiya faqat "yangi ro'yxat" chizilganda — qidiruv paytida miltillamasin */
+.card-anim {
   animation: springCascade 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
@@ -513,6 +561,8 @@ main {
   background: linear-gradient(135deg, rgba(255,255,255,0.08), transparent 60%);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
+  /* Firefox uchun prefikssiz variant ham kerak, aks holda maska ishlamaydi */
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask-composite: exclude;
   pointer-events: none;
 }
@@ -765,6 +815,26 @@ footer b {
   color: var(--ink-sub);
 }
 
+.foot-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--border);
+}
+
+.foot-label {
+  font-size: 12.5px;
+  margin-right: 4px;
+}
+
+.foot-actions button {
+  font-size: 12.5px;
+  padding: 7px 12px;
+}
+
 /* Modal Overlay Base */
 .modal-overlay {
   position: fixed;
@@ -777,6 +847,8 @@ footer b {
   align-items: center;
   justify-content: center;
   padding: 20px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s ease, visibility 0.3s ease;
@@ -795,6 +867,7 @@ footer b {
 .setup-card-wrap {
   width: 100%;
   max-width: 540px;
+  margin: auto;
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: calc(var(--r) * 1.25);
@@ -861,10 +934,28 @@ footer b {
   box-shadow: 0 6px 20px var(--accent-glow);
 }
 
+.ts-hint {
+  font-weight: 600;
+  opacity: 0.85;
+  font-size: 14px;
+}
+
+.ts-error {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: var(--r-sm);
+  background: rgba(244, 63, 94, 0.12);
+  border: 1px solid rgba(244, 63, 94, 0.35);
+  color: var(--danger);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
 /* Flashcard 3D Modal */
 .train-card-wrap {
   width: 100%;
   max-width: 520px;
+  margin: auto;
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: calc(var(--r) * 1.25);
@@ -981,6 +1072,58 @@ footer b {
 .t-ru { font-size: 15.5px; color: var(--ink-sub); margin-bottom: 6px; }
 .t-uz { font-size: 18px; font-weight: 700; color: var(--ink); }
 
+/* Mashg'ulotdagi "Eshitish" tugmasi */
+.listen-btn {
+  margin-bottom: 12px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: 0;
+  border-radius: var(--r-sm);
+  padding: 8px 14px;
+  font-size: 13.5px;
+  font-weight: 700;
+  box-shadow: none;
+}
+
+.listen-btn:hover {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* Yakuniy statistika */
+.t-stats {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  margin-top: 18px;
+}
+
+.t-stats .stat {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.t-stats .stat b {
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.t-stats .stat span {
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
 .t-footer {
   display: flex;
   gap: 14px;
@@ -1021,6 +1164,66 @@ footer b {
   box-shadow: 0 4px 16px rgba(16, 185, 129, 0.35);
 }
 
+.btn-restart {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* Toast */
+.toast-wrap {
+  position: fixed;
+  left: 50%;
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--panel);
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 11px 16px;
+  font-size: 13.5px;
+  font-weight: 600;
+  box-shadow: var(--shadow);
+  pointer-events: auto;
+  animation: toastIn 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.toast.hide {
+  animation: toastOut 0.25s ease forwards;
+}
+
+.toast button {
+  padding: 5px 12px;
+  font-size: 12.5px;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+  box-shadow: none;
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(14px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes toastOut {
+  to { opacity: 0; transform: translateY(10px); }
+}
+
 /* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
@@ -1031,10 +1234,46 @@ footer b {
   }
 }
 
+/* "Sozlamalar" tugmasi faqat mobilda kerak — kengda hamma narsa ochiq turadi */
+#advBtn {
+  display: none;
+}
+
 @media (max-width: 600px) {
-  header { padding: 10px 14px 8px; }
+  header { padding: calc(10px + env(safe-area-inset-top)) 14px 8px; }
   main { padding: 14px 14px 0; }
   .grid { grid-template-columns: 1fr; }
   h1 { font-size: 18px; }
   .train-card-wrap, .setup-card-wrap { padding: 22px; }
+
+  #advBtn { display: inline-flex; }
+
+  /* Yig'ilgan holatda ikkilamchi sozlamalar yashiriladi —
+     sticky sarlavha ekranning yarmini egallab qolmasin */
+  body.adv-collapsed .adv { display: none; }
+
+  /* Joy tejash: tugmalarda faqat ikonka qoladi */
+  #themeBtn .btn-label,
+  #advBtn .btn-label { display: none; }
+  #themeBtn { padding: 8px 10px; }
+  #advBtn   { padding: 8px 10px; }
+
+  .bar { gap: 6px; margin-bottom: 8px; }
+  .titlebar { gap: 8px; margin-bottom: 10px; }
+  /* Qidiruv + sozlamalar + mashg'ulot bitta qatorga sig'sin */
+  .search-wrap { flex: 1 1 120px; }
+  .kb-hint { display: none; }
+  .count { font-size: 12px; padding: 3px 10px; }
+  button { padding: 8px 12px; font-size: 13px; }
+  .seg button { padding: 6px 11px; }
+  footer { line-height: 1.7; }
+  .t-prompt { font-size: 26px; }
+  .t-footer { gap: 10px; }
+  .t-footer button { padding: 12px 8px; font-size: 14px; }
+  .toast-wrap { max-width: calc(100vw - 24px); }
+}
+
+@media (max-width: 380px) {
+  .t-stats { flex-direction: column; }
+  .t-stats .stat { flex-direction: row; align-items: baseline; gap: 8px; }
 }

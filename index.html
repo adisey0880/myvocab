@@ -2,14 +2,34 @@
 <html lang="uz" data-theme="dark">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Lug'at — mening so'zlarim</title>
+<meta name="description" content="Ingliz tili shaxsiy lug'ati: talaffuz, transkripsiya, o'zbekcha va ruscha tarjima, flesh-karta mashg'uloti. Oflayn ishlaydi.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" id="themeColor" content="#090d14">
 <meta name="apple-mobile-web-app-title" content="Lug'at">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="application-name" content="Lug'at">
-<meta name="theme-color" content="#090d14">
 <link rel="manifest" href="manifest.json">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='16' fill='%230b0f17'/><path d='M20 18h8v28h-8zM36 18h8v28h-8z' fill='%23818cf8'/><text x='32' y='42' font-size='32' font-family='sans-serif' font-weight='bold' fill='%23818cf8' text-anchor='middle'>L</text></svg>">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="stylesheet" href="styles.css">
+<script>
+/* Temani CSS'dan oldin qo'yamiz — sahifa yuklanishida rang sakramasligi uchun */
+(function () {
+  try {
+    var raw = localStorage.getItem('myvocab_settings_v3') || localStorage.getItem('myvocab_settings_v2');
+    var saved = raw ? JSON.parse(raw) : null;
+    var t = (saved && saved.theme) ||
+            (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+    document.documentElement.setAttribute('data-theme', t);
+    document.documentElement.style.colorScheme = t;
+    document.getElementById('themeColor').setAttribute('content', t === 'dark' ? '#090d14' : '#f1f5f9');
+  } catch (e) {}
+})();
+</script>
 </head>
 <body>
 
@@ -17,78 +37,87 @@
  <div class="hrow">
   <div class="titlebar">
     <h1>
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent)"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-      Mening <em>lug'atim</em>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent)" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      <span class="h1-text">Mening <em>lug'atim</em></span>
     </h1>
     <span class="count" id="count" aria-live="polite">0 ta so'z</span>
     <button id="themeBtn" aria-label="Mavzuni o'zgartirish" title="Rejimni almashtirish">
-      <svg id="themeIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-      <span>Oq rejim</span>
+      <svg id="themeIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      <span class="btn-label">Oq rejim</span>
     </button>
   </div>
 
   <div class="bar">
     <div class="search-wrap">
-      <svg class="search-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+      <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
       <input type="search" id="q" placeholder="So'z qidirish…" autocomplete="off" aria-label="So'z qidirish">
-      <span class="kb-hint">/</span>
+      <span class="kb-hint" aria-hidden="true">/</span>
     </div>
 
-    <span class="segwrap">
-      <span class="cap">Yozuv</span>
-      <span class="seg" id="scriptSeg" role="radiogroup" aria-label="Yozuv turi">
-        <div class="seg-pill"></div>
-        <button data-v="lat" role="radio" aria-checked="true" class="on">Lotin</button>
-        <button data-v="cyr" role="radio" aria-checked="false">Кирилл</button>
-      </span>
-    </span>
-
-    <span class="segwrap">
-      <span class="cap">Aksent</span>
-      <span class="seg" id="accentSeg" role="radiogroup" aria-label="Talaffuz aksenti">
-        <div class="seg-pill"></div>
-        <button data-v="us" role="radio" aria-checked="true" class="on">🇺🇸 American</button>
-        <button data-v="uk" role="radio" aria-checked="false">🇬🇧 British</button>
-      </span>
-    </span>
+    <button id="advBtn" aria-expanded="false" aria-controls="advBars" aria-label="Sozlamalarni ko'rsatish">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="9" cy="7" r="2.2" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="2.2" fill="currentColor" stroke="none"/><circle cx="8" cy="17" r="2.2" fill="currentColor" stroke="none"/></svg>
+      <span class="btn-label">Sozlamalar</span>
+    </button>
 
     <button id="trainBtn" class="btn-train">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-      🎯 Mashg'ulot
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg>
+      Mashg'ulot
     </button>
   </div>
 
   <div class="bar">
-    <button id="slowBtn">Sekin</button>
     <button id="hideTrBtn">Yashirish: yo‘q</button>
     <button id="playAllBtn">▶ Hammasi</button>
-
-    <span class="segwrap">
-      <span class="cap">Status</span>
-      <span class="seg" id="learnedSeg" role="radiogroup" aria-label="O'rganilganlik holati">
-        <div class="seg-pill"></div>
-        <button data-v="all" role="radio" aria-checked="true" class="on">Barchasi</button>
-        <button data-v="unlearned" role="radio" aria-checked="false">Yangi</button>
-        <button data-v="learned" role="radio" aria-checked="false">Yodlangan</button>
-      </span>
-    </span>
+    <button id="slowBtn">Sekin</button>
   </div>
 
-  <div class="bar">
-    <span class="segwrap">
-      <span class="cap">Filtr</span>
-      <span class="seg" id="modeSeg" role="radiogroup" aria-label="Guruhlash turi">
-        <div class="seg-pill"></div>
-        <button data-v="date" role="radio" aria-checked="true" class="on">Sana</button>
-        <button data-v="topic" role="radio" aria-checked="false">Mavzu</button>
-      </span>
-    </span>
+  <div class="adv" id="advBars">
+    <div class="bar">
+      <div class="segwrap">
+        <span class="cap">Yozuv</span>
+        <div class="seg" id="scriptSeg" role="radiogroup" aria-label="Yozuv turi">
+          <div class="seg-pill" aria-hidden="true"></div>
+          <button data-v="lat" role="radio" aria-checked="true" class="on">Lotin</button>
+          <button data-v="cyr" role="radio" aria-checked="false">Кирилл</button>
+        </div>
+      </div>
+
+      <div class="segwrap">
+        <span class="cap">Aksent</span>
+        <div class="seg" id="accentSeg" role="radiogroup" aria-label="Talaffuz aksenti">
+          <div class="seg-pill" aria-hidden="true"></div>
+          <button data-v="us" role="radio" aria-checked="true" class="on">🇺🇸 American</button>
+          <button data-v="uk" role="radio" aria-checked="false">🇬🇧 British</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="bar">
+      <div class="segwrap">
+        <span class="cap">Status</span>
+        <div class="seg" id="learnedSeg" role="radiogroup" aria-label="O'rganilganlik holati">
+          <div class="seg-pill" aria-hidden="true"></div>
+          <button data-v="all" role="radio" aria-checked="true" class="on">Barchasi</button>
+          <button data-v="unlearned" role="radio" aria-checked="false">Yangi</button>
+          <button data-v="learned" role="radio" aria-checked="false">Yodlangan</button>
+        </div>
+      </div>
+
+      <div class="segwrap">
+        <span class="cap">Filtr</span>
+        <div class="seg" id="modeSeg" role="radiogroup" aria-label="Guruhlash turi">
+          <div class="seg-pill" aria-hidden="true"></div>
+          <button data-v="date" role="radio" aria-checked="true" class="on">Sana</button>
+          <button data-v="topic" role="radio" aria-checked="false">Mavzu</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="lessons-wrap">
     <div class="lessons" id="lessons"></div>
   </div>
-  <div class="warn" id="warn">Ovoz ishlamayapti — sahifada bir marta bosing yoki Chrome/Safari'da oching.</div>
+  <div class="warn" id="warn" role="status">Ovoz ishlamayapti — sahifada bir marta bosing yoki Chrome/Safari'da oching.</div>
  </div>
 </header>
 
@@ -101,44 +130,51 @@
   • Amerikanchada so'z oxiridagi <b>r</b> aytiladi (sailor → сэйла<b>р</b>), britanchada aytilmaydi (сэйла).<br>
   • Amerikanchada unlilar orasidagi <b>t</b> yumshoq <b>d</b> kabi: later → лэй<b>д</b>ар.<br>
   • Imlo farqi: <b>Realise/Traveller</b> (BrE) → <b>Realize/Traveler</b> (AmE) — aksentni almashtirsangiz o'zgaradi.
+
+  <div class="foot-actions">
+    <span class="foot-label">Yodlangan so'zlar faqat shu brauzerda saqlanadi:</span>
+    <button id="exportBtn" type="button">⬇ Zaxira olish</button>
+    <button id="importBtn" type="button">⬆ Zaxiradan tiklash</button>
+    <input type="file" id="importFile" accept="application/json,.json" hidden>
+  </div>
 </footer>
 
 <!-- Training Setup Modal -->
-<div class="modal-overlay" id="trainSetupModal" role="dialog" aria-modal="true" aria-label="Mashg'ulot sozlamalari">
+<div class="modal-overlay" id="trainSetupModal" role="dialog" aria-modal="true" aria-labelledby="setupTitle">
   <div class="setup-card-wrap">
     <div class="train-header">
-      <h3 class="setup-title">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" style="color:var(--accent)"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-        🎯 Mashg'ulot Sozlamalari
+      <h3 class="setup-title" id="setupTitle">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="color:var(--accent)" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg>
+        Mashg'ulot sozlamalari
       </h3>
       <button class="close-modal" id="closeSetup" aria-label="Yopish">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
 
     <div class="setup-grid">
       <!-- 1. Manba -->
       <div class="ts-group">
-        <span class="ts-label">1. So'zlar Manbasi</span>
-        <div class="seg" id="tsSourceSeg" role="radiogroup">
-          <div class="seg-pill"></div>
+        <span class="ts-label">1. So'zlar manbasi</span>
+        <div class="seg" id="tsSourceSeg" role="radiogroup" aria-label="So'zlar manbasi">
+          <div class="seg-pill" aria-hidden="true"></div>
           <button data-v="current" role="radio" aria-checked="true" class="on">Joriy filtr</button>
-          <button data-v="all" role="radio" aria-checked="false">Hammasi (212)</button>
+          <button data-v="all" id="tsAllBtn" role="radio" aria-checked="false">Hammasi</button>
           <button data-v="custom" role="radio" aria-checked="false">Tanlangan dars</button>
         </div>
       </div>
 
       <!-- Custom Lesson Select -->
-      <div class="ts-group" id="tsSelectWrap" style="display:none;">
-        <span class="ts-label">Darsni tanlang</span>
+      <div class="ts-group" id="tsSelectWrap" hidden>
+        <label class="ts-label" for="tsSelect">Darsni tanlang</label>
         <select class="ts-select" id="tsSelect"></select>
       </div>
 
       <!-- 2. Nechta so'z -->
       <div class="ts-group">
         <span class="ts-label">2. So'zlar soni</span>
-        <div class="seg" id="tsCountSeg" role="radiogroup">
-          <div class="seg-pill"></div>
+        <div class="seg" id="tsCountSeg" role="radiogroup" aria-label="So'zlar soni">
+          <div class="seg-pill" aria-hidden="true"></div>
           <button data-v="10" role="radio" aria-checked="false">10 ta</button>
           <button data-v="20" role="radio" aria-checked="true" class="on">20 ta</button>
           <button data-v="50" role="radio" aria-checked="false">50 ta</button>
@@ -149,8 +185,8 @@
       <!-- 3. Yo'nalish -->
       <div class="ts-group">
         <span class="ts-label">3. Yo'nalish</span>
-        <div class="seg" id="tsDirSeg" role="radiogroup">
-          <div class="seg-pill"></div>
+        <div class="seg" id="tsDirSeg" role="radiogroup" aria-label="Yo'nalish">
+          <div class="seg-pill" aria-hidden="true"></div>
           <button data-v="eng_uzb" role="radio" aria-checked="true" class="on">ENG → UZB</button>
           <button data-v="uzb_eng" role="radio" aria-checked="false">UZB → ENG</button>
           <button data-v="mix" role="radio" aria-checked="false">Aralash 🔀</button>
@@ -160,9 +196,9 @@
       <!-- 4. Tartib -->
       <div class="ts-group">
         <span class="ts-label">4. Tartib</span>
-        <div class="seg" id="tsOrderSeg" role="radiogroup">
-          <div class="seg-pill"></div>
-          <button data-v="shuffle" role="radio" aria-checked="true" class="on">Tasodifiy (Shuffle)</button>
+        <div class="seg" id="tsOrderSeg" role="radiogroup" aria-label="Tartib">
+          <div class="seg-pill" aria-hidden="true"></div>
+          <button data-v="shuffle" role="radio" aria-checked="true" class="on">Tasodifiy</button>
           <button data-v="seq" role="radio" aria-checked="false">Ketma-ket</button>
         </div>
       </div>
@@ -170,16 +206,18 @@
       <!-- 5. Status -->
       <div class="ts-group">
         <span class="ts-label">5. Status</span>
-        <div class="seg" id="tsStatusSeg" role="radiogroup">
-          <div class="seg-pill"></div>
+        <div class="seg" id="tsStatusSeg" role="radiogroup" aria-label="Status">
+          <div class="seg-pill" aria-hidden="true"></div>
           <button data-v="unlearned" role="radio" aria-checked="true" class="on">Faqat yangi</button>
           <button data-v="all" role="radio" aria-checked="false">Barchasi</button>
           <button data-v="learned" role="radio" aria-checked="false">Yodlangan</button>
         </div>
       </div>
 
+      <p class="ts-error" id="tsError" role="alert" hidden></p>
+
       <button class="ts-start-btn" id="tsStartBtn">
-        ▶ Mashg'ulotni boshlash
+        ▶ Mashg'ulotni boshlash <span class="ts-hint">(<span id="tsPoolCount">0</span> ta so'z)</span>
       </button>
     </div>
   </div>
@@ -191,7 +229,7 @@
     <div class="train-header">
       <span class="train-progress" id="trainProgress">1 / 10</span>
       <button class="close-modal" id="closeTrain" aria-label="Yopish">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
     <div class="t-bar-bg"><div class="t-bar-fill" id="trainBarFill"></div></div>
@@ -201,21 +239,26 @@
       <div class="t-ipa" id="tIpa" lang="en">/ipa/</div>
       <div class="t-pron" id="tPron">pron</div>
 
-      <button id="tListenBtn" class="listen" style="margin-bottom:12px;">🔊 Eshitish</button>
+      <button id="tListenBtn" class="listen-btn">🔊 Eshitish</button>
 
       <div class="t-answer-box" id="tAnswerBox">
         <div class="t-ru" id="tRu" lang="ru">Русский перевод</div>
         <div class="t-uz" id="tUz" lang="uz">O'zbekcha tarjima</div>
       </div>
+
+      <div class="t-stats" id="tStats" hidden></div>
     </div>
 
     <div class="t-footer" id="tFooter">
       <button id="tShowBtn" class="on">Javobni ko'rsatish (Space)</button>
-      <button id="tHardBtn" class="btn-hard" style="display:none;">Qiyin / Qaytarish (1)</button>
-      <button id="tEasyBtn" class="btn-easy" style="display:none;">Oson / Yodladim (2)</button>
+      <button id="tHardBtn" class="btn-hard" hidden>Qiyin / Qaytarish (1)</button>
+      <button id="tEasyBtn" class="btn-easy" hidden>Oson / Yodladim (2)</button>
+      <button id="tRestartBtn" class="btn-restart" hidden>↻ Yana bir bor</button>
     </div>
   </div>
 </div>
+
+<div class="toast-wrap" id="toastWrap" aria-live="polite"></div>
 
 <script src="words.js"></script>
 <script src="app.js"></script>
