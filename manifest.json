@@ -1,0 +1,16 @@
+{
+  "name": "Lug'at — Mening So'zlarim",
+  "short_name": "Lug'at",
+  "description": "Ingliz tili so'zlashuv lug'ati - Uzbek English vocabulary offline app",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#090d14",
+  "theme_color": "#090d14",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='16' fill='%230b0f17'/><text x='32' y='44' font-size='34' font-family='sans-serif' font-weight='bold' fill='%23818cf8' text-anchor='middle'>L</text></svg>",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}
