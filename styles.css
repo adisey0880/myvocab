@@ -774,6 +774,75 @@ main {
   font-weight: 700;
 }
 
+/* ---------- NOTO'G'RI FE'L KARTOCHKASI ---------- */
+.seg-ds {
+  flex-shrink: 0;
+}
+
+.seg-ds button {
+  font-weight: 700;
+  gap: 5px;
+}
+
+.ds-n {
+  font-size: 11px;
+  font-weight: 700;
+  opacity: 0.65;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Fe'l kartochkasida uchta ustun bor — biroz kengroq joy kerak */
+body.ds-verbs .grid {
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+}
+
+.top-verb {
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
+.vforms {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.vform {
+  min-width: 0;
+}
+
+.vlbl {
+  display: block;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  color: var(--muted);
+  margin-bottom: 3px;
+}
+
+.verb-card .en {
+  font-size: 16px;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+
+.verb-card .ipa {
+  font-size: 10.5px;
+  margin-top: 3px;
+  overflow-wrap: anywhere;
+}
+
+.verb-card .pron {
+  font-size: 12.5px;
+  margin-top: 2px;
+  overflow-wrap: anywhere;
+}
+
+.verb-card .meta {
+  margin-top: 12px;
+  padding-top: 10px;
+}
+
 /* Hide modes with CSS blur */
 body.hide-tr .meta, body.hide-tr .pron {
   filter: blur(6px);
@@ -785,6 +854,18 @@ body.hide-en .en, body.hide-en .ipa, body.hide-en .pron {
   filter: blur(7px);
   transition: filter 0.25s ease;
   user-select: none;
+}
+
+/* Fe'llarda "UZB → ENG" rejimi: 1-shakl ochiq qoladi, V2 va V3 yashiriladi —
+   klassik mashq. "ENG → UZB" da esa transkripsiya xiralashmaydi. */
+body.ds-verbs.hide-tr .pron {
+  filter: none;
+}
+
+body.ds-verbs.hide-en .vform:first-child .en,
+body.ds-verbs.hide-en .vform:first-child .ipa,
+body.ds-verbs.hide-en .vform:first-child .pron {
+  filter: none;
 }
 
 /* Reveal blur rules */
@@ -1099,6 +1180,45 @@ footer b {
 .t-ru { font-size: 15.5px; color: var(--ink-sub); margin-bottom: 6px; }
 .t-uz { font-size: 18px; font-weight: 700; color: var(--ink); }
 
+/* Mashg'ulotdagi fe'l shakllari */
+.t-forms {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px dashed var(--border);
+}
+
+.t-forms .en {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+}
+
+.t-forms .ipa {
+  font-family: var(--font-mono);
+  color: var(--ipa);
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 3px;
+  overflow-wrap: anywhere;
+}
+
+.t-forms .pron {
+  font-style: italic;
+  color: var(--accent);
+  font-size: 13px;
+  margin-top: 2px;
+}
+
+.t-forms .pron.cyr {
+  color: var(--cyr);
+  font-weight: 600;
+}
+
 /* Mashg'ulotdagi "Eshitish" tugmasi */
 .listen-btn {
   margin-bottom: 12px;
@@ -1287,7 +1407,8 @@ footer b {
 
   /* Joy tejash: tugmalarda faqat ikonka qoladi */
   #themeBtn .btn-label,
-  #advBtn .btn-label { display: none; }
+  #advBtn .btn-label,
+  .ds-n { display: none; }
   #themeBtn { padding: 8px 10px; }
   #advBtn   { padding: 8px 10px; }
 

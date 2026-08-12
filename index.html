@@ -48,6 +48,12 @@
   </div>
 
   <div class="bar">
+    <div class="seg seg-ds" id="dsSeg" role="radiogroup" aria-label="Bo‘lim">
+      <div class="seg-pill" aria-hidden="true"></div>
+      <button data-v="words" role="radio" aria-checked="true" class="on">So‘zlar</button>
+      <button data-v="verbs" role="radio" aria-checked="false">Fe'llar</button>
+    </div>
+
     <div class="search-wrap">
       <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
       <input type="search" id="q" placeholder="So'z qidirish…" autocomplete="off" aria-label="So'z qidirish">
@@ -240,6 +246,7 @@
       <button id="tListenBtn" class="listen-btn">🔊 Eshitish</button>
 
       <div class="t-answer-box" id="tAnswerBox">
+        <div class="t-forms" id="tForms" lang="en" hidden></div>
         <div class="t-ru" id="tRu" lang="ru">Русский перевод</div>
         <div class="t-uz" id="tUz" lang="uz">O'zbekcha tarjima</div>
       </div>
@@ -259,6 +266,7 @@
 <div class="toast-wrap" id="toastWrap" aria-live="polite"></div>
 
 <script src="words.js"></script>
+<script src="verbs.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

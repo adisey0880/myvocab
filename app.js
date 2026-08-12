@@ -6,6 +6,7 @@
 const STORE_KEY     = 'myvocab_settings_v3';
 const LEGACY_KEYS   = ['myvocab_settings_v2'];
 const TOTAL_WORDS   = GROUPS.reduce((n, g) => n + g.w.length, 0);
+const TOTAL_VERBS   = VERB_GROUPS.reduce((n, g) => n + g.v.length, 0);
 const RATE_NORMAL   = 0.9;
 const RATE_SLOW     = 0.55;
 const GAP_NORMAL    = 600;
@@ -64,7 +65,9 @@ function saveState() {
       v: 3,
       theme: document.documentElement.getAttribute('data-theme'),
       script, accent, slow, activeLesson, filterMode, mode, learnedFilter, advOpen,
+      dataset, activeVerbGroup,
       learnedWords: [...learnedWordsSet],
+      learnedVerbs: [...learnedVerbsSet],
       tsSource, tsCustomKey, tsCount, tsDir, tsOrder, tsStatus
     }));
   } catch (e) { /* privat rejim / to'la xotira — jim o'tamiz */ }
@@ -83,6 +86,18 @@ let advOpen       = (typeof saved?.advOpen === 'boolean') ? saved.advOpen : fals
 let query         = '';
 
 const learnedWordsSet = new Set(saved?.learnedWords || []);
+const learnedVerbsSet = new Set(saved?.learnedVerbs || []);
+
+/* Ikki bo'lim: so'zlar lug'ati va noto'g'ri fe'llar */
+let dataset         = saved?.dataset === 'verbs' ? 'verbs' : 'words';
+let activeVerbGroup = saved?.activeVerbGroup || 'all';
+
+const isVerbs    = () => dataset === 'verbs';
+const learnedSet = () => isVerbs() ? learnedVerbsSet : learnedWordsSet;
+const activeKey  = () => isVerbs() ? activeVerbGroup : activeLesson;
+const setActiveKey = v => { if (isVerbs()) activeVerbGroup = v; else activeLesson = v; };
+const unit       = () => isVerbs() ? 'ta fe\'l' : 'ta so\'z';
+const totalOf    = () => isVerbs() ? TOTAL_VERBS : TOTAL_WORDS;
 
 /* Mashg'ulot sozlamalari */
 let tsSource    = saved?.tsSource || 'current';   // current | all | custom
@@ -101,6 +116,17 @@ GROUPS.forEach(g => g.w.forEach(w => {
     hay: normText(w.filter(Boolean).join(' '))   // IPA ham qidiruvga kiradi
   });
 }));
+
+const VERB_ITEMS = [];
+VERB_GROUPS.forEach(g => g.v.forEach(v => {
+  VERB_ITEMS.push({
+    v, g,
+    key: normText(v[0].split('|')[0]).trim(),    // kalit — 1-shakl (infinitiv)
+    hay: normText(v.filter(Boolean).join(' ').replace(/\|/g, ' '))
+  });
+}));
+
+const activeItems = () => isVerbs() ? VERB_ITEMS : ITEMS;
 
 /* ---------- TOAST ---------- */
 const toastWrap = $('toastWrap');
@@ -162,8 +188,18 @@ $('themeBtn').addEventListener('click', () => {
 setTheme(document.documentElement.getAttribute('data-theme') || 'dark');
 
 /* ---------- DATA AGGREGATION ---------- */
-let _secCache = null, _secCacheMode = null;
+let _secCache = null, _secCacheMode = null, _verbSecCache = null;
 function sections() {
+  if (isVerbs()) {
+    if (!_verbSecCache) {
+      _verbSecCache = VERB_GROUPS.map(g => ({
+        key: g.key, title: g.title, hint: g.hint,
+        w: VERB_ITEMS.filter(i => i.g === g)
+      }));
+    }
+    return _verbSecCache;
+  }
+
   if (_secCache && _secCacheMode === filterMode) return _secCache;
 
   const map = new Map();
@@ -264,8 +300,16 @@ function pronOf(w) {
   return script === 'cyr' ? w[4] : w[3];
 }
 
+/* Fe'l uchun: uchala shakl massiv sifatida */
+function vFormsOf(v) { return ((accent === 'us' && v[1]) ? v[1] : v[0]).split('|'); }
+function vIpaOf(v)   { return (accent === 'us' ? v[5] : v[2]).split('|'); }
+function vPronOf(v)  {
+  if (accent === 'us') return (script === 'cyr' ? v[7] : v[6]).split('|');
+  return (script === 'cyr' ? v[4] : v[3]).split('|');
+}
+
 function matchesFilters(item) {
-  const isLearned = learnedWordsSet.has(item.key);
+  const isLearned = learnedSet().has(item.key);
   if (learnedFilter === 'unlearned' && isLearned) return false;
   if (learnedFilter === 'learned' && !isLearned) return false;
   return !query || item.hay.includes(query);
@@ -282,6 +326,52 @@ function fmt(iso) {
   return `${d}.${m}.${y}`;
 }
 
+const CHECK_BTN_HTML = (isLearned) => `
+  <button class="check-btn" aria-pressed="${isLearned}" title="Yodlangan deb belgilash" aria-label="Yodlanganlikni almashtirish">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+  </button>
+  <span class="listen">
+    <span class="sound-wave" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+    Eshitish
+  </span>`;
+
+function wordCardHTML(item, isLearned) {
+  const w = item.w;
+  return `
+    <div class="top">
+      <div class="en" lang="en">${escapeHtml(wordOf(w))}</div>
+      <div class="actions-right">${CHECK_BTN_HTML(isLearned)}</div>
+    </div>
+    <div class="ipa" lang="en">${escapeHtml(ipaOf(w))}</div>
+    <div class="pron ${script === 'cyr' ? 'cyr' : ''}">${escapeHtml(pronOf(w))}</div>
+    <div class="meta">
+      <span class="lbl">RU</span><span class="val ru" lang="ru">${escapeHtml(w[8])}</span>
+      <span class="lbl">UZ</span><span class="val uz" lang="uz">${escapeHtml(w[9])}</span>
+    </div>`;
+}
+
+function verbCardHTML(item, isLearned) {
+  const v = item.v;
+  const forms = vFormsOf(v), ipa = vIpaOf(v), pron = vPronOf(v);
+  const cols = forms.map((f, i) => `
+    <div class="vform">
+      <span class="vlbl">V${i + 1}</span>
+      <div class="en" lang="en">${escapeHtml(f)}</div>
+      <div class="ipa" lang="en">${escapeHtml(ipa[i] || '')}</div>
+      <div class="pron ${script === 'cyr' ? 'cyr' : ''}">${escapeHtml(pron[i] || '')}</div>
+    </div>`).join('');
+
+  return `
+    <div class="top top-verb">
+      <div class="actions-right">${CHECK_BTN_HTML(isLearned)}</div>
+    </div>
+    <div class="vforms">${cols}</div>
+    <div class="meta">
+      <span class="lbl">RU</span><span class="val ru" lang="ru">${escapeHtml(v[8])}</span>
+      <span class="lbl">UZ</span><span class="val uz" lang="uz">${escapeHtml(v[9])}</span>
+    </div>`;
+}
+
 /* animate=false — qidiruv paytida kartalar miltillamasligi uchun */
 function render({ animate = true } = {}) {
   /* Ro'yxat qayta chizilsa, navbatdagi kartalar DOM'dan uziladi —
@@ -292,7 +382,7 @@ function render({ animate = true } = {}) {
   let shown = 0;
 
   sections().forEach(L => {
-    if (activeLesson !== 'all' && activeLesson !== L.key) return;
+    if (activeKey() !== 'all' && activeKey() !== L.key) return;
 
     const rows = L.w.filter(matchesFilters);
     if (!rows.length) return;
@@ -300,10 +390,15 @@ function render({ animate = true } = {}) {
     const h = document.createElement('div');
     h.className = 'lhead';
     h.innerHTML = '<h2></h2><span class="date"></span>';
-    h.querySelector('h2').textContent = filterMode === 'date' ? fmt(L.date) : L.topic;
-    h.querySelector('.date').textContent = filterMode === 'date'
-      ? `${rows.length} ta so'z`
-      : `${fmt(L.date)} · ${rows.length} ta so'z`;
+    if (isVerbs()) {
+      h.querySelector('h2').textContent = L.title;
+      h.querySelector('.date').textContent = `${L.hint} · ${rows.length} ta`;
+    } else {
+      h.querySelector('h2').textContent = filterMode === 'date' ? fmt(L.date) : L.topic;
+      h.querySelector('.date').textContent = filterMode === 'date'
+        ? `${rows.length} ta so'z`
+        : `${fmt(L.date)} · ${rows.length} ta so'z`;
+    }
     frag.appendChild(h);
 
     const g = document.createElement('div');
@@ -311,38 +406,21 @@ function render({ animate = true } = {}) {
 
     rows.forEach((item, index) => {
       shown++;
-      const w = item.w;
-      const isLearned = learnedWordsSet.has(item.key);
+      const isLearned = learnedSet().has(item.key);
+      const verb = isVerbs();
+      const say  = verb ? vFormsOf(item.v).join(', ') : wordOf(item.w);
 
       const c = document.createElement('div');
-      c.className = 'card' + (isLearned ? ' is-learned' : '') + (animate ? ' card-anim' : '');
+      c.className = 'card' + (verb ? ' verb-card' : '') +
+                    (isLearned ? ' is-learned' : '') + (animate ? ' card-anim' : '');
       c.setAttribute('role', 'button');
       c.setAttribute('tabindex', '0');
-      c.setAttribute('aria-label', `${wordOf(w)} — ${w[9]}`);
+      c.setAttribute('aria-label', `${say} — ${verb ? item.v[9] : item.w[9]}`);
       if (animate) c.style.animationDelay = `${Math.min(index * 25, 350)}ms`;
-      c.dataset.word = wordOf(w);
+      c.dataset.word = say;
       c.dataset.key  = item.key;
 
-      c.innerHTML = `
-        <div class="top">
-          <div class="en" lang="en">${escapeHtml(wordOf(w))}</div>
-          <div class="actions-right">
-            <button class="check-btn" aria-pressed="${isLearned}" title="Yodlangan deb belgilash" aria-label="Yodlanganlikni almashtirish">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-            </button>
-            <span class="listen">
-              <span class="sound-wave" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
-              Eshitish
-            </span>
-          </div>
-        </div>
-        <div class="ipa" lang="en">${escapeHtml(ipaOf(w))}</div>
-        <div class="pron ${script === 'cyr' ? 'cyr' : ''}">${escapeHtml(pronOf(w))}</div>
-        <div class="meta">
-          <span class="lbl">RU</span><span class="val ru" lang="ru">${escapeHtml(w[8])}</span>
-          <span class="lbl">UZ</span><span class="val uz" lang="uz">${escapeHtml(w[9])}</span>
-        </div>
-      `;
+      c.innerHTML = verb ? verbCardHTML(item, isLearned) : wordCardHTML(item, isLearned);
 
       c.querySelector('.check-btn').addEventListener('click', (e) => {
         e.stopPropagation();
@@ -352,7 +430,7 @@ function render({ animate = true } = {}) {
       const go = () => {
         stopQueue();
         c.classList.add('revealed');
-        speak(wordOf(w), c);
+        speak(say, c);
       };
       c.addEventListener('click', go);
       c.addEventListener('keydown', e => {
@@ -373,7 +451,7 @@ function render({ animate = true } = {}) {
     e.innerHTML = `
       <svg class="empty-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
       <h3>Hech narsa topilmadi</h3>
-      <p>Qidiruv shartiga mos keladigan so'zlar mavjud emas.</p>
+      <p>Qidiruv shartiga mos keladigan natija yo‘q.</p>
       <button id="resetFilterBtn" type="button">Filtrni tozalash</button>
     `;
     list.appendChild(e);
@@ -381,7 +459,7 @@ function render({ animate = true } = {}) {
       $('q').value = '';
       query = '';
       learnedFilter = 'all';
-      activeLesson = 'all';
+      setActiveKey('all');
       syncSeg('learnedSeg', learnedFilter);
       buildLessons();
       render();
@@ -389,13 +467,14 @@ function render({ animate = true } = {}) {
     });
   }
 
-  countEl.textContent = `${shown} ta so'z`;
+  countEl.textContent = `${shown} ${unit()}`;
 }
 
 /* Statusni almashtirish — ekrandagi barcha nusxalarni birdek yangilaydi */
 function toggleLearned(key) {
-  const nowLearned = !learnedWordsSet.has(key);
-  if (nowLearned) learnedWordsSet.add(key); else learnedWordsSet.delete(key);
+  const set = learnedSet();
+  const nowLearned = !set.has(key);
+  if (nowLearned) set.add(key); else set.delete(key);
 
   $$(`.card[data-key="${CSS.escape(key)}"]`).forEach(card => {
     card.classList.toggle('is-learned', nowLearned);
@@ -481,13 +560,13 @@ function buildLessons() {
   const scrollLeft = lessonsWrap.scrollLeft;   // qayta qurishda gorizontal pozitsiya saqlansin
 
   const totalAll   = secs.reduce((s, l) => s + l.w.length, 0);
-  const learnedAll = ITEMS.filter(i => learnedWordsSet.has(i.key)).length;
+  const learnedAll = activeItems().filter(i => learnedSet().has(i.key)).length;
 
   const mk = (label, val, total, learnedCount) => {
     const b = document.createElement('button');
     b.type = 'button';
     b.textContent = label;
-    b.setAttribute('aria-pressed', String(val === activeLesson));
+    b.setAttribute('aria-pressed', String(val === activeKey()));
 
     const sp = document.createElement('span');
     sp.className = 'd';
@@ -499,10 +578,10 @@ function buildLessons() {
     bp.textContent = `${learnedCount}/${total}`;
     b.appendChild(bp);
 
-    if (val === activeLesson) b.classList.add('on');
+    if (val === activeKey()) b.classList.add('on');
     b.addEventListener('click', () => {
       stopQueue();
-      activeLesson = val;
+      setActiveKey(val);
       $$('button', lessonsWrap).forEach(x => {
         x.classList.toggle('on', x === b);
         x.setAttribute('aria-pressed', String(x === b));
@@ -517,8 +596,8 @@ function buildLessons() {
 
   mk('Hammasi', 'all', totalAll, learnedAll);
   secs.forEach(L => {
-    mk(filterMode === 'date' ? fmt(L.date) : L.topic, L.key,
-       L.w.length, L.w.filter(i => learnedWordsSet.has(i.key)).length);
+    const label = isVerbs() ? L.title : (filterMode === 'date' ? fmt(L.date) : L.topic);
+    mk(label, L.key, L.w.length, L.w.filter(i => learnedSet().has(i.key)).length);
   });
 
   lessonsWrap.replaceChildren(frag);
@@ -533,13 +612,16 @@ function populateTsSelect(secs) {
   const frag = document.createDocumentFragment();
   const all  = document.createElement('option');
   all.value = 'all';
-  all.textContent = `Barcha darslar (${TOTAL_WORDS} ta)`;
+  all.textContent = isVerbs()
+    ? `Barcha guruhlar (${TOTAL_VERBS} ta)`
+    : `Barcha darslar (${TOTAL_WORDS} ta)`;
   frag.appendChild(all);
 
   secs.forEach(L => {
     const opt = document.createElement('option');
     opt.value = L.key;
-    opt.textContent = `${filterMode === 'date' ? fmt(L.date) : L.topic} (${L.w.length} ta so'z)`;
+    const label = isVerbs() ? L.title : (filterMode === 'date' ? fmt(L.date) : L.topic);
+    opt.textContent = `${label} (${L.w.length} ${unit()})`;
     frag.appendChild(opt);
   });
 
@@ -717,7 +799,7 @@ function buildPool() {
 
   if (tsSource === 'current') {
     secs.forEach(L => {
-      if (activeLesson !== 'all' && activeLesson !== L.key) return;
+      if (activeKey() !== 'all' && activeKey() !== L.key) return;
       L.w.forEach(item => { if (!query || item.hay.includes(query)) pool.push(item); });
     });
   } else if (tsSource === 'custom') {
@@ -726,7 +808,7 @@ function buildPool() {
       L.w.forEach(item => pool.push(item));
     });
   } else {
-    pool = [...ITEMS];
+    pool = [...activeItems()];
   }
 
   /* Bitta so'z bir necha darsda bo'lsa — mashg'ulotda bir marta */
@@ -734,7 +816,7 @@ function buildPool() {
   pool = pool.filter(item => {
     if (seen.has(item.key)) return false;
     seen.add(item.key);
-    const isLearned = learnedWordsSet.has(item.key);
+    const isLearned = learnedSet().has(item.key);
     if (tsStatus === 'unlearned' && isLearned) return false;
     if (tsStatus === 'learned' && !isLearned)  return false;
     return true;
@@ -779,7 +861,7 @@ function startCustomTraining() {
   let pool = buildPool();
 
   if (!pool.length) {
-    tsError.textContent = 'Bu sozlamalar bo\'yicha so\'z topilmadi. Manba yoki statusni o\'zgartiring.';
+    tsError.textContent = 'Bu sozlamalar bo\'yicha natija topilmadi. Manba yoki statusni o\'zgartiring.';
     tsError.hidden = false;
     return;
   }
@@ -802,13 +884,33 @@ function currentItem() {
   return session && !session.finished ? session.items[session.idx] : null;
 }
 
+function trainSpeakText(item) {
+  return isVerbs() ? vFormsOf(item.v).join(', ') : wordOf(item.w);
+}
+
+/* Fe'l shakllarini javob oynasida chiroyli ustunlar bilan ko'rsatamiz */
+function fillTrainForms(item, from) {
+  const v = item.v;
+  const forms = vFormsOf(v), ipa = vIpaOf(v), pron = vPronOf(v);
+  const el = $('tForms');
+  el.innerHTML = forms.slice(from).map((f, i) => `
+    <div class="vform">
+      <span class="vlbl">V${from + i + 1}</span>
+      <div class="en">${escapeHtml(f)}</div>
+      <div class="ipa">${escapeHtml(ipa[from + i] || '')}</div>
+      <div class="pron ${script === 'cyr' ? 'cyr' : ''}">${escapeHtml(pron[from + i] || '')}</div>
+    </div>`).join('');
+  el.hidden = false;
+}
+
 function showTrainCard() {
   if (!session) return;
   if (session.idx >= session.items.length) { finishTraining(); return; }
 
   session.flipped = false;
   const item = session.items[session.idx];
-  const w = item.w;
+  const verb = isVerbs();
+  const w = verb ? item.v : item.w;
 
   session.dir = tsDir === 'mix' ? (Math.random() < 0.5 ? 'eng_uzb' : 'uzb_eng') : tsDir;
 
@@ -816,8 +918,30 @@ function showTrainCard() {
   $('trainBarFill').style.width = `${(session.idx / session.items.length) * 100}%`;
 
   const promptEl = $('tPrompt'), ipaEl = $('tIpa'), pronEl = $('tPron');
+  $('tForms').hidden = true;
 
-  if (session.dir === 'eng_uzb') {
+  if (verb) {
+    const forms = vFormsOf(w), ipa = vIpaOf(w), pron = vPronOf(w);
+    if (session.dir === 'eng_uzb') {
+      promptEl.textContent = forms[0];        // 1-shakl — qolgan ikkitasini eslash kerak
+      promptEl.setAttribute('lang', 'en');
+      ipaEl.textContent  = ipa[0];
+      pronEl.textContent = pron[0];
+      ipaEl.hidden = pronEl.hidden = false;
+      fillTrainForms(item, 1);                // javobda: V2 va V3
+      $('tListenBtn').hidden = true;          // ovoz uchala shaklni aytadi — javobdan keyin
+    } else {
+      promptEl.textContent = w[9];            // o'zbekcha savol
+      promptEl.setAttribute('lang', 'uz');
+      ipaEl.hidden = pronEl.hidden = true;
+      fillTrainForms(item, 0);                // javobda: uchala shakl
+      $('tListenBtn').hidden = true;
+    }
+    $('tForms').hidden = true;                // javob oynasi bilan birga ochiladi
+    $('tRu').textContent = `RU: ${w[8]}`;
+    $('tUz').textContent = `UZ: ${w[9]}`;
+    $('tUz').hidden = session.dir === 'uzb_eng';
+  } else if (session.dir === 'eng_uzb') {
     promptEl.textContent = wordOf(w);
     promptEl.setAttribute('lang', 'en');
     ipaEl.textContent  = ipaOf(w);
@@ -825,6 +949,7 @@ function showTrainCard() {
     ipaEl.hidden = pronEl.hidden = false;
     $('tRu').textContent = `RU: ${w[8]}`;
     $('tUz').textContent = `UZ: ${w[9]}`;
+    $('tUz').hidden = false;
     $('tListenBtn').hidden = false;          // inglizchani ko'rib turibmiz — eshitish mumkin
   } else {
     promptEl.textContent = w[9];             // o'zbekcha savol
@@ -834,6 +959,7 @@ function showTrainCard() {
     ipaEl.hidden = pronEl.hidden = true;
     $('tRu').textContent = `RU: ${w[8]}`;
     $('tUz').textContent = `ENG: ${wordOf(w)} (${ipaOf(w)})`;
+    $('tUz').hidden = false;
     $('tListenBtn').hidden = true;            // javobni oldindan aytib qo'ymasin
   }
 
@@ -849,7 +975,8 @@ function revealTrainAnswer() {
   if (!item || session.flipped) return;
 
   session.flipped = true;
-  $('tIpa').hidden = $('tPron').hidden = false;
+  $('tIpa').hidden = $('tPron').hidden = isVerbs() && session.dir === 'uzb_eng';
+  $('tForms').hidden = !isVerbs();
   $('tListenBtn').hidden = false;
   $('tAnswerBox').classList.add('show');
   $('tShowBtn').hidden = true;
@@ -857,7 +984,7 @@ function revealTrainAnswer() {
   if (trainModal.contains(document.activeElement) || document.activeElement === document.body) {
     $('tEasyBtn').focus({ preventScroll: true });
   }
-  speak(wordOf(item.w));
+  speak(trainSpeakText(item));
 }
 
 /* Qiyin: so'z sessiya oxiriga qaytariladi va "yodlangan"dan olib tashlanadi */
@@ -867,8 +994,8 @@ function markHard() {
 
   session.repeated++;
   session.learned.delete(item.key);
-  if (learnedWordsSet.has(item.key)) {
-    learnedWordsSet.delete(item.key);
+  if (learnedSet().has(item.key)) {
+    learnedSet().delete(item.key);
     saveState();
     buildLessons();
     syncCardStatus(item.key, false);
@@ -882,8 +1009,8 @@ function markEasy() {
   const item = currentItem();
   if (!item || !session.flipped) return;
 
-  if (!learnedWordsSet.has(item.key)) {
-    learnedWordsSet.add(item.key);
+  if (!learnedSet().has(item.key)) {
+    learnedSet().add(item.key);
     saveState();
     buildLessons();
     syncCardStatus(item.key, true);
@@ -917,7 +1044,7 @@ function finishTraining() {
   const stats = $('tStats');
   stats.replaceChildren();
   [
-    [`${unique} ta`, 'so\'z ko\'rildi'],
+    [`${unique} ta`, `${isVerbs() ? 'fe\'l' : 'so\'z'} ko'rildi`],
     [`${session.learned.size} ta`, 'yodlandi'],
     [`${session.repeated} ta`, 'qaytarildi']
   ].forEach(([big, small]) => {
@@ -937,7 +1064,7 @@ function finishTraining() {
 
 $('tListenBtn').addEventListener('click', () => {
   const item = currentItem();
-  if (item) speak(wordOf(item.w));
+  if (item) speak(trainSpeakText(item));
 });
 $('tShowBtn').addEventListener('click', revealTrainAnswer);
 $('tHardBtn').addEventListener('click', markHard);
@@ -969,7 +1096,7 @@ window.addEventListener('keydown', e => {
     if (e.key === ' ' || e.key === 'Enter') {
       e.preventDefault();
       if (!session?.flipped) revealTrainAnswer();
-      else { const it = currentItem(); if (it) speak(wordOf(it.w)); }
+      else { const it = currentItem(); if (it) speak(trainSpeakText(it)); }
     } else if (e.key === '1' && session?.flipped) {
       e.preventDefault(); markHard();
     } else if (e.key === '2' && session?.flipped) {
@@ -998,7 +1125,8 @@ $('exportBtn').addEventListener('click', () => {
     app: 'myvocab',
     version: 3,
     exportedAt: new Date().toISOString(),
-    learnedWords: [...learnedWordsSet]
+    learnedWords: [...learnedWordsSet],
+    learnedVerbs: [...learnedVerbsSet]
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
   const url  = URL.createObjectURL(blob);
@@ -1007,7 +1135,7 @@ $('exportBtn').addEventListener('click', () => {
   a.download = `myvocab-progress-${new Date().toISOString().slice(0, 10)}.json`;
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
-  toast(`${learnedWordsSet.size} ta yodlangan so'z faylga saqlandi`);
+  toast(`${learnedWordsSet.size} ta so'z va ${learnedVerbsSet.size} ta fe'l faylga saqlandi`);
 });
 
 $('importBtn').addEventListener('click', () => $('importFile').click());
@@ -1019,22 +1147,26 @@ $('importFile').addEventListener('change', async (e) => {
 
   try {
     const data = JSON.parse(await file.text());
-    const listIn = Array.isArray(data) ? data : data?.learnedWords;
-    if (!Array.isArray(listIn)) throw new Error('format');
+    const wordsIn = Array.isArray(data) ? data : data?.learnedWords;
+    const verbsIn = Array.isArray(data) ? [] : (data?.learnedVerbs || []);
+    if (!Array.isArray(wordsIn)) throw new Error('format');
 
-    const before = learnedWordsSet.size;
-    listIn.forEach(k => {
+    const before = learnedWordsSet.size + learnedVerbsSet.size;
+    const add = (arr, set) => arr.forEach(k => {
       if (typeof k !== 'string') return;
       const parts = k.split('::');
       const norm = normText(parts.length >= 3 ? parts.slice(2).join('::') : k).trim();
-      if (norm) learnedWordsSet.add(norm);
+      if (norm) set.add(norm);
     });
+    add(wordsIn, learnedWordsSet);
+    add(verbsIn, learnedVerbsSet);
 
     saveState();
     buildLessons();
     render();
     updatePoolCount();
-    toast(`Tiklandi: ${learnedWordsSet.size - before} ta yangi so'z qo'shildi`);
+    const added = learnedWordsSet.size + learnedVerbsSet.size - before;
+    toast(`Tiklandi: ${added} ta yangi yozuv qo'shildi`);
   } catch (err) {
     toast('Faylni o\'qib bo\'lmadi — myvocab zaxira faylini tanlang');
   }
@@ -1047,7 +1179,36 @@ window.addEventListener('resize', () => {
   resizeTimer = setTimeout(() => updateSegs(true), 120);
 });
 
+/* ---------- BO'LIMNI ALMASHTIRISH (So'zlar / Fe'llar) ---------- */
+function applyDataset(init) {
+  document.body.classList.toggle('ds-verbs', isVerbs());
+
+  /* "Sana / Mavzu" filtri faqat so'zlar lug'atiga tegishli */
+  $('modeSeg').closest('.segwrap').hidden = isVerbs();
+
+  $('q').placeholder = isVerbs() ? 'Fe’l qidirish…' : 'So‘z qidirish…';
+  $('tsAllBtn').textContent = `Hammasi (${totalOf()} ta)`;
+
+  if (init) return;
+  stopQueue();
+  buildLessons();
+  render();
+  updatePoolCount();
+  updateSegs(true);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 /* ---------- INIT ---------- */
+$$('#dsSeg button').forEach(b => {
+  const v = b.dataset.v === 'verbs';
+  b.textContent = v ? 'Fe\'llar' : 'So‘zlar';
+  const n = document.createElement('span');
+  n.className = 'ds-n';                       // mobilda yashiriladi — joy tejash uchun
+  n.textContent = String(v ? TOTAL_VERBS : TOTAL_WORDS);
+  b.appendChild(n);
+});
+seg('dsSeg', dataset, (v, init) => { dataset = v; applyDataset(init); });
+
 seg('scriptSeg',  script,        (v, init) => { script = v; if (!init) render({ animate: false }); });
 seg('accentSeg',  accent,        (v, init) => { accent = v; if (!init) { stopQueue(); render({ animate: false }); } });
 seg('learnedSeg', learnedFilter, (v, init) => { learnedFilter = v; if (!init) render(); });
@@ -1063,6 +1224,7 @@ seg('modeSeg',    filterMode,    (v, init) => {
 
 applyMode(false);
 applyAdv();
+applyDataset(true);
 buildLessons();
 render();
 updatePoolCount();
