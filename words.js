@@ -1,9 +1,60 @@
 /* ============================================================
    myvocab — Vocabulary Dataset
-   Contains all 247 vocabulary items across lessons & dates.
+   Contains all 294 vocabulary items across lessons & dates.
    Format: [en_BR, en_US(or null), ipaBR, latBR, cyrBR, ipaUS, latUS, cyrUS, RU, UZ]
    ============================================================ */
 const GROUPS = [
+ {date:"2026-09-15", topic:"7 G", w:[
+  ["Price",null,"/praɪs/","prays","прайс","/praɪs/","prays","прайс","Цена","Narx"],
+  ["Look for",null,"/ˈlʊk fə(r)/","luk fo","лук фо","/ˈlʊk fɚ/","luk far","лук фар","Искать","Qidirmoq"],
+  ["Popular",null,"/ˈpɒpjələ(r)/","popyula","попьюла","/ˈpɑːpjəlɚ/","paapyular","паапьюлар","Популярный","Mashhur"],
+  ["A bit",null,"/ə ˈbɪt/","a bit","а бит","/ə ˈbɪt/","a bit","а бит","Немного","Ozgina, bir oz"],
+  ["Debit card",null,"/ˈdebɪt kɑːd/","debit kaad","дэбит каад","/ˈdebɪt kɑːrd/","debit kaard","дэбит каард","Дебетовая карта","Debit kartasi"],
+  ["Correctly",null,"/kəˈrektli/","karektli","карэктли","/kəˈrektli/","karektli","карэктли","Правильно, верно","To‘g‘ri"],
+  ["Feature",null,"/ˈfiːtʃə(r)/","fiicha","фиича","/ˈfiːtʃɚ/","fiichar","фиичар","Особенность, функция","Xususiyat"],
+  ["Battery life",null,"/ˈbætri laɪf/","betri layf","бэтри лайф","/ˈbætəri laɪf/","bedari layf","бэдари лайф","Срок службы батареи","Batareyaning ishlash muddati"],
+  ["Built-in 4G",null,"/ˌbɪlt ɪn ˌfɔː ˈdʒiː/","bilt in foo jii","билт ин фоо жии","/ˌbɪlt ɪn ˌfɔːr ˈdʒiː/","bilt in foor jii","билт ин фоор жии","Встроенный 4G","4G o‘rnatilgan"],
+  ["Built-in webcam",null,"/ˌbɪlt ɪn ˈwebkæm/","bilt in vebkem","билт ин вэбкэм","/ˌbɪlt ɪn ˈwebkæm/","bilt in vebkem","билт ин вэбкэм","Встроенная веб-камера","Veb-kamera o‘rnatilgan"],
+  ["Case",null,"/keɪs/","keys","кэйс","/keɪs/","keys","кэйс","Чехол (телефона)","G‘ilof, chexol"],
+  ["Memory card slot",null,"/ˈmeməri kɑːd slɒt/","memari kaad slot","мэмари каад слот","/ˈmeməri kɑːrd slɑːt/","memari kaard slaat","мэмари каард слаат","Слот для карты памяти","Xotira karta uyasi"],
+  ["Motion sensor",null,"/ˈməʊʃn ˈsensə(r)/","moushn sensa","моушн сэнса","/ˈmoʊʃn ˈsensɚ/","moushn sensar","моушн сэнсар","Датчик движения","Harakat sensori"],
+  ["Touchscreen",null,"/ˈtʌtʃskriːn/","tachskriin","тачскриин","/ˈtʌtʃskriːn/","tachskriin","тачскриин","Сенсорный экран","Sensorli ekran"],
+  ["Wireless",null,"/ˈwaɪələs/","vayalas","вайалас","/ˈwaɪɚləs/","vayarlas","вайарлас","Беспроводной","Simsiz"],
+  ["Wireless speakers",null,"/ˈwaɪələs ˈspiːkəz/","vayalas spiikaz","вайалас спииказ","/ˈwaɪɚləs ˈspiːkɚz/","vayarlas spiikarz","вайарлас спиикарз","Беспроводные колонки","Simsiz kolonka"],
+  ["Cash",null,"/kæʃ/","kesh","кэш","/kæʃ/","kesh","кэш","Наличные деньги","Naqd pul"],
+  ["Change",null,"/tʃeɪndʒ/","cheynj","чэйнж","/tʃeɪndʒ/","cheynj","чэйнж","Менять; сдача","Almashtirmoq; qaytim"],
+  ["Receipt",null,"/rɪˈsiːt/","risiit","рисиит","/rɪˈsiːt/","risiit","рисиит","Квитанция, чек","Kvitansiya, chek"],
+  ["Suggest",null,"/səˈdʒest/","sajest","сажэст","/səɡˈdʒest/","sagjest","сагжэст","Предлагать","Taklif qilmoq"],
+  ["Confirm",null,"/kənˈfɜːm/","kanfyom","канфём","/kənˈfɝːm/","kanfyorm","канфёрм","Подтверждать","Tasdiqlamoq"],
+  ["Currency",null,"/ˈkʌrənsi/","karansi","каранси","/ˈkɜːrənsi/","kyoransi","кёранси","Валюта","Valyuta"],
+  ["Payment method",null,"/ˈpeɪmənt ˈmeθəd/","peymant methad","пэймант мэсад","/ˈpeɪmənt ˈmeθəd/","peymant methad","пэймант мэсад","Способ оплаты","To‘lov usuli"]
+ ]},
+ {date:"2026-09-15", topic:"7 H", w:[
+  ["Narrative",null,"/ˈnærətɪv/","nerativ","нэратив","/ˈnerətɪv/","neradiv","нэрадив","Рассказ, повествование","Hikoya"],
+  ["Locked",null,"/lɒkt/","lokt","локт","/lɑːkt/","laakt","лаакт","Заблокирован","Qulflangan"],
+  ["Electronic device",null,"/ɪˌlekˈtrɒnɪk dɪˈvaɪs/","ilektronik divays","илэктроник дивайс","/ɪˌlekˈtrɑːnɪk dɪˈvaɪs/","ilektraanik divays","илэктраник дивайс","Электронное устройство, гаджет","Elektron qurilma"],
+  ["Cause",null,"/kɔːz/","kooz","кооз","/kɑːz/","kaaz","кааз","Причинять, вызывать","Sabab bo‘lmoq"],
+  ["Afterwards",null,"/ˈɑːftəwədz/","aaftavadz","аафтавадз","/ˈæftɚwɚdz/","eftarvardz","эфтарвардз","Впоследствии, потом","Keyin, so‘ngra"],
+  ["Accept",null,"/əkˈsept/","aksept","аксэпт","/əkˈsept/","aksept","аксэпт","Принимать","Qabul qilmoq"],
+  ["Error",null,"/ˈerə(r)/","era","эра","/ˈerɚ/","erar","эрар","Ошибка","Xato"],
+  ["Unfortunately",null,"/ʌnˈfɔːtʃənətli/","anfoochanatli","анфоочанатли","/ʌnˈfɔːrtʃənətli/","anfoorchanatli","анфоорчанатли","К сожалению","Afsuski"],
+  ["Amazingly",null,"/əˈmeɪzɪŋli/","ameyzingli","амэйзингли","/əˈmeɪzɪŋli/","ameyzingli","амэйзингли","Удивительно","Hayratlanarli"],
+  ["Type",null,"/taɪp/","tayp","тайп","/taɪp/","tayp","тайп","Тип, вид","Turi, xili"],
+  ["Swap",null,"/swɒp/","svop","своп","/swɑːp/","svaap","сваап","Менять, обменивать","Almashtirmoq"],
+  ["By accident",null,"/baɪ ˈæksɪdənt/","bay eksidant","бай эксидант","/baɪ ˈæksɪdənt/","bay eksidant","бай эксидант","Случайно","Tasodifan"],
+  ["Lend",null,"/lend/","lend","лэнд","/lend/","lend","лэнд","Одалживать, давать в долг","Qarz bermoq"],
+  ["Safely",null,"/ˈseɪfli/","seyfli","сэйфли","/ˈseɪfli/","seyfli","сэйфли","Безопасно","Xavfsiz"],
+  ["In the end",null,"/ɪn ðə ˈend/","in dhe end","ин зэ энд","/ɪn ðə ˈend/","in dhe end","ин зэ энд","В конце концов","So‘ngida, oxir-oqibat"],
+  ["Set the scene",null,"/ˌset ðə ˈsiːn/","set dhe siin","сэт зэ сиин","/ˌset ðə ˈsiːn/","sed dhe siin","сэд зэ сиин","Задать обстановку, описать место","Sahnalashtirmoq"],
+  ["Recently",null,"/ˈriːsntli/","riisntli","рииснтли","/ˈriːsntli/","riisntli","рииснтли","Недавно","Yaqinda"],
+  ["Later",null,"/ˈleɪtə(r)/","leyta","лэйта","/ˈleɪtɚ/","leydar","лэйдар","Позже","Keyinroq"],
+  ["Comma",null,"/ˈkɒmə/","koma","кома","/ˈkɑːmə/","kaama","каама","Запятая","Vergul"],
+  ["Quotation mark",null,"/kwəʊˈteɪʃn mɑːk/","kvouteyshn maak","квоутэйшн маак","/kwoʊˈteɪʃn mɑːrk/","kvouteyshn maark","квоутэйшн маарк","Кавычки","Qo‘shtirnoq"],
+  ["Question mark",null,"/ˈkwestʃən mɑːk/","kveschan maak","квэсчан маак","/ˈkwestʃən mɑːrk/","kveschan maark","квэсчан маарк","Вопросительный знак","So‘roq belgisi"],
+  ["Exclamation mark",null,"/ˌekskləˈmeɪʃn mɑːk/","eksklameyshn maak","эксклaмэйшн маак","/ˌekskləˈmeɪʃn mɑːrk/","eksklameyshn maark","эксклaмэйшн маарк","Восклицательный знак","Undov belgisi"],
+  ["Particular",null,"/pəˈtɪkjələ(r)/","patikyula","патикьюла","/pɚˈtɪkjəlɚ/","partikyular","партикьюлар","Особенный, конкретный","Maxsus, alohida"],
+  ["Event",null,"/ɪˈvent/","ivent","ивэнт","/ɪˈvent/","ivent","ивэнт","Событие","Hodisa, voqea"]
+ ]},
  {date:"2026-08-13", topic:"7 E", w:[
   ["Put on",null,"/ˌpʊt ˈɒn/","put on","пут он","/ˌpʊt ˈɑːn/","pud aan","пуд аан","Надевать","Kiyib olmoq"],
   ["Back up",null,"/ˌbæk ˈʌp/","bek ap","бэк ап","/ˌbæk ˈʌp/","bek ap","бэк ап","Резервное копирование","Zaxiralamoq"],
