@@ -1,9 +1,28 @@
 /* ============================================================
    myvocab — Vocabulary Dataset
-   Contains all 294 vocabulary items across lessons & dates.
+   Contains all 311 vocabulary items across lessons & dates.
    Format: [en_BR, en_US(or null), ipaBR, latBR, cyrBR, ipaUS, latUS, cyrUS, RU, UZ]
    ============================================================ */
 const GROUPS = [
+ {date:"2026-08-18", topic:"8 A / 8 B", w:[
+  ["Active",null,"/ˈæktɪv/","ektiv","эктив","/ˈæktɪv/","ektiv","эктив","Активный","Faol"],
+  ["How often",null,"/ˌhaʊ ˈɒfn/","hau ofn","хау офн","/ˌhaʊ ˈɔːfn/","hau oofn","хау оофн","Как часто","Qancha vaqtda, qanchalik tez-tez"],
+  ["Normally",null,"/ˈnɔːməli/","noomali","ноомали","/ˈnɔːrməli/","noormali","ноормали","Обычно","Odatda"],
+  ["Team",null,"/tiːm/","tiim","тиим","/tiːm/","tiim","тиим","Команда","Jamoa"],
+  ["Activity",null,"/ækˈtɪvəti/","ektivati","эктивати","/ækˈtɪvəti/","ektivadi","эктивади","Деятельность, занятие","Mashg‘ulot, faoliyat"],
+  ["Combat",null,"/ˈkɒmbæt/","kombet","комбэт","/ˈkɑːmbæt/","kaambet","каамбэт","Бой, сражение; сражаться","Jang; jang qilmoq"],
+  ["Correct",null,"/kəˈrekt/","karekt","карэкт","/kəˈrekt/","karekt","карэкт","Правильный","To‘g‘ri"],
+  ["Add",null,"/æd/","ed","эд","/æd/","ed","эд","Прибавлять, добавлять","Qo‘shmoq"],
+  ["Fall over",null,"/ˌfɔːl ˈəʊvə(r)/","fool ouva","фоол оува","/ˌfɔːl ˈoʊvɚ/","fool ouvar","фоол оувар","Упасть, свалиться","Yiqilib tushmoq"],
+  ["Injure",null,"/ˈɪndʒə(r)/","inja","инжа","/ˈɪndʒɚ/","injar","инжар","Ранить, травмировать","Shikastlamoq, jarohatlamoq"],
+  ["Score",null,"/skɔː(r)/","skoo","скоо","/skɔːr/","skor","скор","Забить гол, забить мяч в ворота","Go‘l urmoq"],
+  ["Break a record",null,"/ˌbreɪk ə ˈrekɔːd/","breyk a rekood","брэйк а рэкоод","/ˌbreɪk ə ˈrekɚd/","breyk a rekard","брэйк а рэкард","Побить рекорд","Rekord o‘rnatmoq"],
+  ["Take part",null,"/ˌteɪk ˈpɑːt/","teyk paat","тэйк паат","/ˌteɪk ˈpɑːrt/","teyk paart","тэйк паарт","Участвовать","Qatnashmoq, ishtirok etmoq"],
+  ["Experience",null,"/ɪkˈspɪəriəns/","ikspiarians","икспиарианс","/ɪkˈspɪriəns/","ikspirians","икспирианс","Опыт","Tajriba"],
+  ["Competition",null,"/ˌkɒmpəˈtɪʃn/","kompatishn","компатишн","/ˌkɑːmpəˈtɪʃn/","kaampatishn","каампатишн","Соревнование","Musobaqa"],
+  ["Support",null,"/səˈpɔːt/","sapoot","сапоот","/səˈpɔːrt/","sapoort","сапоорт","Поддерживать","Qo‘llab-quvvatlamoq"],
+  ["Supporter",null,"/səˈpɔːtə(r)/","sapoota","сапоота","/səˈpɔːrtɚ/","sapoordar","сапоордар","Сторонник, болельщик","Tarafdor, muxlis"]
+ ]},
  {date:"2026-09-15", topic:"7 G", w:[
   ["Price",null,"/praɪs/","prays","прайс","/praɪs/","prays","прайс","Цена","Narx"],
   ["Look for",null,"/ˈlʊk fə(r)/","luk fo","лук фо","/ˈlʊk fɚ/","luk far","лук фар","Искать","Qidirmoq"],
