@@ -23,7 +23,7 @@ const GROUPS = [
   ["Support",null,"/səˈpɔːt/","sapoot","сапоот","/səˈpɔːrt/","sapoort","сапоорт","Поддерживать","Qo‘llab-quvvatlamoq"],
   ["Supporter",null,"/səˈpɔːtə(r)/","sapoota","сапоота","/səˈpɔːrtɚ/","sapoordar","сапоордар","Сторонник, болельщик","Tarafdor, muxlis"]
  ]},
- {date:"2026-09-15", topic:"7 G", w:[
+ {date:"2026-08-15", topic:"7 G", w:[
   ["Price",null,"/praɪs/","prays","прайс","/praɪs/","prays","прайс","Цена","Narx"],
   ["Look for",null,"/ˈlʊk fə(r)/","luk fo","лук фо","/ˈlʊk fɚ/","luk far","лук фар","Искать","Qidirmoq"],
   ["Popular",null,"/ˈpɒpjələ(r)/","popyula","попьюла","/ˈpɑːpjəlɚ/","paapyular","паапьюлар","Популярный","Mashhur"],
@@ -48,7 +48,7 @@ const GROUPS = [
   ["Currency",null,"/ˈkʌrənsi/","karansi","каранси","/ˈkɜːrənsi/","kyoransi","кёранси","Валюта","Valyuta"],
   ["Payment method",null,"/ˈpeɪmənt ˈmeθəd/","peymant methad","пэймант мэсад","/ˈpeɪmənt ˈmeθəd/","peymant methad","пэймант мэсад","Способ оплаты","To‘lov usuli"]
  ]},
- {date:"2026-09-15", topic:"7 H", w:[
+ {date:"2026-08-15", topic:"7 H", w:[
   ["Narrative",null,"/ˈnærətɪv/","nerativ","нэратив","/ˈnerətɪv/","neradiv","нэрадив","Рассказ, повествование","Hikoya"],
   ["Locked",null,"/lɒkt/","lokt","локт","/lɑːkt/","laakt","лаакт","Заблокирован","Qulflangan"],
   ["Electronic device",null,"/ɪˌlekˈtrɒnɪk dɪˈvaɪs/","ilektronik divays","илэктроник дивайс","/ɪˌlekˈtrɑːnɪk dɪˈvaɪs/","ilektraanik divays","илэктраник дивайс","Электронное устройство, гаджет","Elektron qurilma"],
