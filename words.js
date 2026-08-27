@@ -51,7 +51,7 @@ const GROUPS = [
   ["Return",null,"/rɪˈtɜːn/","rityon","ритён","/rɪˈtɝːn/","rityorn","ритёрн","Возвращаться","Qaytib kelmoq"],
   ["Crime",null,"/kraɪm/","kraym","крайм","/kraɪm/","kraym","крайм","Преступление","Jinoyat"]
  ]},
- {date:"2026-08-27", topic:"9 C / 9 E", w:[
+ {date:"2026-08-29", topic:"9 C / 9 E", w:[
   ["Accommodation",null,"/əˌkɒməˈdeɪʃn/","akomadeyshn","акомадэйшн","/əˌkɑːməˈdeɪʃn/","akaamadeyshn","акаамадэйшн","Помещение, жильё","Turar joy"],
   ["Residence",null,"/ˈrezɪdəns/","rezidans","рэзиданс","/ˈrezɪdəns/","rezidans","рэзиданс","Место проживания","Turar joy, yashash joyi"],
   ["Own",null,"/əʊn/","oun","оун","/oʊn/","oun","оун","Владеть (глагол)","Egalik qilmoq"],
