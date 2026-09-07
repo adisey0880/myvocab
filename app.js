@@ -93,7 +93,8 @@ let query         = '';
    Qutidan qutiga o'tganda oraliq uzayadi: 1 → 3 → 7 → 21 → 60 kun. */
 const SRS_STEPS = [1, 3, 7, 21, 60];
 const MAX_BOX   = SRS_STEPS.length;
-const HARD_AT   = 2;                       // shuncha xatodan keyin "Qiyin" ro'yxatiga tushadi
+const HARD_AT   = 2;   // shuncha xatodan keyin "Qiyin" ro'yxatiga tushadi
+const HARD_OUT  = 3;   // shu qutiga yetgach ro'yxatdan chiqadi (haftalik oraliq)
 
 const today = () => new Date().toISOString().slice(0, 10);
 const addDays = (n) => {
@@ -131,7 +132,13 @@ const prog       = () => isVerbs() ? progVerbs : progWords;
 const boxOf      = k => prog()[k]?.box || 0;
 const isLearned  = k => boxOf(k) >= 1;
 const isDue      = k => { const e = prog()[k]; return !!e && e.box >= 1 && e.due <= today(); };
-const isHard     = k => (prog()[k]?.wrong || 0) >= HARD_AT;
+/* "Qiyin" — tarix emas, hozirgi holat: so'z ko'p xato qilingan
+   BO'LSA-DA hali mustahkam o'zlashtirilmagan bo'lsa ro'yxatda turadi.
+   HARD_OUT qutisiga yetgach (haftalik oraliq) o'zi chiqib ketadi. */
+const isHard     = k => {
+  const e = prog()[k];
+  return !!e && (e.wrong || 0) >= HARD_AT && (e.box || 0) < HARD_OUT;
+};
 
 /* Qo'lda belgilash (kartochkadagi ✓) — 1-qutiga qo'yadi yoki tozalaydi */
 function setLearned(key, on) {
