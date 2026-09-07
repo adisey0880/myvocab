@@ -843,6 +843,32 @@ body.ds-verbs .grid {
   padding-top: 10px;
 }
 
+/* ---------- MISOL GAP ---------- */
+.sent {
+  margin-top: 12px;
+  padding-top: 11px;
+  border-top: 1px dashed var(--border);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.sent-en {
+  color: var(--ink-sub);
+  font-style: italic;
+}
+
+.sent-en b {
+  font-style: normal;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.sent-tr {
+  color: var(--muted);
+  font-size: 12.5px;
+  margin-top: 3px;
+}
+
 /* Hide modes with CSS blur */
 body.hide-tr .meta, body.hide-tr .pron {
   filter: blur(6px);
@@ -854,6 +880,25 @@ body.hide-en .en, body.hide-en .ipa, body.hide-en .pron {
   filter: blur(7px);
   transition: filter 0.25s ease;
   user-select: none;
+}
+
+/* Misol gap yashirish rejimlariga bo'ysunadi:
+   ENG→UZB da tarjimasi, UZB→ENG da inglizcha gap xiralashadi */
+body.hide-tr .sent-tr,
+body.hide-en .sent-en {
+  filter: blur(5px);
+  transition: filter 0.25s ease;
+  user-select: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card:hover .sent-tr, .card:hover .sent-en { filter: none; user-select: text; }
+}
+
+.card.revealed .sent-tr, .card.revealed .sent-en,
+.card.playing .sent-tr,  .card.playing .sent-en {
+  filter: none !important;
+  user-select: text;
 }
 
 /* Fe'llarda "UZB → ENG" rejimi: 1-shakl ochiq qoladi, V2 va V3 yashiriladi —
@@ -1236,6 +1281,159 @@ footer b {
   background: var(--accent);
   color: var(--accent-ink);
 }
+
+/* ---------- YOZISH MASHQI ---------- */
+.t-spell {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.spell-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.spell-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 180px;
+  max-width: 320px;
+  text-align: left;
+}
+
+.spell-lbl {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  color: var(--muted);
+}
+
+.spell-input {
+  width: 100%;
+  background: var(--bg);
+  border: 2px solid var(--border);
+  color: var(--ink);
+  padding: 12px 14px;
+  border-radius: var(--r-sm);
+  font-size: 19px;
+  font-weight: 700;
+  font-family: inherit;
+  letter-spacing: 0.02em;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.spell-input::placeholder {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+  letter-spacing: 0;
+}
+
+.spell-input:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.spell-input.is-ok  { border-color: var(--learned); background: var(--learned-soft); }
+.spell-input.is-bad { border-color: var(--danger);  background: rgba(244, 63, 94, 0.1); }
+
+.spell-mask {
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.spell-result {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: var(--r-sm);
+  font-size: 14px;
+}
+
+.spell-result.ok  { background: var(--learned-soft); border: 1px solid rgba(16, 185, 129, 0.35); }
+.spell-result.bad { background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.35); }
+
+.spell-verdict {
+  font-weight: 800;
+  display: block;
+}
+
+.spell-result.ok  .spell-verdict { color: var(--learned); }
+.spell-result.bad .spell-verdict { color: var(--danger); }
+
+.spell-fix {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.spell-correct {
+  font-family: var(--font-mono);
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+.spell-user {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  color: var(--muted);
+  text-decoration-color: var(--danger);
+}
+
+.spell-arrow {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.ch-ok  { color: var(--ink); }
+.ch-bad { color: var(--danger); text-decoration: underline; text-underline-offset: 3px; }
+
+.btn-hint {
+  flex: 0 0 auto !important;
+  padding: 13px 14px !important;
+}
+
+/* Mashg'ulotdagi misol gap */
+.t-sent {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border);
+  text-align: left;
+}
+
+.t-sent .sent-en {
+  font-size: 15px;
+  font-style: italic;
+  color: var(--ink-sub);
+}
+
+.t-sent .sent-en b {
+  font-style: normal;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.t-sent .sent-tr {
+  font-size: 13.5px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.t-sent .sent-ru { opacity: 0.8; }
 
 /* Yakuniy statistika */
 .t-stats {

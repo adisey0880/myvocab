@@ -193,6 +193,7 @@
           <div class="seg-pill" aria-hidden="true"></div>
           <button data-v="eng_uzb" role="radio" aria-checked="true" class="on">ENG → UZB</button>
           <button data-v="uzb_eng" role="radio" aria-checked="false">UZB → ENG</button>
+          <button data-v="spell" role="radio" aria-checked="false">✍️ Yozish</button>
           <button data-v="mix" role="radio" aria-checked="false">Aralash 🔀</button>
         </div>
       </div>
@@ -245,16 +246,25 @@
 
       <button id="tListenBtn" class="listen-btn">🔊 Eshitish</button>
 
+      <!-- Yozish mashqi: inglizcha imloni qo'lda kiritish -->
+      <div class="t-spell" id="tSpell" hidden>
+        <div class="spell-row" id="tSpellRow"></div>
+        <div class="spell-mask" id="tSpellMask" hidden aria-live="polite"></div>
+        <div class="spell-result" id="tSpellResult" hidden aria-live="polite"></div>
+      </div>
+
       <div class="t-answer-box" id="tAnswerBox">
         <div class="t-forms" id="tForms" lang="en" hidden></div>
         <div class="t-ru" id="tRu" lang="ru">Русский перевод</div>
         <div class="t-uz" id="tUz" lang="uz">O'zbekcha tarjima</div>
+        <div class="t-sent" id="tSent" hidden></div>
       </div>
 
       <div class="t-stats" id="tStats" hidden></div>
     </div>
 
     <div class="t-footer" id="tFooter">
+      <button id="tHintBtn" class="btn-hint" hidden>💡 Yordam</button>
       <button id="tShowBtn" class="on">Javobni ko'rsatish (Space)</button>
       <button id="tHardBtn" class="btn-hard" hidden>Qiyin / Qaytarish (1)</button>
       <button id="tEasyBtn" class="btn-easy" hidden>Oson / Yodladim (2)</button>
@@ -267,6 +277,7 @@
 
 <script src="words.js"></script>
 <script src="verbs.js"></script>
+<script src="sentences.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
