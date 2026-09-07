@@ -217,6 +217,54 @@ h1 em {
   flex-shrink: 0;
 }
 
+/* ---------- KUNLIK MAQSAD PANELI ---------- */
+.daily-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  font-size: 12.5px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-sub);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: 4px 12px;
+  border-radius: 20px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* Maqsad sari to'ldiriladigan fon */
+.daily-pill::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: var(--fill, 0%);
+  background: var(--accent-soft);
+  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.daily-pill.is-done {
+  border-color: var(--learned);
+  color: var(--learned);
+}
+
+.daily-pill.is-done::before { background: var(--learned-soft); }
+
+.daily-streak, .daily-count { position: relative; z-index: 1; }
+.daily-count { color: var(--muted); }
+.daily-pill.is-done .daily-count { color: var(--learned); }
+
+.goal-select {
+  width: auto;
+  padding: 6px 10px;
+  font-size: 12.5px;
+}
+
 /* Control Bars */
 .bar {
   display: flex;
@@ -504,6 +552,28 @@ button.btn-train:hover {
 
 .lessons button.on .badge-prog {
   background: rgba(0, 0, 0, 0.22);      /* quyuq qatlam — ustidagi oq raqam aniq ko'rinadi */
+}
+
+/* Maxsus chiplar: takrorlash va qiyin so'zlar */
+.lessons button.chip-special {
+  font-weight: 800;
+}
+
+.lessons button.chip-due:not(.on) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.lessons button.chip-hard:not(.on) {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.lessons button.chip-hard.on {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(244, 63, 94, 0.35);
 }
 
 /* Warning banner */
@@ -845,6 +915,8 @@ body.ds-verbs .grid {
 
 /* ---------- MISOL GAP ---------- */
 .sent {
+  position: relative;
+  padding-right: 26px;
   margin-top: 12px;
   padding-top: 11px;
   border-top: 1px dashed var(--border);
@@ -868,6 +940,35 @@ body.ds-verbs .grid {
   font-size: 12.5px;
   margin-top: 3px;
 }
+
+/* Gapni eshitish tugmasi */
+.sent-play {
+  position: absolute;
+  top: 8px;
+  right: 0;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  box-shadow: none;
+  flex-shrink: 0;
+}
+
+.sent-play:hover {
+  background: var(--accent-solid);
+  color: var(--accent-ink);
+  transform: scale(1.1);
+}
+
+.t-sent {
+  position: relative;
+  padding-right: 30px;
+}
+
+.t-sent .sent-play { top: 12px; width: 28px; height: 28px; }
 
 /* Hide modes with CSS blur */
 body.hide-tr .meta, body.hide-tr .pron {
@@ -1616,6 +1717,7 @@ footer b {
   .search-wrap { flex: 1 1 120px; }
   .kb-hint { display: none; }
   .count { font-size: 12px; padding: 3px 10px; }
+  .daily-pill { font-size: 11.5px; padding: 3px 9px; gap: 6px; }
   button { padding: 8px 12px; font-size: 13px; }
   .seg button { padding: 6px 11px; }
   footer { line-height: 1.7; }

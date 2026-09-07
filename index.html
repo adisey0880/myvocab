@@ -41,6 +41,10 @@
       <span class="h1-text">Mening <em>lug'atim</em></span>
     </h1>
     <span class="count" id="count" aria-live="polite">0 ta so'z</span>
+    <span class="daily-pill" id="dailyPill" aria-live="polite">
+      <span class="daily-streak" id="dailyStreak">🔥 0</span>
+      <span class="daily-count" id="dailyCount">0/20</span>
+    </span>
     <button id="themeBtn" aria-label="Mavzuni o'zgartirish" title="Rejimni almashtirish">
       <svg id="themeIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
       <span class="btn-label">Oq rejim</span>
@@ -136,7 +140,17 @@
   • Imlo farqi: <b>Realise/Traveller</b> (BrE) → <b>Realize/Traveler</b> (AmE) — aksentni almashtirsangiz o'zgaradi.
 
   <div class="foot-actions">
-    <span class="foot-label">Yodlangan so'zlar faqat shu brauzerda saqlanadi:</span>
+    <label class="foot-label" for="goalSelect">Kunlik maqsad:</label>
+    <select class="ts-select goal-select" id="goalSelect">
+      <option value="10">10 ta</option>
+      <option value="20" selected>20 ta</option>
+      <option value="30">30 ta</option>
+      <option value="50">50 ta</option>
+    </select>
+  </div>
+
+  <div class="foot-actions">
+    <span class="foot-label">Progress faqat shu brauzerda saqlanadi:</span>
     <button id="exportBtn" type="button">⬇ Zaxira olish</button>
     <button id="importBtn" type="button">⬆ Zaxiradan tiklash</button>
     <input type="file" id="importFile" accept="application/json,.json" hidden>
