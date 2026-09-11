@@ -129,7 +129,50 @@
  </div>
 </header>
 
-<main id="list"></main>
+<main>
+  <!-- O'rganish markazi: ko'rinib turgan to'plam bo'yicha bir bosishda mashq -->
+  <section class="hub" id="hub" hidden aria-labelledby="hubTitle">
+    <div class="hub-head">
+      <div class="hub-info">
+        <h2 class="hub-title" id="hubTitle">Barcha so'zlar</h2>
+        <div class="hub-sub" id="hubSub"></div>
+      </div>
+      <div class="hub-size">
+        <span class="cap">Soni</span>
+        <div class="seg" id="hubSizeSeg" role="radiogroup" aria-label="Mashq hajmi">
+          <div class="seg-pill" aria-hidden="true"></div>
+          <button data-v="10" role="radio" aria-checked="false">10</button>
+          <button data-v="20" role="radio" aria-checked="true" class="on">20</button>
+          <button data-v="all" role="radio" aria-checked="false">Hammasi</button>
+        </div>
+      </div>
+    </div>
+    <div class="hub-modes">
+      <button class="hub-mode" data-mode="card" type="button">
+        <span class="hub-ico" aria-hidden="true">🃏</span>
+        <b>Kartochka</b>
+        <span class="hub-desc" data-words="ko'rib va eshitib yodlash" data-verbs="uch shaklni ko'rib yodlash">ko'rib va eshitib yodlash</span>
+      </button>
+      <button class="hub-mode" data-mode="dict" type="button">
+        <span class="hub-ico" aria-hidden="true">🎧</span>
+        <b>Eshitib yozish</b>
+        <span class="hub-desc" data-words="diktant: eshiting va yozing" data-verbs="3 shaklni eshitib yozish">diktant: eshiting va yozing</span>
+      </button>
+      <button class="hub-mode" data-mode="spell" type="button">
+        <span class="hub-ico" aria-hidden="true">✍️</span>
+        <b>Yozib mashq</b>
+        <span class="hub-desc" data-words="tarjimadan inglizcha yozish" data-verbs="V2 va V3 ni yozish">tarjimadan inglizcha yozish</span>
+      </button>
+      <button class="hub-mode" data-mode="test" type="button">
+        <span class="hub-ico" aria-hidden="true">✅</span>
+        <b>Test</b>
+        <span class="hub-desc" data-words="4 variantdan to'g'risini tanlash" data-verbs="to'g'ri shakllarni tanlash">4 variantdan to'g'risini tanlash</span>
+      </button>
+    </div>
+  </section>
+
+  <div id="list"></div>
+</main>
 
 <footer>
   <b>Talaffuz belgilari:</b><br>
@@ -208,6 +251,8 @@
           <button data-v="eng_uzb" role="radio" aria-checked="true" class="on">ENG → UZB</button>
           <button data-v="uzb_eng" role="radio" aria-checked="false">UZB → ENG</button>
           <button data-v="spell" role="radio" aria-checked="false">✍️ Yozish</button>
+          <button data-v="dict" role="radio" aria-checked="false">🎧 Eshitib yozish</button>
+          <button data-v="test" role="radio" aria-checked="false">✅ Test</button>
           <button data-v="mix" role="radio" aria-checked="false">Aralash 🔀</button>
         </div>
       </div>
@@ -247,6 +292,7 @@
   <div class="train-card-wrap">
     <div class="train-header">
       <span class="train-progress" id="trainProgress">1 / 10</span>
+      <span class="train-mode" id="trainMode"></span>
       <button class="close-modal" id="closeTrain" aria-label="Yopish">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
@@ -258,7 +304,10 @@
       <div class="t-ipa" id="tIpa" lang="en">/ipa/</div>
       <div class="t-pron" id="tPron">pron</div>
 
-      <button id="tListenBtn" class="listen-btn">🔊 Eshitish</button>
+      <div class="t-audio-row">
+        <button id="tListenBtn" class="listen-btn">🔊 Eshitish</button>
+        <button id="tSlowBtn" class="listen-btn" hidden>🐢 Sekin</button>
+      </div>
 
       <!-- Yozish mashqi: inglizcha imloni qo'lda kiritish -->
       <div class="t-spell" id="tSpell" hidden>
@@ -266,6 +315,9 @@
         <div class="spell-mask" id="tSpellMask" hidden aria-live="polite"></div>
         <div class="spell-result" id="tSpellResult" hidden aria-live="polite"></div>
       </div>
+
+      <!-- Test: 4 ta variant -->
+      <div class="t-options" id="tOptions" hidden role="group" aria-label="Javob variantlari"></div>
 
       <div class="t-answer-box" id="tAnswerBox">
         <div class="t-forms" id="tForms" lang="en" hidden></div>
@@ -282,6 +334,9 @@
       <button id="tShowBtn" class="on">Javobni ko'rsatish (Space)</button>
       <button id="tHardBtn" class="btn-hard" hidden>Qiyin / Qaytarish (1)</button>
       <button id="tEasyBtn" class="btn-easy" hidden>Oson / Yodladim (2)</button>
+      <button id="tNextBtn" class="on" hidden>Keyingi (Enter)</button>
+      <button id="tExitBtn" hidden>← Ro'yxatga</button>
+      <button id="tRetryBtn" class="btn-hard" hidden>🔁 Xatolar</button>
       <button id="tRestartBtn" class="btn-restart" hidden>↻ Yana bir bor</button>
     </div>
   </div>

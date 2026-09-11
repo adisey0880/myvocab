@@ -68,7 +68,7 @@ function saveState() {
       dataset, activeVerbGroup, daily,
       progressWords: progWords,
       progressVerbs: progVerbs,
-      tsSource, tsCustomKey, tsCount, tsDir, tsOrder, tsStatus
+      tsSource, tsCustomKey, tsCount, tsDir, tsOrder, tsStatus, hubCount
     }));
   } catch (e) { /* privat rejim / to'la xotira — jim o'tamiz */ }
 }
@@ -201,9 +201,10 @@ const totalOf    = () => isVerbs() ? TOTAL_VERBS : TOTAL_WORDS;
 let tsSource    = saved?.tsSource || 'current';   // current | all | custom
 let tsCustomKey = saved?.tsCustomKey || 'all';
 let tsCount     = saved?.tsCount || '20';         // 10 | 20 | 50 | all
-let tsDir       = saved?.tsDir || 'eng_uzb';      // eng_uzb | uzb_eng | mix
+let tsDir       = saved?.tsDir || 'eng_uzb';      // eng_uzb | uzb_eng | spell | dict | test | mix
 let tsOrder     = saved?.tsOrder || 'shuffle';    // shuffle | seq
 let tsStatus    = saved?.tsStatus || 'unlearned'; // unlearned | all | learned
+let hubCount    = saved?.hubCount || '20';        // 10 | 20 | all — o'rganish markazidagi mashq hajmi
 
 /* ---------- SEARCH INDEX (bir marta quriladi) ---------- */
 const ITEMS = [];
@@ -412,13 +413,13 @@ function pickVoice() {
 }
 
 let playing = null;
-function speak(text, card, onEnd) {
+function speak(text, card, onEnd, opts = {}) {
   if (!synth) { showWarn(); onEnd && onEnd(); return; }
 
   synth.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.lang  = accent === 'us' ? 'en-US' : 'en-GB';
-  u.rate  = slow ? RATE_SLOW : RATE_NORMAL;
+  u.rate  = opts.rate || (slow ? RATE_SLOW : RATE_NORMAL);
   const v = pickVoice();
   if (v) u.voice = v;
 
@@ -653,6 +654,7 @@ function render({ animate = true } = {}) {
   }
 
   countEl.textContent = `${shown} ${unit()}`;
+  updateHub(visibleItems());
 }
 
 /* Statusni almashtirish — ekrandagi barcha nusxalarni birdek yangilaydi */
@@ -824,6 +826,7 @@ function buildLessons() {
   lessonsWrap.replaceChildren(frag);
   lessonsWrap.scrollLeft = scrollLeft;
   populateTsSelect(secs);
+  updateHub(visibleItems());
 }
 
 function populateTsSelect(secs) {
@@ -988,6 +991,16 @@ function closeModal(el) {
   el.classList.remove('open');
   if (!document.querySelector('.modal-overlay.open')) document.body.classList.remove('modal-open');
   lastFocused?.focus?.({ preventScroll: true });
+  if (el === trainModal) afterTrainClose();
+}
+
+/* Mashg'ulotdan chiqqach: ovoz to'xtaydi, chiplar va ro'yxat yangi holatni ko'rsatadi
+   (masalan, "Takror" to'plamidagi o'tilgan so'zlar ro'yxatdan yo'qoladi) */
+function afterTrainClose() {
+  if (session) clearTimeout(session.autoTimer);
+  if (synth) synth.cancel();
+  buildLessons();
+  render({ animate: false });
 }
 
 function trapFocus(el, e) {
@@ -1007,6 +1020,7 @@ function trapFocus(el, e) {
 /* ---------- TRAINING SETUP ---------- */
 const trainSetupModal = $('trainSetupModal');
 const trainModal      = $('trainModal');
+const trainWrap       = trainModal.querySelector('.train-card-wrap');
 const tsSelectWrap    = $('tsSelectWrap');
 const tsSelect        = $('tsSelect');
 const tsError         = $('tsError');
@@ -1109,21 +1123,213 @@ function startCustomTraining() {
     return;
   }
 
+  const source = pool.slice();
   if (tsOrder === 'shuffle') shuffle(pool);
   if (tsCount !== 'all') {
     const limit = parseInt(tsCount, 10);
     if (limit > 0) pool = pool.slice(0, limit);
   }
 
-  session = { items: pool, idx: 0, flipped: false, dir: tsDir, learned: new Set(),
-              repeated: 0, spellOk: 0, spellTotal: 0, spellChecked: false,
-              spellLastOk: false, finished: false };
-
-  closeModal(trainSetupModal);
-  openModal(trainModal, '#tShowBtn');
-  showTrainCard();
+  startSession(tsDir, pool, { mode: null, source });
 }
 $('tsStartBtn').addEventListener('click', startCustomTraining);
+
+/* ═══════════ O'RGANISH MARKAZI ═══════════
+   Ekranda ko'rinib turgan to'plam (dars, "Takror", "Qiyin", qidiruv natijasi)
+   bo'yicha bitta bosishda mashq boshlanadi — sozlamalar oynasisiz. */
+
+const HUB_DIR = { card: 'eng_uzb', dict: 'dict', spell: 'spell', test: 'test' };
+const MODE_LABEL = {
+  eng_uzb: '🃏 Kartochka', uzb_eng: '🃏 UZB → ENG', mix: '🔀 Aralash',
+  spell: '✍️ Yozib mashq', dict: '🎧 Eshitib yozish', test: '✅ Test'
+};
+
+/* Hozir ekranda ko'rinib turgan so'zlar. Bir so'z bir necha darsda bo'lsa — bir marta. */
+function visibleItems() {
+  const special = isSpecial(activeKey()) ? SPECIAL[activeKey()] : null;
+  const seen = new Set(), out = [];
+  let total = 0;
+  sections().forEach(L => {
+    if (!special && activeKey() !== 'all' && activeKey() !== L.key) return;
+    L.w.forEach(i => {
+      if (!matchesFilters(i) || (special && !special(i.key))) return;
+      total++;
+      if (seen.has(i.key)) return;
+      seen.add(i.key);
+      out.push(i);
+    });
+  });
+  out.total = total;             // kartochkalar soni (takrorlar bilan) — sarlavhadagi raqam bilan solishtirish uchun
+  return out;
+}
+
+function hubTitle() {
+  const k = activeKey();
+  if (k === 'due')  return '🔁 Bugungi takror';
+  if (k === 'hard') return '⚠️ Qiyin so\'zlar';
+  if (k === 'all')  return isVerbs() ? 'Barcha fe\'llar' : 'Barcha so\'zlar';
+  const L = sections().find(x => x.key === k);
+  if (!L) return isVerbs() ? 'Fe\'llar' : 'So\'zlar';
+  if (isVerbs()) return L.title;
+  return filterMode === 'date' ? [...new Set(L.w.map(i => i.g.topic))].join(', ') : L.topic;
+}
+
+function updateHub(items) {
+  const hub = $('hub');
+  if (!items.length) { hub.hidden = true; return; }
+
+  const k = activeKey();
+  const L = (!isSpecial(k) && k !== 'all') ? sections().find(x => x.key === k) : null;
+  const learned = items.filter(i => isLearned(i.key)).length;
+  const due = items.filter(i => isDue(i.key)).length;
+
+  const parts = [];
+  if (L && !isVerbs()) parts.push(fmt(L.date));
+  parts.push(`<b>${items.length}</b> ${unit()}${items.total > items.length ? ' (takrorlarsiz)' : ''}`);
+  parts.push(`${learned} yodlangan`);
+  if (due && k !== 'due') parts.push(`${due} takror`);
+  if (query) parts.push(`qidiruv: «${escapeHtml(query)}»`);
+
+  $('hubTitle').textContent = hubTitle();
+  $('hubSub').innerHTML = parts.join(' · ');
+  $$('.hub-desc', hub).forEach(d => { d.textContent = isVerbs() ? d.dataset.verbs : d.dataset.words; });
+
+  const wasHidden = hub.hidden;
+  hub.hidden = false;
+  if (wasHidden) updateSegPill($('hubSizeSeg'), true);
+}
+
+/* Mashq tartibi — eng foydalisi birinchi:
+   muddati kelganlar → qiyinlar → yangilar → qolganlari.
+   Kartochkada guruh ichida dars tartibi saqlanadi, mashqlarda aralashtiriladi. */
+function orderForSession(items, mode) {
+  const buckets = [[], [], [], []];
+  items.forEach(i => {
+    const b = isDue(i.key) ? 0 : isHard(i.key) ? 1 : !isLearned(i.key) ? 2 : 3;
+    buckets[b].push(i);
+  });
+  if (mode !== 'card') buckets.forEach(b => shuffle(b));
+  return buckets.flat();
+}
+
+function startHub(mode) {
+  const source = visibleItems();
+  if (!source.length || !HUB_DIR[mode]) return;
+  let pool = orderForSession(source, mode);
+  if (hubCount !== 'all') pool = pool.slice(0, parseInt(hubCount, 10) || 20);
+  startSession(HUB_DIR[mode], pool, { mode, source });
+}
+
+/* Barcha mashq turlari uchun yagona sessiya yaratuvchi */
+function startSession(baseDir, pool, origin) {
+  if (session) clearTimeout(session.autoTimer);
+  session = {
+    items: pool.slice(), idx: 0, flipped: false, finished: false,
+    baseDir, dir: baseDir, origin,
+    learned: new Set(), mistakes: new Set(), repeated: 0,
+    spellOk: 0, spellTotal: 0, spellChecked: false, spellLastOk: false, hintLevel: 0,
+    testOk: 0, testTotal: 0, testAnswered: false, testLastOk: false, answerIdx: -1,
+    autoTimer: null
+  };
+  $('trainMode').textContent = MODE_LABEL[baseDir] || '';
+  if (trainSetupModal.classList.contains('open')) closeModal(trainSetupModal);
+  if (!trainModal.classList.contains('open')) openModal(trainModal, '#tShowBtn');
+  showTrainCard();
+}
+
+seg('hubSizeSeg', hubCount, v => { hubCount = v; });
+$$('#hub .hub-mode').forEach(b => b.addEventListener('click', () => startHub(b.dataset.mode)));
+
+/* ── Test ──────────────────────────────────────────────────── */
+
+/* Savol: to'g'ri javob + imkon qadar SHU DARSDAN 3 ta chalg'ituvchi variant.
+   Ma'nosi bir xil variantlar (Accept / Receive — "Qabul qilmoq") olib tashlanadi. */
+function buildTestQuestion(item) {
+  const verb = isVerbs();
+  let prompt, promptLang, ipa = '', hint = '', say = '', textOf, optLang;
+
+  if (verb) {
+    const f = vFormsOf(item.v);
+    prompt = f[0]; promptLang = 'en'; ipa = vIpaOf(item.v)[0]; hint = item.v[9]; say = f[0];
+    textOf = it => { const g = vFormsOf(it.v); return `${g[1]} · ${g[2]}`; };
+    optLang = 'en';
+  } else if (Math.random() < 0.5) {
+    prompt = wordOf(item.w); promptLang = 'en'; ipa = ipaOf(item.w); say = prompt;
+    textOf = it => it.w[9]; optLang = 'uz';
+  } else {
+    prompt = item.w[9]; promptLang = 'uz'; hint = item.w[8];
+    textOf = it => wordOf(it.w); optLang = 'en';
+  }
+
+  const answer = textOf(item);
+  const used = new Set([normText(answer)]);
+  const sameLesson = it => verb ? it.g === item.g : it.g.date === item.g.date;
+  const candidates = shuffle([...(session.origin?.source || session.items), ...activeItems()]
+    .filter(it => it.key !== item.key));
+  candidates.sort((a, b) => (sameLesson(b) ? 1 : 0) - (sameLesson(a) ? 1 : 0));
+
+  const distractors = [];
+  for (const it of candidates) {
+    const t = textOf(it), n = normText(t);
+    if (used.has(n)) continue;
+    used.add(n);
+    distractors.push(t);
+    if (distractors.length === 3) break;
+  }
+
+  const options = shuffle([answer, ...distractors]);
+  return { prompt, promptLang, ipa, hint, say, options, optLang, answer: options.indexOf(answer) };
+}
+
+function renderTestOptions(q) {
+  const box = $('tOptions');
+  box.replaceChildren();
+  q.options.forEach((text, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 't-opt';
+    b.setAttribute('lang', q.optLang);
+    b.innerHTML = `<span class="t-opt-n">${i + 1}</span><span class="t-opt-t"></span>`;
+    b.querySelector('.t-opt-t').textContent = text;
+    b.addEventListener('click', () => chooseTestOption(i));
+    box.appendChild(b);
+  });
+  box.hidden = false;
+}
+
+function chooseTestOption(i) {
+  const item = currentItem();
+  if (!item || session.testAnswered) return;
+  const opts = $$('#tOptions .t-opt');
+  if (!opts[i]) return;
+
+  const ok = i === session.answerIdx;
+  session.testAnswered = true;
+  session.testLastOk = ok;
+  session.testTotal++;
+  if (ok) session.testOk++;
+
+  opts.forEach((b, n) => {
+    b.disabled = true;
+    b.classList.add(n === session.answerIdx ? 'is-correct' : n === i ? 'is-wrong' : 'is-dim');
+  });
+
+  revealTrainAnswer(true);
+  $('tHardBtn').hidden = $('tEasyBtn').hidden = true;     // test o'zi baholaydi
+  $('tNextBtn').hidden = false;
+  $('tNextBtn').textContent = ok ? 'Keyingi (Enter)' : 'Tushundim, keyingi (Enter)';
+  $('tNextBtn').focus({ preventScroll: true });
+
+  /* To'g'ri javobda o'zi o'tadi — sur'at saqlansin. Xatoda javobni o'qib olishga vaqt beriladi. */
+  if (ok) session.autoTimer = setTimeout(advanceTest, 1100);
+}
+
+function advanceTest() {
+  if (!session || !session.testAnswered || session.finished) return;
+  clearTimeout(session.autoTimer);
+  session.testAnswered = false;                           // ikki marta o'tib ketmasin
+  (session.testLastOk ? markEasy : markHard)();
+}
 
 function currentItem() {
   return session && !session.finished ? session.items[session.idx] : null;
@@ -1159,31 +1365,44 @@ function normSpell(s) {
 /* Har bir kiritish maydoni uchun qabul qilinadigan javoblar.
    So'zlarda — britancha va amerikacha imlo; fe'llarda — V2 va V3. */
 function spellTargets(item) {
+  /* "was/were" kabi shakllarda har biri alohida ham qabul qilinadi */
+  const acc = (...xs) => {
+    const out = xs.filter(Boolean);
+    xs.filter(Boolean).forEach(x => { if (x.includes('/')) out.push(...x.split('/')); });
+    return [...new Set(out)];
+  };
   if (isVerbs()) {
     const uk = item.v[0].split('|');
     const us = (item.v[1] || item.v[0]).split('|');
-    return [
-      { label: 'V2', accept: [uk[1], us[1]] },
-      { label: 'V3', accept: [uk[2], us[2]] }
+    const all = [
+      { label: 'V1', accept: acc(uk[0], us[0]) },
+      { label: 'V2', accept: acc(uk[1], us[1]) },
+      { label: 'V3', accept: acc(uk[2], us[2]) }
     ];
+    return session?.dir === 'dict' ? all : all.slice(1);
   }
-  return [{ label: '', accept: [item.w[0], item.w[1]] }];
+  return [{ label: '', accept: acc(item.w[0], item.w[1]) }];
 }
 
 function buildSpellInputs(item) {
   const targets = spellTargets(item);
-  $('tSpellRow').innerHTML = targets.map((t, i) => `
+  const ph = session.dir === 'dict' ? 'eshitganingizni yozing…' : 'ingliz tilida yozing…';
+  const row = $('tSpellRow');
+  row.className = 'spell-row' + (targets.length === 3 ? ' cols-3' : '');
+  row.innerHTML = targets.map((t, i) => `
     <label class="spell-field">
       ${t.label ? `<span class="spell-lbl">${t.label}</span>` : ''}
       <input class="spell-input" id="spellIn${i}" type="text" lang="en" inputmode="text"
              autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-             aria-label="Inglizcha imloni yozing" placeholder="ingliz tilida yozing…">
+             aria-label="Inglizcha imloni yozing" placeholder="${t.label ? '…' : ph}">
     </label>`).join('');
 
   $('tSpell').hidden = false;
   $('tSpellMask').hidden = true;
   $('tSpellResult').hidden = true;
   session.spellChecked = false;
+  session.hintLevel = 0;
+  $('tHintBtn').textContent = '💡 Yordam';
   setTimeout(() => $('spellIn0')?.focus({ preventScroll: true }), 60);
 }
 
@@ -1245,15 +1464,29 @@ function checkSpelling() {
   (allOk ? $('tEasyBtn') : $('tHardBtn')).focus({ preventScroll: true });
 }
 
-/* Yordam: birinchi harf va so'z uzunligi ko'rsatiladi */
+/* Yordam.
+   Yozib mashqda — birinchi harf va so'z uzunligi.
+   Diktantda ikki bosqich: avval ma'nosi, keyin harflar. */
 function showSpellHint() {
   const item = currentItem();
   if (!item) return;
-  $('tSpellMask').innerHTML = spellTargets(item).map(t => {
-    const word = t.accept.find(Boolean) || '';
-    const mask = [...word].map((ch, i) => (i === 0 || ch === ' ' || ch === '-') ? ch : '_').join(' ');
+  session.hintLevel = (session.hintLevel || 0) + 1;
+
+  const w = isVerbs() ? item.v : item.w;
+  const meaning = `<span class="mask-item mask-mean">💡 ${escapeHtml(w[9])}</span>`;
+  const letters = spellTargets(item).map(t => {
+    const word = t.accept[0] || '';
+    const mask = [...word].map((ch, i) => (i === 0 || ' -/'.includes(ch)) ? ch : '_').join(' ');
     return `<span class="mask-item">${t.label ? escapeHtml(t.label) + ': ' : ''}${escapeHtml(mask)}</span>`;
   }).join('');
+
+  if (session.dir === 'dict' && session.hintLevel === 1) {
+    $('tSpellMask').innerHTML = meaning;
+    $('tHintBtn').textContent = '💡 Harflar';
+  } else {
+    $('tSpellMask').innerHTML = (session.dir === 'dict' ? meaning : '') + letters;
+    $('tHintBtn').hidden = true;
+  }
   $('tSpellMask').hidden = false;
 }
 
@@ -1282,7 +1515,7 @@ function showTrainCard() {
   const verb = isVerbs();
   const w = verb ? item.v : item.w;
 
-  session.dir = tsDir === 'mix' ? (Math.random() < 0.5 ? 'eng_uzb' : 'uzb_eng') : tsDir;
+  session.dir = session.baseDir === 'mix' ? (Math.random() < 0.5 ? 'eng_uzb' : 'uzb_eng') : session.baseDir;
 
   $('trainProgress').textContent = `${session.idx + 1} / ${session.items.length}`;
   $('trainBarFill').style.width = `${(session.idx / session.items.length) * 100}%`;
@@ -1291,9 +1524,48 @@ function showTrainCard() {
   $('tForms').hidden = true;
   $('tSpell').hidden = true;
   $('tHintBtn').hidden = true;
+  $('tOptions').hidden = true;
+  $('tSlowBtn').hidden = true;
+  $('tNextBtn').hidden = $('tExitBtn').hidden = $('tRetryBtn').hidden = true;
+  promptEl.classList.remove('is-icon');
+  clearTimeout(session.autoTimer);
+  session.testAnswered = false;
+  trainWrap.dataset.mode = session.dir;
   fillTrainSentence(item, verb ? vFormsOf(w) : [w[0], w[1]]);
 
-  if (session.dir === 'spell') {
+  if (session.dir === 'dict') {
+    /* Diktant: hech narsa ko'rsatilmaydi — faqat ovoz. Javob tekshirilgach ochiladi. */
+    promptEl.textContent = '🎧';
+    promptEl.setAttribute('lang', 'uz');
+    promptEl.classList.add('is-icon');
+    ipaEl.textContent  = verb ? vIpaOf(w).join('  ') : ipaOf(w);
+    pronEl.textContent = verb ? vPronOf(w).join(' · ') : pronOf(w);
+    ipaEl.hidden = pronEl.hidden = true;
+    if (verb) fillTrainForms(item, 0);
+    buildSpellInputs(item);
+    $('tRu').textContent = `RU: ${w[8]}`;
+    $('tUz').textContent = `UZ: ${w[9]}`;
+    $('tUz').hidden = false;
+    $('tListenBtn').hidden = $('tSlowBtn').hidden = $('tHintBtn').hidden = false;
+    $('tShowBtn').textContent = 'Tekshirish (Enter)';
+    speak(trainSpeakText(item));
+  } else if (session.dir === 'test') {
+    const q = buildTestQuestion(item);
+    session.answerIdx = q.answer;
+    promptEl.textContent = q.prompt;
+    promptEl.setAttribute('lang', q.promptLang);
+    ipaEl.textContent  = q.ipa;
+    pronEl.textContent = q.hint;
+    ipaEl.hidden  = !q.ipa;
+    pronEl.hidden = !q.hint;
+    if (verb) fillTrainForms(item, 1);
+    renderTestOptions(q);
+    $('tRu').textContent = `RU: ${w[8]}`;
+    $('tUz').textContent = (verb || q.promptLang === 'en') ? `UZ: ${w[9]}` : `ENG: ${wordOf(w)} (${ipaOf(w)})`;
+    $('tUz').hidden = false;
+    $('tListenBtn').hidden = q.promptLang !== 'en';      // o'zbekcha savolda javobni aytib qo'ymasin
+    if (q.say) speak(q.say);
+  } else if (session.dir === 'spell') {
     /* Savol — tarjima, javob — inglizcha imloni yozish */
     if (verb) {
       promptEl.textContent = vFormsOf(w)[0];
@@ -1360,32 +1632,43 @@ function showTrainCard() {
     $('tListenBtn').hidden = true;            // javobni oldindan aytib qo'ymasin
   }
 
-  if (session.dir !== 'spell') $('tShowBtn').textContent = 'Javobni ko\'rsatish (Space)';
+  if (!['spell', 'dict'].includes(session.dir)) $('tShowBtn').textContent = 'Javobni ko\'rsatish (Space)';
 
   $('tStats').hidden = true;
   $('tAnswerBox').classList.remove('show');
-  $('tShowBtn').hidden = false;
+  $('tShowBtn').hidden = session.dir === 'test';
   $('tHardBtn').hidden = $('tEasyBtn').hidden = $('tRestartBtn').hidden = true;
-  if (session.dir !== 'spell' && trainModal.contains(document.activeElement)) {
+  if (!['spell', 'dict', 'test'].includes(session.dir) && trainModal.contains(document.activeElement)) {
     $('tShowBtn').focus({ preventScroll: true });
   }
+
+  /* Kartochka rejimida so'z paydo bo'lishi bilan eshittiriladi */
+  if (session.origin?.mode === 'card') speak(trainSpeakText(item));
 }
 
-function revealTrainAnswer(fromSpell) {
+function revealTrainAnswer(fromCheck) {
   const item = currentItem();
   if (!item || session.flipped) return;
 
-  /* Yozish rejimida javob faqat "Tekshirish"dan keyin ochiladi */
-  if (session.dir === 'spell' && !fromSpell) { checkSpelling(); return; }
+  /* Yozish va diktantda javob "Tekshirish"dan keyin, testda — variant tanlangach ochiladi */
+  if ((session.dir === 'spell' || session.dir === 'dict') && !fromCheck) { checkSpelling(); return; }
+  if (session.dir === 'test' && !fromCheck) return;
 
   session.flipped = true;
-  $('tIpa').hidden = $('tPron').hidden = isVerbs() && session.dir === 'uzb_eng';
-  $('tForms').hidden = !isVerbs();
+  const verb = isVerbs();
+  if (session.dir === 'dict') {
+    const w = verb ? item.v : item.w;
+    $('tPrompt').classList.remove('is-icon');
+    $('tPrompt').textContent = verb ? vFormsOf(w).join(' · ') : wordOf(w);
+    $('tPrompt').setAttribute('lang', 'en');
+  }
+  $('tIpa').hidden = $('tPron').hidden = verb && (session.dir === 'uzb_eng' || session.dir === 'dict');
+  $('tForms').hidden = !verb;
   $('tListenBtn').hidden = false;
   $('tAnswerBox').classList.add('show');
   $('tShowBtn').hidden = true;
   $('tHardBtn').hidden = $('tEasyBtn').hidden = false;
-  if (!fromSpell &&
+  if (!fromCheck &&
       (trainModal.contains(document.activeElement) || document.activeElement === document.body)) {
     $('tEasyBtn').focus({ preventScroll: true });
   }
@@ -1397,7 +1680,9 @@ function markHard() {
   const item = currentItem();
   if (!item || !session.flipped) return;
 
+  clearTimeout(session.autoTimer);
   session.repeated++;
+  session.mistakes.add(item.key);
   session.learned.delete(item.key);
   srsAnswer(item.key, false);
   saveState();
@@ -1414,6 +1699,7 @@ function markEasy() {
   const item = currentItem();
   if (!item || !session.flipped) return;
 
+  clearTimeout(session.autoTimer);
   srsAnswer(item.key, true);
   saveState();
   buildLessons();
@@ -1434,15 +1720,24 @@ function syncCardStatus(key, isLearned) {
 function finishTraining() {
   session.finished = true;
   session.flipped = false;
+  clearTimeout(session.autoTimer);
 
   const unique = new Set(session.items.map(i => i.key)).size;
+  const titles = {
+    test:  '🎉 Test yakunlandi!',
+    dict:  '🎉 Diktant yakunlandi!',
+    spell: '🎉 Yozish mashqi yakunlandi!'
+  };
 
+  trainWrap.dataset.mode = 'done';
   $('trainProgress').textContent = `${unique} / ${unique}`;
   $('trainBarFill').style.width = '100%';
-  $('tPrompt').textContent = '🎉 Mashg\'ulot yakunlandi!';
+  $('tPrompt').classList.remove('is-icon');
+  $('tPrompt').textContent = titles[session.baseDir] || '🎉 Mashg\'ulot yakunlandi!';
   $('tPrompt').setAttribute('lang', 'uz');
   $('tIpa').hidden = $('tPron').hidden = true;
-  $('tListenBtn').hidden = true;
+  $('tListenBtn').hidden = $('tSlowBtn').hidden = true;
+  $('tSpell').hidden = $('tOptions').hidden = true;
   $('tAnswerBox').classList.remove('show');
 
   const stats = $('tStats');
@@ -1450,11 +1745,10 @@ function finishTraining() {
   const cards = [
     [`${unique} ta`, `${isVerbs() ? 'fe\'l' : 'so\'z'} ko'rildi`],
     [`${session.learned.size} ta`, 'yodlandi'],
-    [`${session.repeated} ta`, 'qaytarildi']
+    [`${session.mistakes.size} ta`, 'xato qilindi']
   ];
-  if (session.spellTotal) {
-    cards.push([`${session.spellOk}/${session.spellTotal}`, 'to\'g\'ri yozildi']);
-  }
+  if (session.spellTotal) cards.push([`${session.spellOk}/${session.spellTotal}`, 'to\'g\'ri yozildi']);
+  if (session.testTotal)  cards.push([`${session.testOk}/${session.testTotal}`, 'to\'g\'ri javob']);
   cards.forEach(([big, small]) => {
     const d = document.createElement('div');
     d.className = 'stat';
@@ -1466,8 +1760,15 @@ function finishTraining() {
   stats.hidden = false;
 
   $('tShowBtn').hidden = $('tHardBtn').hidden = $('tEasyBtn').hidden = true;
+  $('tNextBtn').hidden = $('tHintBtn').hidden = true;
+
+  const miss = session.mistakes.size;
+  $('tRetryBtn').hidden = !miss;
+  $('tRetryBtn').textContent = `🔁 Xatolar (${miss})`;
+  $('tExitBtn').hidden = false;
   $('tRestartBtn').hidden = false;
-  $('tRestartBtn').focus({ preventScroll: true });
+  $('tRestartBtn').textContent = '↻ Yana';
+  (miss ? $('tRetryBtn') : $('tRestartBtn')).focus({ preventScroll: true });
 }
 
 $('tListenBtn').addEventListener('click', () => {
@@ -1478,7 +1779,32 @@ $('tShowBtn').addEventListener('click', () => revealTrainAnswer());
 $('tHintBtn').addEventListener('click', showSpellHint);
 $('tHardBtn').addEventListener('click', markHard);
 $('tEasyBtn').addEventListener('click', markEasy);
+$('tSlowBtn').addEventListener('click', () => {
+  const item = currentItem();
+  if (item) speak(trainSpeakText(item), null, null, { rate: slow ? 0.42 : RATE_SLOW });
+});
+$('tNextBtn').addEventListener('click', advanceTest);
+$('tExitBtn').addEventListener('click', () => closeModal(trainModal));
+
+/* Faqat xato qilingan so'zlar bilan, o'sha rejimda qaytadan */
+$('tRetryBtn').addEventListener('click', () => {
+  if (!session) return;
+  const seen = new Set();
+  const pool = session.items.filter(i =>
+    session.mistakes.has(i.key) && !seen.has(i.key) && seen.add(i.key));
+  if (pool.length) startSession(session.baseDir, shuffle(pool), session.origin);
+});
+
+/* "Yana": markazdan boshlangan bo'lsa — o'sha to'plam va rejim yangi tanlov bilan;
+   sozlamalar oynasidan boshlangan bo'lsa — sozlamalar oynasi */
 $('tRestartBtn').addEventListener('click', () => {
+  const o = session?.origin;
+  if (o?.mode) {
+    let pool = orderForSession(o.source, o.mode);
+    if (hubCount !== 'all') pool = pool.slice(0, parseInt(hubCount, 10) || 20);
+    startSession(HUB_DIR[o.mode], pool, o);
+    return;
+  }
   closeModal(trainModal);
   openTrainSetup();
 });
@@ -1504,7 +1830,7 @@ window.addEventListener('keydown', e => {
 
     const typing = e.target && e.target.classList && e.target.classList.contains('spell-input');
 
-    if (session?.dir === 'spell') {
+    if (session?.dir === 'spell' || session?.dir === 'dict') {
       if (e.key === 'Enter') {
         e.preventDefault();
         if (!session.spellChecked) checkSpelling();
@@ -1514,6 +1840,19 @@ window.addEventListener('keydown', e => {
         (e.key === '1' ? markHard : markEasy)();
       }
       return;                                  // Space va harflar inputga tegishli
+    }
+
+    if (session?.dir === 'test') {
+      if (!session.testAnswered && /^[1-4]$/.test(e.key)) {
+        e.preventDefault(); chooseTestOption(Number(e.key) - 1);
+      } else if (session.testAnswered && e.key === 'Enter') {
+        e.preventDefault(); advanceTest();
+      } else if (e.key === ' ') {
+        e.preventDefault();
+        const it = currentItem();
+        if (it && !$('tListenBtn').hidden) speak(trainSpeakText(it));
+      }
+      return;
     }
 
     if (e.key === ' ' || e.key === 'Enter') {
