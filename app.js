@@ -344,6 +344,7 @@ function toast(message, actionLabel, onAction) {
   }
   toastWrap.appendChild(t);
   setTimeout(kill, actionLabel ? 10000 : 3200);
+  return t;
 }
 
 /* ---------- THEME ---------- */
@@ -1052,9 +1053,10 @@ function trapFocus(el, e) {
   else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
 }
 
-/* Fon (overlay) bosilganda yopish */
-[['trainSetupModal'], ['trainModal']].forEach(([id]) => {
-  $(id).addEventListener('mousedown', e => { if (e.target === $(id)) closeModal($(id)); });
+/* Fon (overlay) bosilganda yopish — faqat sozlamalar oynasida.
+   Mashq oynasi tasodifan yopilib qolmasin: u faqat ✕ tugmasi (yoki yakundagi "Ro'yxatga") bilan yopiladi. */
+$('trainSetupModal').addEventListener('mousedown', e => {
+  if (e.target === $('trainSetupModal')) closeModal($('trainSetupModal'));
 });
 
 /* ---------- TRAINING SETUP ---------- */
@@ -1606,7 +1608,7 @@ function showTrainCard() {
   $('tHintBtn').hidden = true;
   $('tOptions').hidden = true;
   $('tSlowBtn').hidden = true;
-  $('tNextBtn').hidden = $('tExitBtn').hidden = $('tRetryBtn').hidden = true;
+  $('tNextBtn').hidden = $('tExitBtn').hidden = $('tRetryBtn').hidden = $('tNextExBtn').hidden = true;
   promptEl.classList.remove('is-icon');
   clearTimeout(session.autoTimer);
   session.testAnswered = false;
@@ -1787,7 +1789,8 @@ function applyResult(item, result) {
   if (result === 'bad') session.mistakes.add(item.key);
   if (graduated) {
     session.graduated.add(item.key);
-    toast(`🎉 ${trainSpeakText(item)} — 4/4, Takrorga qo'shildi`);
+    clearGradToasts();                                    // ketma-ket bo'lsa ustma-ust yig'ilmasin
+    toast(`🎉 ${trainSpeakText(item)} — 4/4, Takrorga qo'shildi`).classList.add('toast-grad');
   }
   session.lastResult = result;
 
@@ -1796,6 +1799,8 @@ function applyResult(item, result) {
   syncCardStatus(item.key);
   renderTrainStages(item, stage, result);
 }
+
+const clearGradToasts = () => $$('.toast-grad').forEach(t => t.remove());
 
 /* Keyingi so'z. requeue — so'z sessiya oxiriga qaytadi (chinakam takrorlash) */
 function nextCard(requeue) {
@@ -1823,6 +1828,7 @@ function syncCardStatus(key) {
 }
 
 function finishTraining() {
+  clearGradToasts();                // natija statistikada yoziladi — tugmalar ustini yopmasin
   session.finished = true;
   session.flipped = false;
   clearTimeout(session.autoTimer);
@@ -1884,7 +1890,30 @@ function finishTraining() {
   $('tExitBtn').hidden = false;
   $('tRestartBtn').hidden = false;
   $('tRestartBtn').textContent = '↻ Yana';
-  (miss ? $('tRetryBtn') : $('tRestartBtn')).focus({ preventScroll: true });
+
+  const nx = nextExercise();
+  session.nextEx = nx;
+  $('tNextExBtn').hidden = !nx;
+  if (nx) $('tNextExBtn').textContent = `→ ${nx.num}. ${nx.stage.ico} ${nx.stage.name} (${nx.pool.length} ta)`;
+  (nx ? $('tNextExBtn') : miss ? $('tRetryBtn') : $('tRestartBtn')).focus({ preventScroll: true });
+}
+
+/* Yakundan keyingi mashq — shu sessiyadagi so'zlar bilan.
+   Tartibda keyingi (1→2→3→4, oxiridan boshiga) va shu so'zlardan kimdir hali o'tmagan mashq tanlanadi;
+   ro'yxatga faqat o'sha mashqdan o'tmagan so'zlar kiradi.
+   Hammasi yodlangan bo'lsa (masalan, Takror) — shunchaki tartibdagi keyingi mashq, hamma so'z bilan. */
+function nextExercise() {
+  const cur = STAGES.findIndex(s => s.id === DIR_STAGE[session.baseDir]);
+  const seen = new Set();
+  const words = session.items.filter(i => !seen.has(i.key) && seen.add(i.key));
+
+  for (let n = 1; n < STAGES.length; n++) {
+    const i = (cur + n) % STAGES.length;
+    const pool = words.filter(w => !isLearned(w.key) && !(stOf(w.key) & STAGES[i].bit));
+    if (pool.length) return { stage: STAGES[i], num: i + 1, pool };
+  }
+  if (cur >= 0 && cur < STAGES.length - 1) return { stage: STAGES[cur + 1], num: cur + 2, pool: words };
+  return null;
 }
 
 $('tListenBtn').addEventListener('click', () => {
@@ -1901,6 +1930,14 @@ $('tSlowBtn').addEventListener('click', () => {
 });
 $('tNextBtn').addEventListener('click', advanceChecked);
 $('tExitBtn').addEventListener('click', () => closeModal(trainModal));
+
+$('tNextExBtn').addEventListener('click', () => {
+  const nx = session?.nextEx;
+  if (!nx) return;
+  const mode = nx.stage.id;
+  startSession(HUB_DIR[mode], orderForSession(nx.pool, mode),
+               { mode, source: session.origin?.source || nx.pool });
+});
 
 /* Faqat xato qilingan so'zlar bilan, o'sha rejimda qaytadan */
 $('tRetryBtn').addEventListener('click', () => {
@@ -1941,7 +1978,7 @@ window.addEventListener('keydown', e => {
   /* 2) Flesh-karta */
   if (trainModal.classList.contains('open')) {
     trapFocus(trainModal, e);
-    if (e.key === 'Escape') { e.preventDefault(); closeModal(trainModal); return; }
+    if (e.key === 'Escape') { e.preventDefault(); return; }     // Esc ham yopmaydi — faqat ✕
     if (session?.finished) return;
 
     if (session?.dir === 'spell' || session?.dir === 'dict') {
