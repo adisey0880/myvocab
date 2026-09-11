@@ -1717,6 +1717,8 @@ footer b {
   .search-wrap { flex: 1 1 120px; }
   .kb-hint { display: none; }
   .count { font-size: 12px; padding: 3px 10px; }
+  .count-unit { display: none; }
+  h1 { gap: 8px; }
   .daily-pill { font-size: 11.5px; padding: 3px 9px; gap: 6px; }
   button { padding: 8px 12px; font-size: 13px; }
   .seg button { padding: 6px 11px; }
@@ -1725,6 +1727,14 @@ footer b {
   .t-footer { gap: 10px; }
   .t-footer button { padding: 12px 8px; font-size: 14px; }
   .toast-wrap { max-width: calc(100vw - 24px); }
+}
+
+/* Tor telefonlar (360px Android, iPhone SE): "My Vocabulary" to'liq sig'sin */
+@media (max-width: 374px) {
+  h1 svg { display: none; }
+}
+@media (max-width: 340px) {
+  .count { display: none; }
 }
 
 @media (max-width: 380px) {

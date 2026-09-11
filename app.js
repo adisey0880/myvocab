@@ -653,7 +653,9 @@ function render({ animate = true } = {}) {
     });
   }
 
-  countEl.textContent = `${shown} ${unit()}`;
+  /* Telefonda sarlavhaga joy qolsin — "ta so'z" qismi CSS'da yashiriladi */
+  countEl.innerHTML = `${shown}<span class="count-unit"> ${unit()}</span>`;
+  countEl.title = `${shown} ${unit()}`;
   updateHub(visibleItems());
 }
 
