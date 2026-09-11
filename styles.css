@@ -719,35 +719,6 @@ main {
   flex-shrink: 0;
 }
 
-.check-btn {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--muted);
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: none;
-}
-
-.check-btn:hover {
-  border-color: var(--learned);
-  color: var(--learned);
-  background: var(--learned-soft);
-  transform: scale(1.1);
-}
-
-.card.is-learned .check-btn {
-  background: var(--learned);
-  border-color: var(--learned);
-  color: #ffffff;
-  transform: scale(1.05);
-}
-
 .listen {
   display: inline-flex;
   align-items: center;
@@ -1719,6 +1690,9 @@ footer b {
   .count { font-size: 12px; padding: 3px 10px; }
   .count-unit { display: none; }
   h1 { gap: 8px; }
+  /* Status: 4 ta tugma bir qatorga sig'sin — tugmalar nomi o'zi tushunarli */
+  .segwrap-status .cap { display: none; }
+  #learnedSeg button { padding: 6px 8px; }
   .daily-pill { font-size: 11.5px; padding: 3px 9px; gap: 6px; }
   button { padding: 8px 12px; font-size: 13px; }
   .seg button { padding: 6px 11px; }
@@ -1824,6 +1798,35 @@ footer b {
 }
 
 .hub-ico  { font-size: 22px; line-height: 1; margin-bottom: 5px; }
+
+.hub-mode { position: relative; }
+.hub-num {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--muted);
+  background: var(--badge-bg);
+}
+.hub-left {
+  margin-top: 6px;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+.hub-left:empty   { display: none; }
+.hub-left.is-done { color: var(--learned); }
+/* Keyingi tavsiya qilingan mashq */
+.hub-mode.is-next { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.hub-mode.is-next .hub-num { background: var(--accent-solid); color: var(--accent-ink); }
 .hub-mode b { font-size: 15px; font-weight: 800; color: var(--ink); }
 .hub-desc { font-size: 12px; font-weight: 500; color: var(--muted); line-height: 1.35; }
 
@@ -1923,4 +1926,78 @@ footer b {
   .t-options { grid-template-columns: 1fr; }
   .t-opt { min-height: 48px; }
   .train-mode { font-size: 11.5px; }
+}
+
+/* ═══════════ 4 TA MASHQ: SO'Z HOLATI ═══════════ */
+.stages {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 14px;
+  padding-top: 11px;
+  border-top: 1px dashed var(--border);
+}
+
+.stg {
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  line-height: 1;
+  border-radius: 8px;
+  background: var(--badge-bg);
+  outline: 1px dashed var(--border-hover);
+  outline-offset: -1px;
+  filter: grayscale(1);
+  opacity: 0.55;
+}
+
+.stg.on { outline: 0; }
+
+.stg.on {
+  filter: none;
+  opacity: 1;
+  background: var(--learned-soft);
+  box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.45);
+}
+
+.stg-text {
+  margin-left: 3px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--muted);
+  min-width: 0;
+}
+
+.card.is-learned .stg-text { color: var(--learned); }
+
+/* Mashq oynasida — markazda, javob bilan birga ochiladi */
+.t-stages .stages { justify-content: center; margin-top: 12px; }
+
+.stg.flash-ok  { animation: stgPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.stg.flash-bad { animation: stgShake 0.4s ease; box-shadow: inset 0 0 0 1.5px var(--danger); opacity: 0.85; }
+
+@keyframes stgPop {
+  0%   { transform: scale(0.6); }
+  60%  { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+@keyframes stgShake {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-3px); }
+  75%      { transform: translateX(3px); }
+}
+
+.spell-note { margin-top: 4px; font-size: 12.5px; font-weight: 500; color: var(--muted); }
+
+.t-note {
+  margin: 12px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-sub);
+  text-align: center;
 }

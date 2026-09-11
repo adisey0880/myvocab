@@ -101,12 +101,13 @@
         </div>
       </div>
 
-      <div class="segwrap">
+      <div class="segwrap segwrap-status">
         <span class="cap">Status</span>
         <div class="seg" id="learnedSeg" role="radiogroup" aria-label="O'rganilganlik holati">
           <div class="seg-pill" aria-hidden="true"></div>
           <button data-v="all" role="radio" aria-checked="true" class="on">Barchasi</button>
           <button data-v="unlearned" role="radio" aria-checked="false">Yangi</button>
+          <button data-v="learning" role="radio" aria-checked="false">O'rganilmoqda</button>
           <button data-v="learned" role="radio" aria-checked="false">Yodlangan</button>
         </div>
       </div>
@@ -147,26 +148,35 @@
         </div>
       </div>
     </div>
+    <!-- So'z Takrorga faqat 4 ta mashqning hammasidan o'tgach tushadi. Tartib — osondan qiyinga. -->
     <div class="hub-modes">
       <button class="hub-mode" data-mode="card" type="button">
+        <span class="hub-num" aria-hidden="true">1</span>
         <span class="hub-ico" aria-hidden="true">🃏</span>
         <b>Kartochka</b>
         <span class="hub-desc" data-words="ko'rib va eshitib yodlash" data-verbs="uch shaklni ko'rib yodlash">ko'rib va eshitib yodlash</span>
-      </button>
-      <button class="hub-mode" data-mode="dict" type="button">
-        <span class="hub-ico" aria-hidden="true">🎧</span>
-        <b>Eshitib yozish</b>
-        <span class="hub-desc" data-words="diktant: eshiting va yozing" data-verbs="3 shaklni eshitib yozish">diktant: eshiting va yozing</span>
-      </button>
-      <button class="hub-mode" data-mode="spell" type="button">
-        <span class="hub-ico" aria-hidden="true">✍️</span>
-        <b>Yozib mashq</b>
-        <span class="hub-desc" data-words="tarjimadan inglizcha yozish" data-verbs="V2 va V3 ni yozish">tarjimadan inglizcha yozish</span>
+        <span class="hub-left"></span>
       </button>
       <button class="hub-mode" data-mode="test" type="button">
+        <span class="hub-num" aria-hidden="true">2</span>
         <span class="hub-ico" aria-hidden="true">✅</span>
         <b>Test</b>
         <span class="hub-desc" data-words="4 variantdan to'g'risini tanlash" data-verbs="to'g'ri shakllarni tanlash">4 variantdan to'g'risini tanlash</span>
+        <span class="hub-left"></span>
+      </button>
+      <button class="hub-mode" data-mode="spell" type="button">
+        <span class="hub-num" aria-hidden="true">3</span>
+        <span class="hub-ico" aria-hidden="true">✍️</span>
+        <b>Yozib mashq</b>
+        <span class="hub-desc" data-words="tarjimadan inglizcha yozish" data-verbs="V2 va V3 ni yozish">tarjimadan inglizcha yozish</span>
+        <span class="hub-left"></span>
+      </button>
+      <button class="hub-mode" data-mode="dict" type="button">
+        <span class="hub-num" aria-hidden="true">4</span>
+        <span class="hub-ico" aria-hidden="true">🎧</span>
+        <b>Eshitib yozish</b>
+        <span class="hub-desc" data-words="diktant: eshiting va yozing" data-verbs="3 shaklni eshitib yozish">diktant: eshiting va yozing</span>
+        <span class="hub-left"></span>
       </button>
     </div>
   </section>
@@ -272,7 +282,7 @@
         <span class="ts-label">5. Status</span>
         <div class="seg" id="tsStatusSeg" role="radiogroup" aria-label="Status">
           <div class="seg-pill" aria-hidden="true"></div>
-          <button data-v="unlearned" role="radio" aria-checked="true" class="on">Faqat yangi</button>
+          <button data-v="unlearned" role="radio" aria-checked="true" class="on">Yodlanmagan</button>
           <button data-v="all" role="radio" aria-checked="false">Barchasi</button>
           <button data-v="learned" role="radio" aria-checked="false">Yodlangan</button>
         </div>
@@ -323,17 +333,19 @@
         <div class="t-forms" id="tForms" lang="en" hidden></div>
         <div class="t-ru" id="tRu" lang="ru">Русский перевод</div>
         <div class="t-uz" id="tUz" lang="uz">O'zbekcha tarjima</div>
+        <div class="t-stages" id="tStages" aria-live="polite"></div>
         <div class="t-sent" id="tSent" hidden></div>
       </div>
 
       <div class="t-stats" id="tStats" hidden></div>
+      <p class="t-note" id="tNote" hidden></p>
     </div>
 
     <div class="t-footer" id="tFooter">
       <button id="tHintBtn" class="btn-hint" hidden>💡 Yordam</button>
       <button id="tShowBtn" class="on">Javobni ko'rsatish (Space)</button>
       <button id="tHardBtn" class="btn-hard" hidden>Qiyin / Qaytarish (1)</button>
-      <button id="tEasyBtn" class="btn-easy" hidden>Oson / Yodladim (2)</button>
+      <button id="tEasyBtn" class="btn-easy" hidden>Oson / Bilaman (2)</button>
       <button id="tNextBtn" class="on" hidden>Keyingi (Enter)</button>
       <button id="tExitBtn" hidden>← Ro'yxatga</button>
       <button id="tRetryBtn" class="btn-hard" hidden>🔁 Xatolar</button>

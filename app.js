@@ -62,7 +62,7 @@ function migrate(s) {
 function saveState() {
   try {
     localStorage.setItem(STORE_KEY, JSON.stringify({
-      v: 4,
+      v: 5,
       theme: document.documentElement.getAttribute('data-theme'),
       script, accent, slow, activeLesson, filterMode, mode, learnedFilter, advOpen,
       dataset, activeVerbGroup, daily,
@@ -81,7 +81,7 @@ let slow          = !!saved?.slow;
 let activeLesson  = saved?.activeLesson || 'all';
 let filterMode    = saved?.filterMode || 'date';       // date | topic
 let mode          = (typeof saved?.mode === 'number') ? saved.mode : 0;
-let learnedFilter = saved?.learnedFilter || 'all';     // all | unlearned | learned
+let learnedFilter = saved?.learnedFilter || 'all';     // all | unlearned | learning | learned
 let advOpen       = (typeof saved?.advOpen === 'boolean') ? saved.advOpen : false;
 let query         = '';
 
@@ -96,6 +96,20 @@ const MAX_BOX   = SRS_STEPS.length;
 const HARD_AT   = 2;   // shuncha xatodan keyin "Qiyin" ro'yxatiga tushadi
 const HARD_OUT  = 3;   // shu qutiga yetgach ro'yxatdan chiqadi (haftalik oraliq)
 
+/* ---------- 4 TA MASHQ: so'z Takrorga faqat hammasidan o'tgach tushadi ----------
+   st — bit maskasi: qaysi mashqlardan o'tilgani. Tartib erkin,
+   tavsiya qilingani — osondan qiyinga (ro'yxatdagi tartib). */
+const STAGES = [
+  { id: 'card',  bit: 1, ico: '🃏', name: 'Kartochka' },
+  { id: 'test',  bit: 2, ico: '✅', name: 'Test' },
+  { id: 'spell', bit: 4, ico: '✍️', name: 'Yozib mashq' },
+  { id: 'dict',  bit: 8, ico: '🎧', name: 'Eshitib yozish' }
+];
+const ALL_STAGES = 15;
+/* Mashq rejimi → bosqich. UZB → ENG va Aralash ham kartochka hisoblanadi. */
+const DIR_STAGE = { eng_uzb: 'card', uzb_eng: 'card', mix: 'card', test: 'test', spell: 'spell', dict: 'dict' };
+const stageBit  = id => STAGES.find(s => s.id === id)?.bit || 0;
+
 const today = () => new Date().toISOString().slice(0, 10);
 const addDays = (n) => {
   const d = new Date();
@@ -109,12 +123,23 @@ let progVerbs = migrateProgress(saved?.progressVerbs, saved?.learnedVerbs);
 /* v3 → v4: eski "yodlangan so'zlar ro'yxati" SRS yozuvlariga aylanadi.
    Ular allaqachon o'rganilgan, shuning uchun 2-qutiga qo'yiladi. */
 function migrateProgress(fresh, legacyList) {
-  if (fresh && typeof fresh === 'object') return { ...fresh };
   const out = {};
+  if (fresh && typeof fresh === 'object') {
+    Object.entries(fresh).forEach(([k, e]) => { if (e && typeof e === 'object') out[k] = withStages(e); });
+    return out;
+  }
   (Array.isArray(legacyList) ? legacyList : []).forEach(k => {
-    if (typeof k === 'string' && k) out[k] = { box: 2, due: addDays(3), wrong: 0 };
+    if (typeof k === 'string' && k) out[k] = { box: 2, due: addDays(3), wrong: 0, st: ALL_STAGES };
   });
   return out;
+}
+
+/* v4 → v5: mashq bosqichlari paydo bo'lishidan oldin yodlangan so'zlar 4/4 hisoblanadi.
+   Qoida: Takrordagi so'z (box ≥ 1) doim 4/4. */
+function withStages(e) {
+  const box = e.box || 0;
+  const st  = box >= 1 ? ALL_STAGES : (typeof e.st === 'number' ? e.st & ALL_STAGES : 0);
+  return { box, due: e.due || today(), wrong: e.wrong || 0, st };
 }
 
 /* Kunlik maqsad va ketma-ket kunlar */
@@ -131,6 +156,8 @@ const prog       = () => isVerbs() ? progVerbs : progWords;
 
 const boxOf      = k => prog()[k]?.box || 0;
 const isLearned  = k => boxOf(k) >= 1;
+const stOf       = k => prog()[k]?.st || 0;
+const isLearning = k => !isLearned(k) && stOf(k) > 0;     // 1–3 ta mashqdan o'tgan
 const isDue      = k => { const e = prog()[k]; return !!e && e.box >= 1 && e.due <= today(); };
 /* "Qiyin" — tarix emas, hozirgi holat: so'z ko'p xato qilingan
    BO'LSA-DA hali mustahkam o'zlashtirilmagan bo'lsa ro'yxatda turadi.
@@ -140,28 +167,35 @@ const isHard     = k => {
   return !!e && (e.wrong || 0) >= HARD_AT && (e.box || 0) < HARD_OUT;
 };
 
-/* Qo'lda belgilash (kartochkadagi ✓) — 1-qutiga qo'yadi yoki tozalaydi */
-function setLearned(key, on) {
-  const p = prog();
-  if (on) {
-    const e = p[key] || { box: 0, due: today(), wrong: 0 };
-    p[key] = { ...e, box: Math.max(e.box, 1), due: addDays(SRS_STEPS[0]) };
-  } else if (p[key]) {
-    p[key] = { ...p[key], box: 0, due: today() };
-  }
-}
-
-/* Mashg'ulot javobi: to'g'ri bo'lsa keyingi qutiga, xato bo'lsa boshiga */
-function srsAnswer(key, ok) {
-  const p = prog();
-  const e = p[key] || { box: 0, due: today(), wrong: 0 };
-  if (ok) {
-    const box = Math.min(e.box + 1, MAX_BOX);
-    p[key] = { box, due: addDays(SRS_STEPS[box - 1]), wrong: e.wrong };
-  } else {
-    p[key] = { box: 0, due: today(), wrong: e.wrong + 1 };
-  }
+/* Mashq natijasi.
+   result: 'ok'   — o'tdi,
+           'bad'  — xato,
+           'hint' — to'g'ri, lekin harflar ochilgan: hisoblanmaydi (lekin xato ham emas).
+   Yodlanmagan so'zda: shu mashq belgilanadi; 4/4 bo'lsa — 1-quti, ya'ni ertaga Takrorda.
+   Takrordagi so'zda: to'g'ri — keyingi quti (oldingidek);
+   xato — boshiga qaytadi va FAQAT shu mashq qayta "bajarilmagan" bo'ladi.
+   Qaytaradi: true — so'z hozirgina Takrorga o'tdi. */
+function recordAnswer(key, stage, result) {
   markDailyDone(key);
+  if (result === 'hint') return false;
+
+  const p   = prog();
+  const e   = p[key] || { box: 0, due: today(), wrong: 0, st: 0 };
+  const bit = stageBit(stage);
+
+  if (result === 'bad') {
+    p[key] = { box: 0, due: today(), wrong: e.wrong + 1, st: e.st & ~bit };
+    return false;
+  }
+  if (e.box >= 1) {
+    const box = Math.min(e.box + 1, MAX_BOX);
+    p[key] = { ...e, box, due: addDays(SRS_STEPS[box - 1]) };
+    return false;
+  }
+  const st = e.st | bit;
+  if (st !== ALL_STAGES) { p[key] = { ...e, st }; return false; }
+  p[key] = { box: 1, due: addDays(SRS_STEPS[0]), wrong: e.wrong, st };
+  return true;
 }
 
 /* ---------- KUNLIK MAQSAD ---------- */
@@ -469,9 +503,10 @@ function vPronOf(v)  {
 }
 
 function matchesFilters(item) {
-  const learned = isLearned(item.key);
-  if (learnedFilter === 'unlearned' && learned) return false;
-  if (learnedFilter === 'learned' && !learned) return false;
+  const k = item.key;
+  if (learnedFilter === 'unlearned' && (isLearned(k) || stOf(k))) return false;   // hali birorta mashq yo'q
+  if (learnedFilter === 'learning'  && !isLearning(k)) return false;
+  if (learnedFilter === 'learned'   && !isLearned(k))  return false;
   return !query || item.hay.includes(query);
 }
 
@@ -486,10 +521,32 @@ function fmt(iso) {
   return `${d}.${m}.${y}`;
 }
 
-const CHECK_BTN_HTML = (isLearned) => `
-  <button class="check-btn" aria-pressed="${isLearned}" title="Yodlangan deb belgilash" aria-label="Yodlanganlikni almashtirish">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-  </button>
+/* So'z holati: 4 ta mashq belgisi va nima qolgani.
+   Qo'lda "yodlandi" deb belgilash yo'q — so'z faqat 4 ta mashq orqali Takrorga o'tadi. */
+function stageStripHTML(key) {
+  const e = prog()[key];
+  const st = e?.st || 0, learned = isLearned(key);
+  const icons = STAGES.map(s => {
+    const on = learned || (st & s.bit);
+    return `<span class="stg${on ? ' on' : ''}" data-stage="${s.id}" title="${s.name}: ${on ? 'o‘tildi' : 'hali o‘tilmagan'}">${s.ico}</span>`;
+  }).join('');
+
+  let text;
+  if (learned) {
+    text = isDue(key)          ? '🔁 Bugun takrorlash'
+         : e.box >= MAX_BOX    ? `⭐ Mustahkam · takror ${fmt(e.due)}`
+         :                       `🔁 Takror: ${fmt(e.due)}`;
+  } else {
+    const left = STAGES.filter(s => !(st & s.bit));
+    text = left.length === STAGES.length ? 'Yangi · 4 ta mashq kerak'
+         : left.length === 1             ? `3/4 · oxirgisi: ${left[0].name} → Takror`
+         : `${STAGES.length - left.length}/4 · qoldi: ${left.map(s => s.name).join(', ')}`;
+  }
+  if (isHard(key)) text = '⚠️ ' + text;
+  return `<div class="stages">${icons}<span class="stg-text">${escapeHtml(text)}</span></div>`;
+}
+
+const LISTEN_HTML = `
   <span class="listen">
     <span class="sound-wave" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
     Eshitish
@@ -509,12 +566,12 @@ function sentBlockHTML(key, words) {
     </div>`;
 }
 
-function wordCardHTML(item, isLearned) {
+function wordCardHTML(item) {
   const w = item.w;
   return `
     <div class="top">
       <div class="en" lang="en">${escapeHtml(wordOf(w))}</div>
-      <div class="actions-right">${CHECK_BTN_HTML(isLearned)}</div>
+      <div class="actions-right">${LISTEN_HTML}</div>
     </div>
     <div class="ipa" lang="en">${escapeHtml(ipaOf(w))}</div>
     <div class="pron ${script === 'cyr' ? 'cyr' : ''}">${escapeHtml(pronOf(w))}</div>
@@ -522,10 +579,11 @@ function wordCardHTML(item, isLearned) {
       <span class="lbl">RU</span><span class="val ru" lang="ru">${escapeHtml(w[8])}</span>
       <span class="lbl">UZ</span><span class="val uz" lang="uz">${escapeHtml(w[9])}</span>
     </div>
-    ${sentBlockHTML(item.key, [w[0], w[1]])}`;
+    ${sentBlockHTML(item.key, [w[0], w[1]])}
+    ${stageStripHTML(item.key)}`;
 }
 
-function verbCardHTML(item, isLearned) {
+function verbCardHTML(item) {
   const v = item.v;
   const forms = vFormsOf(v), ipa = vIpaOf(v), pron = vPronOf(v);
   const cols = forms.map((f, i) => `
@@ -538,14 +596,15 @@ function verbCardHTML(item, isLearned) {
 
   return `
     <div class="top top-verb">
-      <div class="actions-right">${CHECK_BTN_HTML(isLearned)}</div>
+      <div class="actions-right">${LISTEN_HTML}</div>
     </div>
     <div class="vforms">${cols}</div>
     <div class="meta">
       <span class="lbl">RU</span><span class="val ru" lang="ru">${escapeHtml(v[8])}</span>
       <span class="lbl">UZ</span><span class="val uz" lang="uz">${escapeHtml(v[9])}</span>
     </div>
-    ${sentBlockHTML(item.key, [...forms, ...vFormsOf(v)])}`;
+    ${sentBlockHTML(item.key, [...forms, ...vFormsOf(v)])}
+    ${stageStripHTML(item.key)}`;
 }
 
 /* animate=false — qidiruv paytida kartalar miltillamasligi uchun */
@@ -598,12 +657,7 @@ function render({ animate = true } = {}) {
       c.dataset.word = say;
       c.dataset.key  = item.key;
 
-      c.innerHTML = verb ? verbCardHTML(item, learned) : wordCardHTML(item, learned);
-
-      c.querySelector('.check-btn').addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleLearned(item.key);
-      });
+      c.innerHTML = verb ? verbCardHTML(item) : wordCardHTML(item);
 
       /* Misol gapni alohida eshitish — kartani bosish bilan aralashmasin */
       c.querySelector('.sent-play')?.addEventListener('click', (e) => {
@@ -657,22 +711,6 @@ function render({ animate = true } = {}) {
   countEl.innerHTML = `${shown}<span class="count-unit"> ${unit()}</span>`;
   countEl.title = `${shown} ${unit()}`;
   updateHub(visibleItems());
-}
-
-/* Statusni almashtirish — ekrandagi barcha nusxalarni birdek yangilaydi */
-function toggleLearned(key) {
-  const nowLearned = !isLearned(key);
-  setLearned(key, nowLearned);
-  if (nowLearned) markDailyDone(key);
-
-  $$(`.card[data-key="${CSS.escape(key)}"]`).forEach(card => {
-    card.classList.toggle('is-learned', nowLearned);
-    card.querySelector('.check-btn')?.setAttribute('aria-pressed', String(nowLearned));
-  });
-
-  saveState();
-  buildLessons();
-  updatePoolCount();
 }
 
 /* ---------- SEGMENTED CONTROLS ---------- */
@@ -1076,8 +1114,8 @@ function buildPool() {
     if (seen.has(item.key)) return false;
     seen.add(item.key);
     const learned = isLearned(item.key);
-    if (tsStatus === 'unlearned' && isLearned) return false;
-    if (tsStatus === 'learned' && !isLearned)  return false;
+    if (tsStatus === 'unlearned' && learned) return false;
+    if (tsStatus === 'learned' && !learned)  return false;
     return true;
   });
 
@@ -1182,12 +1220,16 @@ function updateHub(items) {
 
   const k = activeKey();
   const L = (!isSpecial(k) && k !== 'all') ? sections().find(x => x.key === k) : null;
-  const learned = items.filter(i => isLearned(i.key)).length;
+  const learned  = items.filter(i => isLearned(i.key)).length;
+  const learning = items.filter(i => isLearning(i.key)).length;
+  const fresh    = items.length - learned - learning;
   const due = items.filter(i => isDue(i.key)).length;
 
   const parts = [];
   if (L && !isVerbs()) parts.push(fmt(L.date));
   parts.push(`<b>${items.length}</b> ${unit()}${items.total > items.length ? ' (takrorlarsiz)' : ''}`);
+  if (fresh)    parts.push(`${fresh} yangi`);
+  if (learning) parts.push(`${learning} o'rganilmoqda`);
   parts.push(`${learned} yodlangan`);
   if (due && k !== 'due') parts.push(`${due} takror`);
   if (query) parts.push(`qidiruv: «${escapeHtml(query)}»`);
@@ -1196,18 +1238,39 @@ function updateHub(items) {
   $('hubSub').innerHTML = parts.join(' · ');
   $$('.hub-desc', hub).forEach(d => { d.textContent = isVerbs() ? d.dataset.verbs : d.dataset.words; });
 
+  /* Har bir mashq bo'yicha: yodlanmagan so'zlardan nechtasi hali undan o'tmagan.
+     Birinchi tugallanmagan mashq "keyingi qadam" sifatida ajratiladi. */
+  const open = items.filter(i => !isLearned(i.key));
+  let nextMarked = false;
+  $$('.hub-mode', hub).forEach(b => {
+    const bit  = stageBit(b.dataset.mode);
+    const left = open.filter(i => !(stOf(i.key) & bit)).length;
+    const el   = b.querySelector('.hub-left');
+    el.textContent = !open.length ? '' : left ? `${left} ta qoldi` : '✓ bajarildi';
+    el.classList.toggle('is-done', !!open.length && !left);
+    const isNext = !nextMarked && left > 0;
+    if (isNext) nextMarked = true;
+    b.classList.toggle('is-next', isNext);
+  });
+
   const wasHidden = hub.hidden;
   hub.hidden = false;
   if (wasHidden) updateSegPill($('hubSizeSeg'), true);
 }
 
 /* Mashq tartibi — eng foydalisi birinchi:
-   muddati kelganlar → qiyinlar → yangilar → qolganlari.
+   muddati kelganlar → shu mashqdan hali o'tmaganlar (qiyinlar, Takrorga yaqinlar, yangilar)
+   → shu mashqdan o'tib bo'lganlar → yodlanganlar.
    Kartochkada guruh ichida dars tartibi saqlanadi, mashqlarda aralashtiriladi. */
 function orderForSession(items, mode) {
-  const buckets = [[], [], [], []];
+  const bit = stageBit(mode);
+  const buckets = [[], [], [], [], [], []];
   items.forEach(i => {
-    const b = isDue(i.key) ? 0 : isHard(i.key) ? 1 : !isLearned(i.key) ? 2 : 3;
+    const k = i.key;
+    const need = !isLearned(k) && !(stOf(k) & bit);
+    const b = isDue(k) ? 0
+            : need     ? (isHard(k) ? 1 : stOf(k) ? 2 : 3)
+            : (isHard(k) || !isLearned(k)) ? 4 : 5;
     buckets[b].push(i);
   });
   if (mode !== 'card') buckets.forEach(b => shuffle(b));
@@ -1228,10 +1291,10 @@ function startSession(baseDir, pool, origin) {
   session = {
     items: pool.slice(), idx: 0, flipped: false, finished: false,
     baseDir, dir: baseDir, origin,
-    learned: new Set(), mistakes: new Set(), repeated: 0,
-    spellOk: 0, spellTotal: 0, spellChecked: false, spellLastOk: false, hintLevel: 0,
-    testOk: 0, testTotal: 0, testAnswered: false, testLastOk: false, answerIdx: -1,
-    autoTimer: null
+    passed: new Set(), graduated: new Set(), mistakes: new Set(), repeated: 0,
+    spellOk: 0, spellTotal: 0, spellChecked: false, hintLevel: 0,
+    testOk: 0, testTotal: 0, testAnswered: false, answerIdx: -1,
+    lastResult: null, autoTimer: null
   };
   $('trainMode').textContent = MODE_LABEL[baseDir] || '';
   if (trainSetupModal.classList.contains('open')) closeModal(trainSetupModal);
@@ -1307,7 +1370,6 @@ function chooseTestOption(i) {
 
   const ok = i === session.answerIdx;
   session.testAnswered = true;
-  session.testLastOk = ok;
   session.testTotal++;
   if (ok) session.testOk++;
 
@@ -1322,15 +1384,20 @@ function chooseTestOption(i) {
   $('tNextBtn').textContent = ok ? 'Keyingi (Enter)' : 'Tushundim, keyingi (Enter)';
   $('tNextBtn').focus({ preventScroll: true });
 
+  applyResult(item, ok ? 'ok' : 'bad');
+
   /* To'g'ri javobda o'zi o'tadi — sur'at saqlansin. Xatoda javobni o'qib olishga vaqt beriladi. */
-  if (ok) session.autoTimer = setTimeout(advanceTest, 1100);
+  if (ok) session.autoTimer = setTimeout(advanceChecked, 1100);
 }
 
-function advanceTest() {
-  if (!session || !session.testAnswered || session.finished) return;
+/* Test, yozish va diktant: natija tekshirilgan zahoti qayd etilgan —
+   bu yerda faqat keyingisiga o'tamiz. To'g'ri bo'lmasa so'z sessiya oxiriga qaytadi. */
+function advanceChecked() {
+  if (!session || session.finished || !session.lastResult) return;
   clearTimeout(session.autoTimer);
-  session.testAnswered = false;                           // ikki marta o'tib ketmasin
-  (session.testLastOk ? markEasy : markHard)();
+  const requeue = session.lastResult !== 'ok';
+  session.lastResult = null;                              // ikki marta o'tib ketmasin
+  nextCard(requeue);
 }
 
 function currentItem() {
@@ -1441,15 +1508,22 @@ function checkSpelling() {
     return { ok, val, correct: accept[0], label: t.label };
   });
 
+  /* Harflar ochilgan bo'lsa, to'g'ri yozilgan javob mashq sifatida hisoblanmaydi.
+     Diktantdagi 1-yordam — faqat ma'nosi, u hisobga olinmaydi. */
+  const lettersShown = session.hintLevel >= (session.dir === 'dict' ? 2 : 1);
+  const result = !allOk ? 'bad' : lettersShown ? 'hint' : 'ok';
+
   session.spellChecked = true;
-  session.spellLastOk = allOk;
   session.spellTotal++;
   if (allOk) session.spellOk++;
 
   const res = $('tSpellResult');
   res.className = 'spell-result ' + (allOk ? 'ok' : 'bad');
-  res.innerHTML = allOk
+  res.innerHTML = result === 'ok'
     ? '<span class="spell-verdict">✓ To‘g‘ri yozdingiz!</span>'
+    : result === 'hint'
+    ? '<span class="spell-verdict">✓ To‘g‘ri, lekin yordam bilan</span>' +
+      '<div class="spell-note">Harflar ochilgani uchun mashq hisoblanmadi — so‘z oxirida yana so‘raladi.</div>'
     : '<span class="spell-verdict">✗ Imloda xato bor</span>' +
       rows.filter(r => !r.ok).map(r => `
         <div class="spell-fix">
@@ -1463,7 +1537,11 @@ function checkSpelling() {
   $('tHintBtn').hidden = true;
 
   revealTrainAnswer(true);
-  (allOk ? $('tEasyBtn') : $('tHardBtn')).focus({ preventScroll: true });
+  $('tHardBtn').hidden = $('tEasyBtn').hidden = true;     // natijani ilovaning o'zi baholaydi
+  $('tNextBtn').hidden = false;
+  $('tNextBtn').textContent = result === 'bad' ? 'Tushundim, keyingi (Enter)' : 'Keyingi (Enter)';
+  $('tNextBtn').focus({ preventScroll: true });
+  applyResult(item, result);
 }
 
 /* Yordam.
@@ -1532,8 +1610,10 @@ function showTrainCard() {
   promptEl.classList.remove('is-icon');
   clearTimeout(session.autoTimer);
   session.testAnswered = false;
+  session.lastResult = null;
   trainWrap.dataset.mode = session.dir;
   fillTrainSentence(item, verb ? vFormsOf(w) : [w[0], w[1]]);
+  renderTrainStages(item);
 
   if (session.dir === 'dict') {
     /* Diktant: hech narsa ko'rsatilmaydi — faqat ovoz. Javob tekshirilgach ochiladi. */
@@ -1636,7 +1716,7 @@ function showTrainCard() {
 
   if (!['spell', 'dict'].includes(session.dir)) $('tShowBtn').textContent = 'Javobni ko\'rsatish (Space)';
 
-  $('tStats').hidden = true;
+  $('tStats').hidden = $('tNote').hidden = true;
   $('tAnswerBox').classList.remove('show');
   $('tShowBtn').hidden = session.dir === 'test';
   $('tHardBtn').hidden = $('tEasyBtn').hidden = $('tRestartBtn').hidden = true;
@@ -1677,45 +1757,68 @@ function revealTrainAnswer(fromCheck) {
   speak(trainSpeakText(item));
 }
 
-/* Qiyin: so'z 1-qutiga qaytadi, xato hisoblanadi va sessiya oxiriga qo'shiladi */
+/* Test, yozish va diktantni ilovaning o'zi tekshiradi — u yerda Qiyin/Oson yo'q */
+const CHECKED_DIRS = new Set(['test', 'spell', 'dict']);
+
+/* Kartochka — Qiyin: mashq "bajarilmagan" bo'ladi, xato hisoblanadi, so'z sessiya oxiriga qaytadi */
 function markHard() {
   const item = currentItem();
-  if (!item || !session.flipped) return;
-
+  if (!item || !session.flipped || CHECKED_DIRS.has(session.dir)) return;
   clearTimeout(session.autoTimer);
-  session.repeated++;
-  session.mistakes.add(item.key);
-  session.learned.delete(item.key);
-  srsAnswer(item.key, false);
-  saveState();
-  buildLessons();
-  syncCardStatus(item.key, false);
-
-  session.items.push(item);      // oxiriga qaytaramiz — chinakam takrorlash
-  session.idx++;
-  showTrainCard();
+  applyResult(item, 'bad');
+  nextCard(true);
 }
 
-/* Oson: keyingi qutiga o'tadi, takrorlash sanasi uzayadi */
+/* Kartochka — Oson: kartochka mashqidan o'tdi (Takrordagi so'z — keyingi qutiga) */
 function markEasy() {
   const item = currentItem();
-  if (!item || !session.flipped) return;
-
+  if (!item || !session.flipped || CHECKED_DIRS.has(session.dir)) return;
   clearTimeout(session.autoTimer);
-  srsAnswer(item.key, true);
+  applyResult(item, 'ok');
+  nextCard(false);
+}
+
+/* Javobni qayd etadi: progress, ro'yxatdagi karta, oynadagi 4 belgi va tabrik */
+function applyResult(item, result) {
+  const stage = DIR_STAGE[session.dir];
+  const graduated = recordAnswer(item.key, stage, result);
+
+  if (result === 'ok')  session.passed.add(item.key);
+  if (result === 'bad') session.mistakes.add(item.key);
+  if (graduated) {
+    session.graduated.add(item.key);
+    toast(`🎉 ${trainSpeakText(item)} — 4/4, Takrorga qo'shildi`);
+  }
+  session.lastResult = result;
+
   saveState();
   buildLessons();
-  syncCardStatus(item.key, true);
+  syncCardStatus(item.key);
+  renderTrainStages(item, stage, result);
+}
 
-  session.learned.add(item.key);
+/* Keyingi so'z. requeue — so'z sessiya oxiriga qaytadi (chinakam takrorlash) */
+function nextCard(requeue) {
+  const item = currentItem();
+  if (requeue && item) { session.items.push(item); session.repeated++; }
   session.idx++;
   showTrainCard();
 }
 
-function syncCardStatus(key, isLearned) {
+/* Mashq oynasidagi 4 belgi. Javobdan keyin o'zgargan belgi "sakraydi" (yoki qizaradi). */
+function renderTrainStages(item, stage, result) {
+  const el = $('tStages');
+  el.innerHTML = stageStripHTML(item.key);
+  const cls = result === 'ok' ? 'flash-ok' : result === 'bad' ? 'flash-bad' : '';
+  if (stage && cls) el.querySelector(`[data-stage="${stage}"]`)?.classList.add(cls);
+}
+
+function syncCardStatus(key) {
+  const learned = isLearned(key);
   $$(`.card[data-key="${CSS.escape(key)}"]`).forEach(card => {
-    card.classList.toggle('is-learned', isLearned);
-    card.querySelector('.check-btn')?.setAttribute('aria-pressed', String(isLearned));
+    card.classList.toggle('is-learned', learned);
+    const strip = card.querySelector('.stages');
+    if (strip) strip.outerHTML = stageStripHTML(key);
   });
 }
 
@@ -1746,9 +1849,10 @@ function finishTraining() {
   stats.replaceChildren();
   const cards = [
     [`${unique} ta`, `${isVerbs() ? 'fe\'l' : 'so\'z'} ko'rildi`],
-    [`${session.learned.size} ta`, 'yodlandi'],
-    [`${session.mistakes.size} ta`, 'xato qilindi']
+    [`${session.passed.size} ta`, 'mashqdan o\'tdi']
   ];
+  if (session.graduated.size) cards.push([`${session.graduated.size} ta`, 'Takrorga qo\'shildi']);
+  cards.push([`${session.mistakes.size} ta`, 'xato qilindi']);
   if (session.spellTotal) cards.push([`${session.spellOk}/${session.spellTotal}`, 'to\'g\'ri yozildi']);
   if (session.testTotal)  cards.push([`${session.testOk}/${session.testTotal}`, 'to\'g\'ri javob']);
   cards.forEach(([big, small]) => {
@@ -1760,6 +1864,16 @@ function finishTraining() {
     stats.appendChild(d);
   });
   stats.hidden = false;
+
+  /* Shu sessiyadagi so'zlar uchun qolgan mashqlar — keyin nima qilishni aytib turadi */
+  const keys = [...new Set(session.items.map(i => i.key))].filter(k => !isLearned(k));
+  const need = STAGES.map(s => [s, keys.filter(k => !(stOf(k) & s.bit)).length]).filter(([, n]) => n);
+  const oneLeft = keys.filter(k => STAGES.filter(s => !(stOf(k) & s.bit)).length === 1).length;
+  const note = $('tNote');
+  note.textContent = !need.length ? '' :
+    (oneLeft ? `${oneLeft} ta so'z Takrorga 1 qadam qoldi. ` : '') +
+    'Qolgan mashqlar: ' + need.map(([s, n]) => `${s.ico} ${s.name} — ${n} ta`).join(' · ');
+  note.hidden = !need.length;
 
   $('tShowBtn').hidden = $('tHardBtn').hidden = $('tEasyBtn').hidden = true;
   $('tNextBtn').hidden = $('tHintBtn').hidden = true;
@@ -1785,7 +1899,7 @@ $('tSlowBtn').addEventListener('click', () => {
   const item = currentItem();
   if (item) speak(trainSpeakText(item), null, null, { rate: slow ? 0.42 : RATE_SLOW });
 });
-$('tNextBtn').addEventListener('click', advanceTest);
+$('tNextBtn').addEventListener('click', advanceChecked);
 $('tExitBtn').addEventListener('click', () => closeModal(trainModal));
 
 /* Faqat xato qilingan so'zlar bilan, o'sha rejimda qaytadan */
@@ -1830,16 +1944,11 @@ window.addEventListener('keydown', e => {
     if (e.key === 'Escape') { e.preventDefault(); closeModal(trainModal); return; }
     if (session?.finished) return;
 
-    const typing = e.target && e.target.classList && e.target.classList.contains('spell-input');
-
     if (session?.dir === 'spell' || session?.dir === 'dict') {
       if (e.key === 'Enter') {
         e.preventDefault();
         if (!session.spellChecked) checkSpelling();
-        else (session.spellLastOk ? markEasy : markHard)();
-      } else if (!typing && (e.key === '1' || e.key === '2') && session.flipped) {
-        e.preventDefault();
-        (e.key === '1' ? markHard : markEasy)();
+        else advanceChecked();
       }
       return;                                  // Space va harflar inputga tegishli
     }
@@ -1848,7 +1957,7 @@ window.addEventListener('keydown', e => {
       if (!session.testAnswered && /^[1-4]$/.test(e.key)) {
         e.preventDefault(); chooseTestOption(Number(e.key) - 1);
       } else if (session.testAnswered && e.key === 'Enter') {
-        e.preventDefault(); advanceTest();
+        e.preventDefault(); advanceChecked();
       } else if (e.key === ' ') {
         e.preventDefault();
         const it = currentItem();
@@ -1925,7 +2034,8 @@ $('importFile').addEventListener('change', async (e) => {
     const mergeProg = (src, dst) => Object.entries(src || {}).forEach(([k, e]) => {
       if (!e || typeof e !== 'object') return;
       const cur = dst[k];
-      if (!cur || (e.box || 0) > cur.box) dst[k] = { box: e.box || 0, due: e.due || today(), wrong: e.wrong || 0 };
+      if (!cur || (e.box || 0) > cur.box) dst[k] = withStages(e);
+      else if (!cur.box && !e.box) cur.st |= withStages(e).st;          // o'tilgan mashqlar birlashadi
     });
     mergeProg(data.progressWords, progWords);
     mergeProg(data.progressVerbs, progVerbs);
@@ -1935,7 +2045,7 @@ $('importFile').addEventListener('change', async (e) => {
       if (typeof k !== 'string') return;
       const parts = k.split('::');
       const norm = normText(parts.length >= 3 ? parts.slice(2).join('::') : k).trim();
-      if (norm && !dst[norm]) dst[norm] = { box: 2, due: addDays(3), wrong: 0 };
+      if (norm && !dst[norm]) dst[norm] = { box: 2, due: addDays(3), wrong: 0, st: ALL_STAGES };
     });
     addList(wordsIn, progWords);
     addList(verbsIn, progVerbs);
