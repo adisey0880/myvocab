@@ -68,7 +68,7 @@ function saveState() {
       dataset, activeVerbGroup, daily, level, lessonByLevel,
       progressWords: progWords,
       progressVerbs: progVerbs,
-      tsSource, tsCustomKey, tsCount, tsDir, tsOrder, tsStatus, hubCount
+      tsSource, tsCustomKey, tsCount, tsDir, tsOrder, tsStatus, hubCount, hubOrder
     }));
   } catch (e) { /* privat rejim / to'la xotira — jim o'tamiz */ }
 }
@@ -247,6 +247,7 @@ let tsDir       = saved?.tsDir || 'eng_uzb';      // eng_uzb | uzb_eng | spell |
 let tsOrder     = saved?.tsOrder || 'shuffle';    // shuffle | seq
 let tsStatus    = saved?.tsStatus || 'unlearned'; // unlearned | all | learned
 let hubCount    = saved?.hubCount || '20';        // 10 | 20 | all — o'rganish markazidagi mashq hajmi
+let hubOrder    = saved?.hubOrder === 'seq' ? 'seq' : 'shuffle';   // shuffle | seq — markazdagi so'zlar tartibi
 
 /* ---------- SEARCH INDEX (bir marta quriladi) ---------- */
 const ITEMS = [];
@@ -1345,7 +1346,7 @@ function updateHub(items) {
 /* Mashq tartibi — eng foydalisi birinchi:
    muddati kelganlar → shu mashqdan hali o'tmaganlar (qiyinlar, Takrorga yaqinlar, yangilar)
    → shu mashqdan o'tib bo'lganlar → yodlanganlar.
-   Kartochkada guruh ichida dars tartibi saqlanadi, mashqlarda aralashtiriladi. */
+   Guruh ichida — foydalanuvchi tanlovi: "Aralash" yoki "Ketma-ket" (dars tartibi). */
 function orderForSession(items, mode) {
   const bit = stageBit(mode);
   const buckets = [[], [], [], [], [], []];
@@ -1357,7 +1358,7 @@ function orderForSession(items, mode) {
             : (isHard(k) || !isLearned(k)) ? 4 : 5;
     buckets[b].push(i);
   });
-  if (mode !== 'card') buckets.forEach(b => shuffle(b));
+  if (hubOrder === 'shuffle') buckets.forEach(b => shuffle(b));
   return buckets.flat();
 }
 
@@ -1387,6 +1388,7 @@ function startSession(baseDir, pool, origin) {
 }
 
 seg('hubSizeSeg', hubCount, v => { hubCount = v; });
+seg('hubOrderSeg', hubOrder, v => { hubOrder = v; });
 $$('#hub .hub-mode').forEach(b => b.addEventListener('click', () => startHub(b.dataset.mode)));
 
 /* ── Test ──────────────────────────────────────────────────── */
@@ -1469,9 +1471,7 @@ function chooseTestOption(i) {
   $('tNextBtn').focus({ preventScroll: true });
 
   applyResult(item, ok ? 'ok' : 'bad');
-
-  /* To'g'ri javobda o'zi o'tadi — sur'at saqlansin. Xatoda javobni o'qib olishga vaqt beriladi. */
-  if (ok) session.autoTimer = setTimeout(advanceChecked, 1100);
+  /* O'zi o'tib ketmaydi — javobni o'qib olib, Enter yoki "Keyingi" bilan o'tiladi */
 }
 
 /* Test, yozish va diktant: natija tekshirilgan zahoti qayd etilgan —

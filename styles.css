@@ -1798,6 +1798,12 @@ body.modal-open .toast-wrap {
 
 .hub-sub b { color: var(--ink-sub); font-weight: 800; }
 
+.hub-opts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+}
+
 .hub-size {
   display: inline-flex;
   align-items: center;
