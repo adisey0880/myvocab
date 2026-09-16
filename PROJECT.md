@@ -18,12 +18,12 @@
 
 | Параметр | Значение |
 |---|---|
-| Слов | 567 (515 уникальных): Elementary — 507 (463), Pre-Intermediate — 60 (59) |
+| Слов | 640 (578 уникальных): Elementary — 507 (463), Pre-Intermediate — 133 (132) |
 | Модулей | 2 — Elementary (A2) и Pre-Intermediate (B1), см. 3.9 |
 | Неправильных глаголов | 83 (10 групп по типу чередования) |
-| Примеров-предложений | 593 — по одному на каждое слово и глагол (100%) |
+| Примеров-предложений | 653 — по одному на каждое слово и глагол (100%) |
 | Модель прогресса | SRS, 5 коробок + 4 упражнения (`myvocab_settings_v3`, поле `v: 5`) |
-| Уроков | Elementary — 15 дат, 20 тем; Pre-Intermediate — 2 даты, 2 темы |
+| Уроков | Elementary — 15 дат, 20 тем; Pre-Intermediate — 4 даты, 4 темы |
 | Файлы | `index.html`, `styles.css`, `words.js`, `verbs.js`, `sentences.js`, `app.js`, `manifest.json`, `sw.js`, `icon-192.png`, `icon-512.png` |
 | Зависимости | нет, чистый HTML/CSS/JS |
 | Сборка | не требуется |
@@ -38,6 +38,10 @@
 |---|---|---|
 | 15.09.2026 | 1 A / 1 B | 35 |
 | 17.09.2026 | 1 C / 1 D | 25 |
+| 19.09.2026 | 1 E / 1 F | 39 |
+| 22.09.2026 | 1 G / 1 H | 34 |
+
+**1E–1H.** Ещё 13 слов уже были раньше: из Elementary — Title, Reply, Amazed, Annoy, Injure, Fall over, Well-known, Set the scene, Nightmare, Find out; `Burn`, `Hurt`, `Cut` есть в «Fe'llar» (прогресс у слов и глаголов раздельный, а предложение общее — поэтому у существительных «ожог»/«порез» пример глагольный). В 1H пары «фразовый глагол / синоним» (Own up / Confess, Put up with / Tolerate…) записаны одной карточкой: заголовок — фразовый глагол, синоним — подсказкой в переводе: «Tan olmoq (= confess)». Так в «Yozib mashq» нет двусмысленности (перевод один, ответ один), и упражнение тренирует именно замену синонима фразовым глаголом, как в учебнике. `Joke` и `Kid` — две карточки с разными переводами. Исправлено: Astonishing — «Поразительный» (не «Изумлённый»), Satisfy — «Qoniqtirmoq», Get away — «Сбежать» (не «Избегать»), Kashif → Kashf, Xurmat → Hurmat; «I bet», «Get up to», «Bug», «Well-known» получили настоящий перевод вместо английского синонима.
 
 Семь слов уже были в Elementary (A bit, Happiness, Huge, Drop, Rude, Accept, Offer) — у них общий статус и общее предложение. `Drop` встречается в обоих уроках 1-го раздела. При переносе из PDF исправлены опечатки и «переводы» английскими словами: Delighted, Huge, Trouble, Glad, Gist, Have a word — получили нормальный узбекский/русский перевод; Chiqibdi → Chiqindi, Ekra → Ekran, Baxona → Bahona, Take offence — «Xafa bo‘lmoq» (а не «xafa qilmoq»), Cross — «Jahli chiqqan».
 
@@ -285,6 +289,7 @@ daily: { goal: 20, days: { "2026-09-07": 14 }, todayKeys: [...], day: "2026-09-0
 - **Поиск:** если в текущем модуле ничего нет, а в другом есть — кнопка «Elementaryda N ta topildi →».
 - По умолчанию открыт Pre-Intermediate (`level` сохраняется в состоянии).
 - В предложениях `smb` / `sth` в ключе подсвечивают любое слово: «**Give me a call**» для `Give smb a call`.
+- Подсветка учитывает удвоение последней согласной: `kid` → «**kidding**», `slip` → «**slipped**».
 
 ## 4. Функции интерфейса
 

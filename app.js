@@ -310,7 +310,8 @@ function highlightWord(sentence, words) {
   /* har bir qismga qo'shimcha ruxsat: make -> makes, study -> studied */
   /* "smb", "sth" — gapda istalgan so'z: "give smb a call" -> "Give me a call" */
   const WILD = /^(smb|sb|sth|somebody|someone|something)$/i;
-  const flex = p => WILD.test(p) ? "[\\w']+" : esc(p).replace(/e$/, 'e?') + '[a-z]{0,3}';
+  const flex = p => WILD.test(p) ? "[\\w']+"
+    : esc(p).replace(/e$/, 'e?') + (/[bdgklmnprt]$/i.test(p) ? esc(p.slice(-1)) + '?' : '') + '[a-z]{0,3}';
 
   const cands = expandForms(Array.isArray(words) ? words : [words]);
   for (const word of cands) {
