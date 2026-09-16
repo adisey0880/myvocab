@@ -846,6 +846,21 @@ main {
 }
 .seg-level button.on .lv-code { background: rgba(255, 255, 255, 0.22); color: inherit; }
 .lv-short { display: none; }
+/* Boshqa modulda bugun takrorlanadigan so'zlar soni */
+.lv-due {
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10.5px;
+  font-weight: 800;
+  line-height: 1;
+  background: var(--danger);
+  color: #fff;
+}
 
 /* Fe'l kartochkasida uchta ustun bor — biroz kengroq joy kerak */
 body.ds-verbs .grid {

@@ -62,7 +62,7 @@ function migrate(s) {
 function saveState() {
   try {
     localStorage.setItem(STORE_KEY, JSON.stringify({
-      v: 5,
+      v: 6,
       theme: document.documentElement.getAttribute('data-theme'),
       script, accent, slow, activeLesson, filterMode, mode, learnedFilter, advOpen,
       dataset, activeVerbGroup, daily, level, lessonByLevel,
@@ -251,13 +251,38 @@ let hubCount    = saved?.hubCount || '20';        // 10 | 20 | all — o'rganish
 /* ---------- SEARCH INDEX (bir marta quriladi) ---------- */
 const ITEMS = [];
 GROUPS.forEach(g => g.w.forEach(w => {
+  const level = g.level || 'elem';
   ITEMS.push({
-    w, g,
-    level: g.level || 'elem',
-    key: wordKey(w),
+    w, g, level,
+    /* Modullar holati alohida: Pre-Intermediate'dagi "accept" — Elementary'dagisidan boshqa so'z */
+    key: (level === 'elem' ? '' : level + ':') + wordKey(w),
     hay: normText(w.filter(Boolean).join(' '))   // IPA ham qidiruvga kiradi
   });
 }));
+
+/* v5 → v6: Pre-Intermediate so'zlari o'z kalitiga ko'chadi ("feeling" → "preint:feeling").
+   Elementary'da ham bor so'zlar ko'chirilmaydi — ular Elementary'niki bo'lib qoladi. */
+const LEGACY_KEYS_PREINT = {
+  'have a word with smb': 'have a word (with somebody)', 'trip': 'trip (v)', 'bleed': 'bleed (v)',
+  'sprain': 'sprain (v)', 'scare': 'scare (v)', 'burn': 'burn (n)', 'cut': 'cut (n)',
+  'joke': 'joke (v) / kid (v)', 'kid': 'joke (v) / kid (v)', 'get over': 'recover from / get over',
+  'examine': 'examine / look carefully at', 'own up': 'confess / own up', 'carry on': 'carry on / continue',
+  'come back': 'come back / return', 'get away': 'get away / escape', 'give back': 'give back / return something',
+  'look up to': 'look up to / respect', 'make up': 'make up / invent', 'put up with': 'put up with / tolerate',
+  'run after': 'run after / chase'
+};
+function migrateLevelKeys() {
+  const elemKeys = new Set(ITEMS.filter(i => i.level === 'elem').map(i => i.key));
+  const preKeys  = new Set(ITEMS.filter(i => i.level === 'preint').map(i => i.key));
+  Object.keys(progWords).forEach(k => {
+    if (k.includes(':') || elemKeys.has(k)) return;
+    const nk = 'preint:' + (LEGACY_KEYS_PREINT[k] || k);
+    if (!preKeys.has(nk)) return;
+    if (!progWords[nk]) progWords[nk] = progWords[k];
+    delete progWords[k];
+  });
+}
+if ((saved?.v || 0) < 6) migrateLevelKeys();
 
 const VERB_ITEMS = [];
 VERB_GROUPS.forEach(g => g.v.forEach(v => {
@@ -274,7 +299,6 @@ const levelItems  = () => {
   return _lvItems;
 };
 const activeItems = () => isVerbs() ? VERB_ITEMS : levelItems();   // joriy modul
-const allItems    = () => isVerbs() ? VERB_ITEMS : ITEMS;          // barcha modullar
 
 /* ---------- MISOL GAPLAR ----------
    sentences.js hali yuklanmagan yoki so'z uchun gap yozilmagan
@@ -313,7 +337,9 @@ function highlightWord(sentence, words) {
   const flex = p => WILD.test(p) ? "[\\w']+"
     : esc(p).replace(/e$/, 'e?') + (/[bdgklmnprt]$/i.test(p) ? esc(p.slice(-1)) + '?' : '') + '[a-z]{0,3}';
 
-  const cands = expandForms(Array.isArray(words) ? words : [words]);
+  const clean = s => s.replace(/\((?:n|v|adj|adv)\)/gi, '').replace(/[()]/g, '').replace(/\s+/g, ' ').trim();
+  const cands = expandForms((Array.isArray(words) ? words : [words]).filter(Boolean)
+    .flatMap(w => String(w).split('/')).map(clean));
   for (const word of cands) {
   const parts = String(word).trim().split(/\s+/);
   const last  = parts[parts.length - 1];
@@ -401,10 +427,9 @@ $('themeBtn').addEventListener('click', () => {
 setTheme(document.documentElement.getAttribute('data-theme') || 'dark');
 
 /* ---------- DATA AGGREGATION ---------- */
-/* allLevels — "Takror"/"Qiyin" uchun: barcha modullarning darslari */
 const _secCache = new Map();
 let _verbSecCache = null;
-function sections(allLevels = false) {
+function sections() {
   if (isVerbs()) {
     if (!_verbSecCache) {
       _verbSecCache = VERB_GROUPS.map(g => ({
@@ -415,11 +440,11 @@ function sections(allLevels = false) {
     return _verbSecCache;
   }
 
-  const ck = `${filterMode}|${allLevels ? '*' : level}`;
+  const ck = `${filterMode}|${level}`;
   if (_secCache.has(ck)) return _secCache.get(ck);
 
   const map = new Map();
-  (allLevels ? ITEMS : levelItems()).forEach(item => {
+  levelItems().forEach(item => {
     const key = filterMode === 'date' ? item.g.date : item.g.topic;
     let o = map.get(key);
     if (!o) { o = { key, date: item.g.date, topic: item.g.topic, level: item.level, w: [] }; map.set(key, o); }
@@ -473,6 +498,7 @@ function speak(text, card, onEnd, opts = {}) {
   if (!synth) { showWarn(); onEnd && onEnd(); return; }
 
   synth.cancel();
+  text = String(text).replace(/\((?:n|v|adj|adv)\)/gi, '').replace(/\s*\/\s*/g, ', ');
   const u = new SpeechSynthesisUtterance(text);
   u.lang  = accent === 'us' ? 'en-US' : 'en-GB';
   u.rate  = opts.rate || (slow ? RATE_SLOW : RATE_NORMAL);
@@ -640,7 +666,7 @@ function render({ animate = true } = {}) {
 
   const special = isSpecial(activeKey()) ? SPECIAL[activeKey()] : null;
 
-  sections(!!special).forEach(L => {
+  sections().forEach(L => {
     if (!special && activeKey() !== 'all' && activeKey() !== L.key) return;
 
     const rows = L.w.filter(i => matchesFilters(i) && (!special || special(i.key)));
@@ -653,8 +679,7 @@ function render({ animate = true } = {}) {
       h.querySelector('h2').textContent = L.title;
       h.querySelector('.date').textContent = `${L.hint} · ${rows.length} ta`;
     } else {
-      h.querySelector('h2').textContent = (filterMode === 'date' ? fmt(L.date) : L.topic) +
-        (special ? ` · ${LEVELS[L.level].code}` : '');       // Takrorda — qaysi moduldan
+      h.querySelector('h2').textContent = filterMode === 'date' ? fmt(L.date) : L.topic;
       h.querySelector('.date').textContent = filterMode === 'date'
         ? `${rows.length} ta so'z`
         : `${fmt(L.date)} · ${rows.length} ta so'z`;
@@ -823,7 +848,7 @@ function seg(id, initialVal, cb) {
    'hard' — mashg'ulotda ikki va undan ko'p xato qilingan so'zlar */
 const SPECIAL = { due: isDue, hard: isHard };
 const isSpecial = k => Object.prototype.hasOwnProperty.call(SPECIAL, k);
-const countSpecial = kind => allItems().filter(i => SPECIAL[kind](i.key)).length;   // barcha modullardan
+const countSpecial = kind => activeItems().filter(i => SPECIAL[kind](i.key)).length;   // joriy modul
 
 /* ---------- LESSON CHIPS ---------- */
 const lessonsWrap = $('lessons');
@@ -903,9 +928,27 @@ function buildLessons() {
   });
 
   lessonsWrap.replaceChildren(frag);
+  updateLevelBadges();
   lessonsWrap.scrollLeft = scrollLeft;
   populateTsSelect(secs);
   updateHub(visibleItems());
+}
+
+/* Takror har modulda alohida — boshqa modulda bugun takrorlanadigan so'zlar bo'lsa,
+   uning tugmasida son chiqadi (esdan chiqmasin) */
+function updateLevelBadges() {
+  $$('#levelSeg button').forEach(b => {
+    const lv = b.dataset.v;
+    const n = lv === level ? 0 : new Set(ITEMS.filter(i => {
+      const e = progWords[i.key];
+      return i.level === lv && e && e.box >= 1 && e.due <= today();
+    }).map(i => i.key)).size;
+    const el = b.querySelector('.lv-due');
+    el.textContent = String(n);
+    el.hidden = !n;
+    b.title = `${LEVELS[lv].name} — ${LEVELS[lv].code}` + (n ? ` · bugun ${n} ta so'z takrorlanadi` : '');
+  });
+  updateSegPill($('levelSeg'), true);
 }
 
 function populateTsSelect(secs) {
@@ -1132,7 +1175,7 @@ function buildPool() {
 
   if (tsSource === 'current') {
     const special = isSpecial(activeKey()) ? SPECIAL[activeKey()] : null;
-    sections(!!special).forEach(L => {
+    sections().forEach(L => {
       if (!special && activeKey() !== 'all' && activeKey() !== L.key) return;
       L.w.forEach(item => {
         if (special && !special(item.key)) return;
@@ -1229,7 +1272,7 @@ function visibleItems() {
   const special = isSpecial(activeKey()) ? SPECIAL[activeKey()] : null;
   const seen = new Set(), out = [];
   let total = 0;
-  sections(!!special).forEach(L => {
+  sections().forEach(L => {
     if (!special && activeKey() !== 'all' && activeKey() !== L.key) return;
     L.w.forEach(i => {
       if (!matchesFilters(i) || (special && !special(i.key))) return;
@@ -1245,9 +1288,9 @@ function visibleItems() {
 
 function hubTitle() {
   const k = activeKey();
-  const allLv = isVerbs() ? '' : ' · ' + Object.values(LEVELS).map(l => l.code).join(' + ');
-  if (k === 'due')  return '🔁 Bugungi takror' + allLv;
-  if (k === 'hard') return '⚠️ Qiyin so\'zlar' + allLv;
+  const lv = isVerbs() ? '' : ' · ' + LEVELS[level].code;
+  if (k === 'due')  return '🔁 Bugungi takror' + lv;
+  if (k === 'hard') return '⚠️ Qiyin so\'zlar' + lv;
   if (k === 'all')  return isVerbs() ? 'Barcha fe\'llar' : `${LEVELS[level].name}: barcha so'zlar`;
   const L = sections().find(x => x.key === k);
   if (!L) return isVerbs() ? 'Fe\'llar' : 'So\'zlar';
@@ -1476,10 +1519,17 @@ function normSpell(s) {
    So'zlarda — britancha va amerikacha imlo; fe'llarda — V2 va V3. */
 function spellTargets(item) {
   /* "was/were" kabi shakllarda har biri alohida ham qabul qilinadi */
+  /* "Burn (n)" yoki "Have a word (with somebody)" — qavssiz yozilgani ham to'g'ri */
+  const bare = s => s.replace(/\([^)]*\)/g, ' ').replace(/\s+/g, ' ').trim();
   const acc = (...xs) => {
-    const out = xs.filter(Boolean);
-    xs.filter(Boolean).forEach(x => { if (x.includes('/')) out.push(...x.split('/')); });
-    return [...new Set(out)];
+    const out = [];
+    xs.filter(Boolean).forEach(x => {
+      [x, ...(x.includes('/') ? x.split('/') : [])].forEach(v => {
+        v = v.trim();
+        out.push(v, bare(v), v.replace(/[()]/g, ''));
+      });
+    });
+    return [...new Set(out.filter(Boolean))];
   };
   if (isVerbs()) {
     const uk = item.v[0].split('|');
@@ -2115,6 +2165,7 @@ $('importFile').addEventListener('change', async (e) => {
     });
     mergeProg(data.progressWords, progWords);
     mergeProg(data.progressVerbs, progVerbs);
+    migrateLevelKeys();
 
     /* Eski format: shunchaki ro'yxat */
     const addList = (arr, dst) => (arr || []).forEach(k => {
