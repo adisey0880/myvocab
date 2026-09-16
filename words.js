@@ -1,10 +1,78 @@
 /* ============================================================
    myvocab — Vocabulary Dataset
-   Contains all 507 vocabulary items across lessons & dates.
+   Contains all 567 vocabulary items across lessons & dates.
+   level: "elem" — Elementary (A2), "preint" — Pre-Intermediate (B1).
+   Har bir daraja saytda alohida modul; so'z holati (progress) umumiy.
    Format: [en_BR, en_US(or null), ipaBR, latBR, cyrBR, ipaUS, latUS, cyrUS, RU, UZ]
    ============================================================ */
 const GROUPS = [
- {date:"2026-09-05", topic:"9 G / 9 H", w:[
+ /* ═══════════ PRE-INTERMEDIATE (B1) ═══════════ */
+ {level:"preint", date:"2026-09-17", topic:"1 C / 1 D", w:[
+  ["Gist",null,"/dʒɪst/","jist","жист","/dʒɪst/","jist","жист","Суть, основная мысль","Asosiy mazmun"],
+  ["Borrow",null,"/ˈbɒrəʊ/","borou","бороу","/ˈbɑːroʊ/","baarou","баароу","Брать взаймы, одалживать","Qarzga olmoq"],
+  ["Truth",null,"/truːθ/","truuth","труус","/truːθ/","truuth","труус","Правда","Haqiqat"],
+  ["As soon as possible",null,"/əz ˌsuːn əz ˈpɒsəbl/","az suun az posabl","аз суун аз посабл","/əz ˌsuːn əz ˈpɑːsəbl/","az suun az paasabl","аз суун аз паасабл","Как можно скорее","Iloji boricha tezroq"],
+  ["Insist",null,"/ɪnˈsɪst/","insist","инсист","/ɪnˈsɪst/","insist","инсист","Настаивать","Qattiq turib olmoq, talab qilmoq"],
+  ["Go away",null,"/ˌɡəʊ əˈweɪ/","gou avey","гоу авэй","/ˌɡoʊ əˈweɪ/","gou avey","гоу авэй","Уходить","Ketib qolmoq, yo‘qolmoq"],
+  ["Behave",null,"/bɪˈheɪv/","biheyv","бихэйв","/bɪˈheɪv/","biheyv","бихэйв","Вести себя","O‘zini tutmoq"],
+  ["Separate",null,"/ˈseprət/","seprat","сэпрат","/ˈsepərət/","separat","сэпарат","Отдельный","Alohida"],
+  ["Distract",null,"/dɪˈstrækt/","distrekt","дистрэкт","/dɪˈstrækt/","distrekt","дистрэкт","Отвлекать","Chalg‘itmoq"],
+  ["Summary",null,"/ˈsʌməri/","samari","самари","/ˈsʌməri/","samari","самари","Краткое изложение, вывод","Qisqacha mazmun, xulosa"],
+  ["Refuse",null,"/rɪˈfjuːz/","rifyuuz","рифьююз","/rɪˈfjuːz/","rifyuuz","рифьююз","Отказываться","Rad etmoq"],
+  ["Calm down",null,"/ˌkɑːm ˈdaʊn/","kaam daun","каам даун","/ˌkɑːm ˈdaʊn/","kaam daun","каам даун","Успокоиться","Tinchlanmoq"],
+  ["Revise",null,"/rɪˈvaɪz/","rivayz","ривайз","/rɪˈvaɪz/","rivayz","ривайз","Повторять (материал), пересматривать","Takrorlamoq, qayta ko‘rib chiqmoq"],
+  ["Accept",null,"/əkˈsept/","aksept","аксэпт","/əkˈsept/","aksept","аксэпт","Принимать","Qabul qilmoq"],
+  ["Offer",null,"/ˈɒfə(r)/","ofa","офа","/ˈɔːfɚ/","oofar","оофар","Предлагать","Taklif qilmoq"],
+  ["Make a plan",null,"/ˌmeɪk ə ˈplæn/","meyk a plen","мэйк а плэн","/ˌmeɪk ə ˈplæn/","meyk a plen","мэйк а плэн","Составить план","Reja tuzmoq"],
+  ["Take a break",null,"/ˌteɪk ə ˈbreɪk/","teyk a breyk","тэйк а брэйк","/ˌteɪk ə ˈbreɪk/","teyk a breyk","тэйк а брэйк","Сделать перерыв","Tanaffus qilmoq"],
+  ["Tell the truth",null,"/ˌtel ðə ˈtruːθ/","tel dhe truuth","тэл зэ труус","/ˌtel ðə ˈtruːθ/","tel dhe truuth","тэл зэ труус","Говорить правду","Haqiqatni aytmoq"],
+  ["Have a word with smb",null,"/ˌhæv ə ˈwɜːd wɪð ˌsʌmbədi/","hev a vyod vidh sambadi","хэв а вёд виз самбади","/ˌhæv ə ˈwɝːd wɪð ˌsʌmbɑːdi/","hev a vyord vidh sambaadi","хэв а вёрд виз самбаади","Поговорить с кем-то","Kim bilandir gaplashib olmoq"],
+  ["Take offence","Take offense","/ˌteɪk əˈfens/","teyk afens","тэйк афэнс","/ˌteɪk əˈfens/","teyk afens","тэйк афэнс","Обижаться","Xafa bo‘lmoq, ranjimoq"],
+  ["Give smb a call",null,"/ˌɡɪv ˌsʌmbədi ə ˈkɔːl/","giv sambadi a kool","гив самбади а коол","/ˌɡɪv ˌsʌmbɑːdi ə ˈkɑːl/","giv sambaadi a kaal","гив самбаади а каал","Позвонить кому-нибудь","Kimgadir qo‘ng‘iroq qilmoq"],
+  ["Make an excuse",null,"/ˌmeɪk ən ɪkˈskjuːs/","meyk an ikskyuus","мэйк ан икскьюус","/ˌmeɪk ən ɪkˈskjuːs/","meyk an ikskyuus","мэйк ан икскьюус","Оправдываться, придумать отговорку","Bahona qilmoq"],
+  ["Tell a lie",null,"/ˌtel ə ˈlaɪ/","tel a lay","тэл а лай","/ˌtel ə ˈlaɪ/","tel a lay","тэл а лай","Солгать","Yolg‘on gapirmoq"],
+  ["Screen",null,"/skriːn/","skriin","скриин","/skriːn/","skriin","скриин","Экран","Ekran"],
+  ["Drop",null,"/drɒp/","drop","дроп","/drɑːp/","draap","драап","Ронять, уронить; падать","Tushirib yubormoq; tushmoq"]
+ ]},
+ {level:"preint", date:"2026-09-15", topic:"1 A / 1 B", w:[
+  ["Feeling",null,"/ˈfiːlɪŋ/","fiiling","фиилинг","/ˈfiːlɪŋ/","fiiling","фиилинг","Чувство, ощущение","His-tuyg‘u"],
+  ["Anxious",null,"/ˈæŋkʃəs/","enkshas","энкшас","/ˈæŋkʃəs/","enkshas","энкшас","Беспокойный, тревожный","Xavotirlangan"],
+  ["Ashamed",null,"/əˈʃeɪmd/","asheymd","ашэймд","/əˈʃeɪmd/","asheymd","ашэймд","Пристыженный","Uyalgan"],
+  ["Bored",null,"/bɔːd/","bood","боод","/bɔːrd/","boord","боорд","Скучающий","Zerikkan"],
+  ["Confused",null,"/kənˈfjuːzd/","kanfyuuzd","канфьююзд","/kənˈfjuːzd/","kanfyuuzd","канфьююзд","Растерянный, сбитый с толку","Chalkashib ketgan, gangigan"],
+  ["Cross",null,"/krɒs/","kros","крос","/krɔːs/","kroos","кроос","Сердитый","Jahli chiqqan, badjahl"],
+  ["Delighted",null,"/dɪˈlaɪtɪd/","dilaytid","дилайтид","/dɪˈlaɪtɪd/","dilaydid","дилайдид","В восторге, очень рад","Juda xursand"],
+  ["Disappointed",null,"/ˌdɪsəˈpɔɪntɪd/","disapoyntid","дисапойнтид","/ˌdɪsəˈpɔɪntɪd/","disapoyntid","дисапойнтид","Разочарованный","Hafsalasi pir bo‘lgan"],
+  ["Embarrassed",null,"/ɪmˈbærəst/","imberast","имбэраст","/ɪmˈberəst/","imberast","имбэраст","Смущённый","Xijolat bo‘lgan"],
+  ["Envious",null,"/ˈenviəs/","envias","энвиас","/ˈenviəs/","envias","энвиас","Завистливый","Hasadgo‘y"],
+  ["Excited",null,"/ɪkˈsaɪtɪd/","iksaytid","иксайтид","/ɪkˈsaɪtɪd/","iksaydid","иксайдид","Взволнованный (радостно)","Hayajonlangan"],
+  ["Frightened",null,"/ˈfraɪtnd/","fraytnd","фрайтнд","/ˈfraɪtnd/","fraytnd","фрайтнд","Испуганный","Qo‘rqqan"],
+  ["Proud",null,"/praʊd/","praud","прауд","/praʊd/","praud","прауд","Гордый","Faxrlangan, mag‘rur"],
+  ["Relieved",null,"/rɪˈliːvd/","riliivd","рилиивд","/rɪˈliːvd/","riliivd","рилиивд","Почувствовавший облегчение","Yengil tortgan, xotirjam"],
+  ["Suspicious",null,"/səˈspɪʃəs/","saspishas","саспишас","/səˈspɪʃəs/","saspishas","саспишас","Подозрительный","Shubhali"],
+  ["Upset",null,"/ʌpˈset/","apset","апсэт","/ʌpˈset/","apset","апсэт","Расстроенный","Xafa"],
+  ["Extremely",null,"/ɪkˈstriːmli/","ikstriimli","икстриимли","/ɪkˈstriːmli/","ikstriimli","икстриимли","Чрезвычайно, крайне","Nihoyatda, haddan tashqari"],
+  ["Very",null,"/ˈveri/","veri","вэри","/ˈveri/","veri","вэри","Очень","Juda"],
+  ["Rather",null,"/ˈrɑːðə(r)/","raadha","рааза","/ˈræðɚ/","redhar","рэзар","Довольно","Ancha"],
+  ["A bit",null,"/ə ˈbɪt/","a bit","а бит","/ə ˈbɪt/","a bit","а бит","Немного","Ozgina, bir oz"],
+  ["A little bit",null,"/ə ˌlɪtl ˈbɪt/","a litl bit","а литл бит","/ə ˌlɪtl ˈbɪt/","a lidl bit","а лидл бит","Немножко","Biroz"],
+  ["Winner",null,"/ˈwɪnə(r)/","vina","вина","/ˈwɪnɚ/","vinar","винар","Победитель","G‘olib"],
+  ["Happiness",null,"/ˈhæpinəs/","hepinas","хэпинас","/ˈhæpinəs/","hepinas","хэпинас","Счастье","Baxt"],
+  ["Unlucky",null,"/ʌnˈlʌki/","anlaki","анлаки","/ʌnˈlʌki/","anlaki","анлаки","Невезучий, неудачливый","Omadsiz"],
+  ["Huge",null,"/hjuːdʒ/","hyuuj","хьююж","/hjuːdʒ/","hyuuj","хьююж","Огромный","Juda katta, ulkan"],
+  ["Major",null,"/ˈmeɪdʒə(r)/","meyja","мэйжа","/ˈmeɪdʒɚ/","meyjar","мэйжар","Главный, крупный","Asosiy, jiddiy"],
+  ["Terrible",null,"/ˈterəbl/","terabl","тэрабл","/ˈterəbl/","terabl","тэрабл","Ужасный","Dahshatli"],
+  ["Argument",null,"/ˈɑːɡjumənt/","aagyumant","аагьюмант","/ˈɑːrɡjumənt/","aargyumant","ааргьюмант","Спор, ссора","Bahs, janjal"],
+  ["Drop",null,"/drɒp/","drop","дроп","/drɑːp/","draap","драап","Ронять, уронить; падать","Tushirib yubormoq; tushmoq"],
+  ["Refuse collector",null,"/ˈrefjuːs kəˌlektə(r)/","refyuus kalekta","рэфьюус калэкта","/ˈrefjuːs kəˌlektɚ/","refyuus kalektar","рэфьюус калэктар","Сборщик мусора","Chiqindi yig‘uvchi"],
+  ["Trouble",null,"/ˈtrʌbl/","trabl","трабл","/ˈtrʌbl/","trabl","трабл","Проблема, неприятность","Muammo, tashvish"],
+  ["Glad",null,"/ɡlæd/","gled","глэд","/ɡlæd/","gled","глэд","Рад","Xursand, mamnun"],
+  ["It's over",null,"/ɪts ˈəʊvə(r)/","its ouva","итс оува","/ɪts ˈoʊvɚ/","its ouvar","итс оувар","Всё кончено","Hammasi tugadi"],
+  ["Warning",null,"/ˈwɔːnɪŋ/","vooning","воонинг","/ˈwɔːrnɪŋ/","voorning","воорнинг","Предупреждение","Ogohlantirish"],
+  ["Rude",null,"/ruːd/","ruud","руд","/ruːd/","ruud","руд","Грубый","Qo‘pol"]
+ ]},
+ /* ═══════════ ELEMENTARY (A2) ═══════════ */
+ {level:"elem", date:"2026-09-05", topic:"9 G / 9 H", w:[
   ["Comparison",null,"/kəmˈpærɪsn/","kamperisn","кампэрисн","/kəmˈperəsn/","kamperasn","кампэрасн","Сравнение","Taqqoslash"],
   ["Above",null,"/əˈbʌv/","abav","абав","/əˈbʌv/","abav","абав","Выше, над","Yuqorida, ustida"],
   ["Bright",null,"/braɪt/","brayt","брайт","/braɪt/","brayt","брайт","Яркий","Yorqin"],
@@ -25,7 +93,7 @@ const GROUPS = [
   ["Although",null,"/ɔːlˈðəʊ/","ooldhou","оолзоу","/ɔːlˈðoʊ/","ooldhou","оолзоу","Несмотря на, хотя","…ga qaramasdan"],
   ["Contrast",null,"/kənˈtrɑːst/","kantraast","кантрааст","/kənˈtræst/","kantrest","кантрэст","Противопоставлять, сравнивать","Taqqoslamoq, qiyoslamoq"]
  ]},
- {date:"2026-09-03", topic:"9 F", w:[
+ {level:"elem", date:"2026-09-03", topic:"9 F", w:[
   ["In the middle of nowhere",null,"/ɪn ðə ˌmɪdl əv ˈnəʊweə(r)/","in dhe midl av nouvea","ин зэ мидл ав ноувэа","/ɪn ðə ˌmɪdl əv ˈnoʊwer/","in dhe midl av nouver","ин зэ мидл ав ноувэр","У чёрта на куличках, очень далеко","Juda uzoqda, olis joyda"],
   ["Clear",null,"/klɪə(r)/","klia","клиа","/klɪr/","klir","клир","Чистый, прозрачный","Toza, tiniq"],
   ["Peaceful",null,"/ˈpiːsfl/","piisfl","пиисфл","/ˈpiːsfl/","piisfl","пиисфл","Мирный, спокойный","Tinch, osoyishta"],
@@ -51,7 +119,7 @@ const GROUPS = [
   ["Return",null,"/rɪˈtɜːn/","rityon","ритён","/rɪˈtɝːn/","rityorn","ритёрн","Возвращаться","Qaytib kelmoq"],
   ["Crime",null,"/kraɪm/","kraym","крайм","/kraɪm/","kraym","крайм","Преступление","Jinoyat"]
  ]},
- {date:"2026-08-29", topic:"9 C / 9 E", w:[
+ {level:"elem", date:"2026-08-29", topic:"9 C / 9 E", w:[
   ["Accommodation",null,"/əˌkɒməˈdeɪʃn/","akomadeyshn","акомадэйшн","/əˌkɑːməˈdeɪʃn/","akaamadeyshn","акаамадэйшн","Помещение, жильё","Turar joy"],
   ["Residence",null,"/ˈrezɪdəns/","rezidans","рэзиданс","/ˈrezɪdəns/","rezidans","рэзиданс","Место проживания","Turar joy, yashash joyi"],
   ["Own",null,"/əʊn/","oun","оун","/oʊn/","oun","оун","Владеть (глагол)","Egalik qilmoq"],
@@ -76,7 +144,7 @@ const GROUPS = [
   ["Take medicine",null,"/ˌteɪk ˈmedsn/","teyk medsn","тэйк мэдсн","/ˌteɪk ˈmedɪsn/","teyk medisn","тэйк мэдисн","Принимать лекарство","Dori ichmoq"],
   ["Have a lot of arguments",null,"/ˌhæv ə lɒt əv ˈɑːɡjumənts/","hev a lot av aagyumants","хэв а лот ав аагьюмантс","/ˌhæv ə lɑːt əv ˈɑːrɡjumənts/","hev a laat av aargyumants","хэв а лаат ав ааргьюмантс","Часто ссориться, много спорить","Ko‘p bahslashmoq"]
  ]},
- {date:"2026-08-27", topic:"9 A / 9 B", w:[
+ {level:"elem", date:"2026-08-27", topic:"9 A / 9 B", w:[
   ["Attractive",null,"/əˈtræktɪv/","atrektiv","атрэктив","/əˈtræktɪv/","atrektiv","атрэктив","Привлекательный","Jozibali"],
   ["Comfortable",null,"/ˈkʌmftəbl/","kamftabl","камфтабл","/ˈkʌmfɚtəbl/","kamfartabl","камфартабл","Удобный","Qulay"],
   ["Modern",null,"/ˈmɒdn/","modn","модн","/ˈmɑːdɚn/","maadarn","маадарн","Современный","Zamonaviy"],
@@ -110,7 +178,7 @@ const GROUPS = [
   ["Recent",null,"/ˈriːsnt/","riisnt","рииснт","/ˈriːsnt/","riisnt","рииснт","Недавний","So‘nggi, yaqinda bo‘lgan"],
   ["Emphasise","Emphasize","/ˈemfəsaɪz/","emfasayz","эмфасайз","/ˈemfəsaɪz/","emfasayz","эмфасайз","Подчёркивать, выделять","Alohida urg‘u bermoq"]
  ]},
- {date:"2026-08-25", topic:"8 G / 8 H", w:[
+ {level:"elem", date:"2026-08-25", topic:"8 G / 8 H", w:[
   ["Negotiating",null,"/nɪˈɡəʊʃieɪtɪŋ/","nigoushieyting","нигоушиэйтинг","/nɪˈɡoʊʃieɪtɪŋ/","nigoushieyding","нигоушиэйдинг","Вести переговоры","Muzokara olib borish"],
   ["High jump",null,"/ˈhaɪ dʒʌmp/","hay jamp","хай жамп","/ˈhaɪ dʒʌmp/","hay jamp","хай жамп","Прыжок в высоту","Balandlikka sakrash"],
   ["Long jump",null,"/ˈlɒŋ dʒʌmp/","long jamp","лонг жамп","/ˈlɔːŋ dʒʌmp/","loong jamp","лоонг жамп","Прыжок в длину","Uzoqqa sakrash"],
@@ -143,7 +211,7 @@ const GROUPS = [
   ["Racket",null,"/ˈrækɪt/","rekit","рэкит","/ˈrækɪt/","redit","рэдит","Ракетка","Raketka"],
   ["Apologise","Apologize","/əˈpɒlədʒaɪz/","apolajayz","аполажайз","/əˈpɑːlədʒaɪz/","apaalajayz","апаалажайз","Извиняться","Kechirim so‘ramoq"]
  ]},
- {date:"2026-08-22", topic:"8 E / 8 F", w:[
+ {level:"elem", date:"2026-08-22", topic:"8 E / 8 F", w:[
   ["Beat",null,"/biːt/","biit","биит","/biːt/","biit","биит","Побеждать, побороть","Yengmoq, qarshi kurashmoq"],
   ["Cancer",null,"/ˈkænsə(r)/","kensa","кэнса","/ˈkænsɚ/","kensar","кэнсар","Рак (болезнь)","Saraton kasalligi"],
   ["Title",null,"/ˈtaɪtl/","taytl","тайтл","/ˈtaɪtl/","taydl","тайдл","Заголовок","Sarlavha"],
@@ -196,7 +264,7 @@ const GROUPS = [
   ["Recent",null,"/ˈriːsnt/","riisnt","рииснт","/ˈriːsnt/","riisnt","рииснт","Недавний","So‘nggi, yaqinda bo‘lgan"],
   ["Brave",null,"/breɪv/","breyv","брэйв","/breɪv/","breyv","брэйв","Храбрый","Jasur"]
  ]},
- {date:"2026-08-20", topic:"8 C / 8 D", w:[
+ {level:"elem", date:"2026-08-20", topic:"8 C / 8 D", w:[
   ["Prediction",null,"/prɪˈdɪkʃn/","pridikshn","придикшн","/prɪˈdɪkʃn/","pridikshn","придикшн","Предсказание","Bashorat"],
   ["Rock face",null,"/ˈrɒk feɪs/","rok feys","рок фэйс","/ˈrɑːk feɪs/","raak feys","раак фэйс","Скала, отвесная стена","Qoya yuzasi, tosh yuzi"],
   ["Rope",null,"/rəʊp/","roup","роуп","/roʊp/","roup","роуп","Верёвка","Arqon"],
@@ -214,7 +282,7 @@ const GROUPS = [
   ["Own",null,"/əʊn/","oun","оун","/oʊn/","oun","оун","Собственный","Shaxsiy, o‘z"],
   ["Rest",null,"/rest/","rest","рэст","/rest/","rest","рэст","Остаток","Qoldiq"]
  ]},
- {date:"2026-08-18", topic:"8 A / 8 B", w:[
+ {level:"elem", date:"2026-08-18", topic:"8 A / 8 B", w:[
   ["Active",null,"/ˈæktɪv/","ektiv","эктив","/ˈæktɪv/","ektiv","эктив","Активный","Faol"],
   ["How often",null,"/ˌhaʊ ˈɒfn/","hau ofn","хау офн","/ˌhaʊ ˈɔːfn/","hau oofn","хау оофн","Как часто","Qancha vaqtda, qanchalik tez-tez"],
   ["Normally",null,"/ˈnɔːməli/","noomali","ноомали","/ˈnɔːrməli/","noormali","ноормали","Обычно","Odatda"],
@@ -233,7 +301,7 @@ const GROUPS = [
   ["Support",null,"/səˈpɔːt/","sapoot","сапоот","/səˈpɔːrt/","sapoort","сапоорт","Поддерживать","Qo‘llab-quvvatlamoq"],
   ["Supporter",null,"/səˈpɔːtə(r)/","sapoota","сапоота","/səˈpɔːrtɚ/","sapoordar","сапоордар","Сторонник, болельщик","Tarafdor, muxlis"]
  ]},
- {date:"2026-08-15", topic:"7 G", w:[
+ {level:"elem", date:"2026-08-15", topic:"7 G", w:[
   ["Price",null,"/praɪs/","prays","прайс","/praɪs/","prays","прайс","Цена","Narx"],
   ["Look for",null,"/ˈlʊk fə(r)/","luk fo","лук фо","/ˈlʊk fɚ/","luk far","лук фар","Искать","Qidirmoq"],
   ["Popular",null,"/ˈpɒpjələ(r)/","popyula","попьюла","/ˈpɑːpjəlɚ/","paapyular","паапьюлар","Популярный","Mashhur"],
@@ -258,7 +326,7 @@ const GROUPS = [
   ["Currency",null,"/ˈkʌrənsi/","karansi","каранси","/ˈkɜːrənsi/","kyoransi","кёранси","Валюта","Valyuta"],
   ["Payment method",null,"/ˈpeɪmənt ˈmeθəd/","peymant methad","пэймант мэсад","/ˈpeɪmənt ˈmeθəd/","peymant methad","пэймант мэсад","Способ оплаты","To‘lov usuli"]
  ]},
- {date:"2026-08-15", topic:"7 H", w:[
+ {level:"elem", date:"2026-08-15", topic:"7 H", w:[
   ["Narrative",null,"/ˈnærətɪv/","nerativ","нэратив","/ˈnerətɪv/","neradiv","нэрадив","Рассказ, повествование","Hikoya"],
   ["Locked",null,"/lɒkt/","lokt","локт","/lɑːkt/","laakt","лаакт","Заблокирован","Qulflangan"],
   ["Electronic device",null,"/ɪˌlekˈtrɒnɪk dɪˈvaɪs/","ilektronik divays","илэктроник дивайс","/ɪˌlekˈtrɑːnɪk dɪˈvaɪs/","ilektraanik divays","илэктраник дивайс","Электронное устройство, гаджет","Elektron qurilma"],
@@ -284,7 +352,7 @@ const GROUPS = [
   ["Particular",null,"/pəˈtɪkjələ(r)/","patikyula","патикьюла","/pɚˈtɪkjəlɚ/","partikyular","партикьюлар","Особенный, конкретный","Maxsus, alohida"],
   ["Event",null,"/ɪˈvent/","ivent","ивэнт","/ɪˈvent/","ivent","ивэнт","Событие","Hodisa, voqea"]
  ]},
- {date:"2026-08-13", topic:"7 E", w:[
+ {level:"elem", date:"2026-08-13", topic:"7 E", w:[
   ["Put on",null,"/ˌpʊt ˈɒn/","put on","пут он","/ˌpʊt ˈɑːn/","pud aan","пуд аан","Надевать","Kiyib olmoq"],
   ["Back up",null,"/ˌbæk ˈʌp/","bek ap","бэк ап","/ˌbæk ˈʌp/","bek ap","бэк ап","Резервное копирование","Zaxiralamoq"],
   ["Plug in",null,"/ˌplʌɡ ˈɪn/","plag in","плаг ин","/ˌplʌɡ ˈɪn/","plag in","плаг ин","Подключать","Ulamoq"],
@@ -301,7 +369,7 @@ const GROUPS = [
   ["Loud",null,"/laʊd/","laud","лауд","/laʊd/","laud","лауд","Громкий","Baland (ovoz)"],
   ["Application",null,"/ˌæplɪˈkeɪʃn/","eplikeyshn","эпликэйшн","/ˌæpləˈkeɪʃən/","eplakeyshn","эплакэйшн","Заявление","Ariza"]
  ]},
- {date:"2026-08-13", topic:"7 F", w:[
+ {level:"elem", date:"2026-08-13", topic:"7 F", w:[
   ["Cyberbullying",null,"/ˈsaɪbəbʊliɪŋ/","saybabuliing","сайбабулиинг","/ˈsaɪbɚbʊliɪŋ/","saybarbuliing","сайбарбулиинг","Кибербуллинг, интернет-травля","Kiber zo‘ravonlik"],
   ["Mention",null,"/ˈmenʃn/","menshn","мэншн","/ˈmenʃən/","menshn","мэншн","Упоминать","Eslatib o‘tmoq"],
   ["Fit",null,"/fɪt/","fit","фит","/fɪt/","fit","фит","Подходить, быть впору","Mos kelmoq"],
@@ -323,7 +391,7 @@ const GROUPS = [
   ["Environment",null,"/ɪnˈvaɪrənmənt/","invayranmant","инвайранмант","/ɪnˈvaɪrənmənt/","invayranmant","инвайранмант","Окружающая среда","Atrof-muhit"],
   ["Celebrity",null,"/səˈlebrəti/","salebrati","сэлэбрати","/səˈlebrəti/","salebradi","сэлэбради","Знаменитость","Mashhur shaxs, yulduz"]
  ]},
- {date:"2026-08-11", topic:"7 C / 7 D", w:[
+ {level:"elem", date:"2026-08-11", topic:"7 C / 7 D", w:[
   ["Instruction",null,"/ɪnˈstrʌkʃn/","instrakshn","инстракшн","/ɪnˈstrʌkʃən/","instrakshn","инстракшн","Инструкция","Ko‘rsatma"],
   ["Experience",null,"/ɪkˈspɪəriəns/","ikspiarians","икспиарианс","/ɪkˈspɪriəns/","ikspirians","икспирианс","Опыт; пережить","Tajriba; boshdan kechirmoq"],
   ["Slow",null,"/sləʊ/","slou","слоу","/sloʊ/","slou","слоу","Медленный","Sekin"],
@@ -358,7 +426,7 @@ const GROUPS = [
   ["Useless",null,"/ˈjuːsləs/","yuuslas","юслас","/ˈjuːsləs/","yuuslas","юслас","Бесполезный","Foydasiz"],
   ["Write down",null,"/ˌraɪt ˈdaʊn/","rayt daun","райт даун","/ˌraɪt ˈdaʊn/","rayd daun","райд даун","Записывать","Yozib qo‘ymoq"]
  ]},
- {date:"2026-08-08", topic:"7 A", w:[
+ {level:"elem", date:"2026-08-08", topic:"7 A", w:[
   ["Digital",null,"/ˈdɪdʒɪtl/","dijitl","дижитл","/ˈdɪdʒətl/","dijatl","дижатл","Цифровой","Raqamli"],
   ["Equipment",null,"/ɪˈkwɪpmənt/","ikwipmant","иквипмант","/ɪˈkwɪpmənt/","ikwipmant","иквипмант","Оборудование","Jihoz"],
   ["Modern",null,"/ˈmɒdn/","modn","моди̇н","/ˈmɑːdɚn/","maadarn","маадарн","Современный","Zamonaviy"],
@@ -379,7 +447,7 @@ const GROUPS = [
   ["Scan",null,"/skæn/","sken","скэн","/skæn/","sken","скэн","Сканировать","Skanerlamoq"],
   ["Surf the web",null,"/sɜːf ðə web/","syof dhe veb","сёф зэ вэб","/sɝːf ðə web/","syorf dhe veb","сёрф зэ вэб","Сидеть в интернете","Internetda yurish"]
  ]},
- {date:"2026-08-08", topic:"7 B", w:[
+ {level:"elem", date:"2026-08-08", topic:"7 B", w:[
   ["Upload",null,"/ˌʌpˈləʊd/","aploud","аплоуд","/ˈʌploʊd/","aploud","аплоуд","Загружать","Yuklamoq"],
   ["Conversation",null,"/ˌkɒnvəˈseɪʃn/","konvaseyshn","конвасэйшн","/ˌkɑːnvɚˈseɪʃn/","kaanvarseyshn","каанварсэйшн","Разговор","Suhbat"],
   ["Flash drive",null,"/ˈflæʃ draɪv/","flesh drayv","флэш драйв","/ˈflæʃ draɪv/","flesh drayv","флэш драйв","Флешка","Fleshka"],
@@ -401,7 +469,7 @@ const GROUPS = [
   ["Give up",null,"/ˌɡɪv ˈʌp/","giv ap","гив ап","/ˌɡɪv ˈʌp/","giv ap","гив ап","Бросать (привычку)","Tashlamoq, to‘xtatish"],
   ["Piece",null,"/piːs/","piis","пиис","/piːs/","piis","пиис","Кусок, часть","Parcha"]
  ]},
- {date:"2026-08-01", topic:"6 C / 6 D", w:[
+ {level:"elem", date:"2026-08-01", topic:"6 C / 6 D", w:[
   ["Miss",null,"/mɪs/","mis","мис","/mɪs/","mis","мис","Пропускать","O‘tqazib yubormoq"],
   ["Grass",null,"/ɡrɑːs/","graas","граас","/ɡræs/","gres","грэс","Трава","O‘t, maysa"],
   ["Paw",null,"/pɔː/","poo","поо","/pɑː/","paa","паа","Лапа","Panja"],
@@ -426,7 +494,7 @@ const GROUPS = [
   ["Count",null,"/kaʊnt/","kaunt","каунт","/kaʊnt/","kaunt","каунт","Считать","Sanamoq"],
   ["Guess",null,"/ɡes/","ges","гэс","/ɡes/","ges","гэс","Предполагать","Taxmin qilmoq"]
  ]},
- {date:"2026-08-06", topic:"6 G", w:[
+ {level:"elem", date:"2026-08-06", topic:"6 G", w:[
   ["Relaxing",null,"/rɪˈlæksɪŋ/","rileksing","рилэксинг","/rɪˈlæksɪŋ/","rileksing","рилэксинг","Расслабляющий","Dam oldiradigan"],
   ["Quiet",null,"/ˈkwaɪət/","kwayat","квайат","/ˈkwaɪət/","kwayat","квайат","Тихий","Tinch"],
   ["Warm",null,"/wɔːm/","voom","воом","/wɔːrm/","vorm","ворм","Теплый","Issiq, iliq"],
@@ -461,7 +529,7 @@ const GROUPS = [
   ["Look down",null,"/ˌlʊk ˈdaʊn/","luk daun","лук даун","/ˌlʊk ˈdaʊn/","luk daun","лук даун","Смотреть вниз","Pastga qaramoq"],
   ["Climb",null,"/klaɪm/","klaym","клайм","/klaɪm/","klaym","клайм","Взбираться, подниматься","Yuqoriga tirmashib chiqmoq"]
  ]},
- {date:"2026-08-06", topic:"6 H", w:[
+ {level:"elem", date:"2026-08-06", topic:"6 H", w:[
   ["Postcard",null,"/ˈpəʊstkɑːd/","poustkaad","поусткаад","/ˈpoʊstkɑːrd/","poustkard","поусткард","Почтовая открытка","Pochta varaqasi"],
   ["Adventure",null,"/ədˈventʃə(r)/","advencha","адвэнча","/ədˈventʃɚ/","advenchar","адвэнчар","Приключение","Sarguzasht"],
   ["Holiday",null,"/ˈhɒlədeɪ/","holidey","холидэй","/ˈhɑːlədeɪ/","haaliday","хаалидэй","Отпуск, день отдыха","Ta’til"],
@@ -483,7 +551,7 @@ const GROUPS = [
   ["Arrangement",null,"/əˈreɪndʒmənt/","areynjmant","арэйнжмант","/əˈreɪndʒmənt/","areynjmant","арэйнжмант","План, договоренность","Kelishuv, tartib"],
   ["Appropriate",null,"/əˈprəʊpriət/","aproupriat","апроуприат","/əˈproʊpriət/","aproupriat","апроуприат","Соответствующий, подходящий","To‘g‘ri keladigan"]
  ]},
- {date:"2026-08-03", topic:"6 E", w:[
+ {level:"elem", date:"2026-08-03", topic:"6 E", w:[
   ["Movement",null,"/ˈmuːvmənt/","muuvment","мувмэнт","/ˈmuːvmənt/","muuvment","мувмэнт","Движение","Harakat"],
   ["Survival",null,"/səˈvaɪvl/","savayvl","сэвайвл","/sɚˈvaɪvəl/","sarvayval","сарвайвал","Выживание","Omon qolish"],
   ["Rainforest",null,"/ˈreɪnfɒrɪst/","reynforist","рэйнфорист","/ˈreɪnˌfɔːrɪst/","reynfoorist","рэйнфоорист","Тропический лес","Tropik o'rmon"],
@@ -499,7 +567,7 @@ const GROUPS = [
   ["Lucky",null,"/ˈlʌki/","laki","лаки","/ˈlʌki/","laki","лаки","Удачный","Omadli"],
   ["Surface",null,"/ˈsɜːfɪs/","syofis","сёфис","/ˈsɝːfɪs/","syorfis","сёрфис","Поверхность","Yuza, sirt"]
  ]},
- {date:"2026-08-03", topic:"6 F", w:[
+ {level:"elem", date:"2026-08-03", topic:"6 F", w:[
   ["Strange",null,"/streɪndʒ/","streynj","стрэйнж","/streɪndʒ/","streynj","стрэйнж","Странный","G'alati"],
   ["Fiction",null,"/ˈfɪkʃn/","fikshn","фикшн","/ˈfɪkʃən/","fikshn","фикшн","Выдумка","Uydirma"],
   ["Traveller","Traveler","/ˈtrævələ(r)/","trevala","трэвала","/ˈtrævələr/","trevalar","трэвалар","Путешественник","Sayohatchi"],

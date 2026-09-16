@@ -65,7 +65,7 @@ function saveState() {
       v: 5,
       theme: document.documentElement.getAttribute('data-theme'),
       script, accent, slow, activeLesson, filterMode, mode, learnedFilter, advOpen,
-      dataset, activeVerbGroup, daily,
+      dataset, activeVerbGroup, daily, level, lessonByLevel,
       progressWords: progWords,
       progressVerbs: progVerbs,
       tsSource, tsCustomKey, tsCount, tsDir, tsOrder, tsStatus, hubCount
@@ -79,6 +79,14 @@ let script        = saved?.script || 'lat';            // lat | cyr
 let accent        = saved?.accent || 'us';             // us  | uk
 let slow          = !!saved?.slow;
 let activeLesson  = saved?.activeLesson || 'all';
+/* Modul (daraja). Har biri o'z darslari bilan alohida; so'z holati (SRS) esa umumiy —
+   bir so'z ikkala modulda bo'lsa, statusi bitta. "Takror" va "Qiyin" — barcha modullardan. */
+const LEVELS = {
+  elem:   { name: 'Elementary',       code: 'A2' },
+  preint: { name: 'Pre-Intermediate', code: 'B1' }
+};
+let level         = LEVELS[saved?.level] ? saved.level : 'preint';
+let lessonByLevel = saved?.lessonByLevel || {};        // har modulda oxirgi tanlangan dars
 let filterMode    = saved?.filterMode || 'date';       // date | topic
 let mode          = (typeof saved?.mode === 'number') ? saved.mode : 0;
 let learnedFilter = saved?.learnedFilter || 'all';     // all | unlearned | learning | learned
@@ -229,7 +237,7 @@ function streakDays() {
 const activeKey  = () => isVerbs() ? activeVerbGroup : activeLesson;
 const setActiveKey = v => { if (isVerbs()) activeVerbGroup = v; else activeLesson = v; };
 const unit       = () => isVerbs() ? 'ta fe\'l' : 'ta so\'z';
-const totalOf    = () => isVerbs() ? TOTAL_VERBS : TOTAL_WORDS;
+const totalOf    = () => isVerbs() ? TOTAL_VERBS : levelItems().length;
 
 /* Mashg'ulot sozlamalari */
 let tsSource    = saved?.tsSource || 'current';   // current | all | custom
@@ -245,6 +253,7 @@ const ITEMS = [];
 GROUPS.forEach(g => g.w.forEach(w => {
   ITEMS.push({
     w, g,
+    level: g.level || 'elem',
     key: wordKey(w),
     hay: normText(w.filter(Boolean).join(' '))   // IPA ham qidiruvga kiradi
   });
@@ -259,7 +268,13 @@ VERB_GROUPS.forEach(g => g.v.forEach(v => {
   });
 }));
 
-const activeItems = () => isVerbs() ? VERB_ITEMS : ITEMS;
+let _lvItems = null, _lvKey = null;
+const levelItems  = () => {
+  if (_lvKey !== level) { _lvItems = ITEMS.filter(i => i.level === level); _lvKey = level; }
+  return _lvItems;
+};
+const activeItems = () => isVerbs() ? VERB_ITEMS : levelItems();   // joriy modul
+const allItems    = () => isVerbs() ? VERB_ITEMS : ITEMS;          // barcha modullar
 
 /* ---------- MISOL GAPLAR ----------
    sentences.js hali yuklanmagan yoki so'z uchun gap yozilmagan
@@ -293,7 +308,9 @@ function expandForms(words) {
 function highlightWord(sentence, words) {
   const esc  = p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   /* har bir qismga qo'shimcha ruxsat: make -> makes, study -> studied */
-  const flex = p => esc(p).replace(/e$/, 'e?') + '[a-z]{0,3}';
+  /* "smb", "sth" — gapda istalgan so'z: "give smb a call" -> "Give me a call" */
+  const WILD = /^(smb|sb|sth|somebody|someone|something)$/i;
+  const flex = p => WILD.test(p) ? "[\\w']+" : esc(p).replace(/e$/, 'e?') + '[a-z]{0,3}';
 
   const cands = expandForms(Array.isArray(words) ? words : [words]);
   for (const word of cands) {
@@ -304,7 +321,7 @@ function highlightWord(sentence, words) {
     parts.length > 1                                           // orada qo'shimcha so'z:
       ? parts.map(flex).join('\\s+(?:\\w+\\s+){0,2}')          // "have a long conversation"
       : null,
-    last.length >= 4                                           // faqat asosiy so'z:
+    last.length >= 4 && !WILD.test(last)                       // faqat asosiy so'z:
       ? esc(last).replace(/s$/, '') + '[a-z]{0,3}'             // "do smb a favour" -> favour
       : null
   ].filter(Boolean);
@@ -383,8 +400,10 @@ $('themeBtn').addEventListener('click', () => {
 setTheme(document.documentElement.getAttribute('data-theme') || 'dark');
 
 /* ---------- DATA AGGREGATION ---------- */
-let _secCache = null, _secCacheMode = null, _verbSecCache = null;
-function sections() {
+/* allLevels — "Takror"/"Qiyin" uchun: barcha modullarning darslari */
+const _secCache = new Map();
+let _verbSecCache = null;
+function sections(allLevels = false) {
   if (isVerbs()) {
     if (!_verbSecCache) {
       _verbSecCache = VERB_GROUPS.map(g => ({
@@ -395,20 +414,21 @@ function sections() {
     return _verbSecCache;
   }
 
-  if (_secCache && _secCacheMode === filterMode) return _secCache;
+  const ck = `${filterMode}|${allLevels ? '*' : level}`;
+  if (_secCache.has(ck)) return _secCache.get(ck);
 
   const map = new Map();
-  ITEMS.forEach(item => {
+  (allLevels ? ITEMS : levelItems()).forEach(item => {
     const key = filterMode === 'date' ? item.g.date : item.g.topic;
     let o = map.get(key);
-    if (!o) { o = { key, date: item.g.date, topic: item.g.topic, w: [] }; map.set(key, o); }
+    if (!o) { o = { key, date: item.g.date, topic: item.g.topic, level: item.level, w: [] }; map.set(key, o); }
     o.w.push(item);
     if (item.g.date > o.date) o.date = item.g.date;
   });
 
-  _secCache = [...map.values()].sort((a, b) => b.date.localeCompare(a.date) || a.topic.localeCompare(b.topic));
-  _secCacheMode = filterMode;
-  return _secCache;
+  const out = [...map.values()].sort((a, b) => b.date.localeCompare(a.date) || a.topic.localeCompare(b.topic));
+  _secCache.set(ck, out);
+  return out;
 }
 
 /* ---------- TTS AUDIO ---------- */
@@ -619,7 +639,7 @@ function render({ animate = true } = {}) {
 
   const special = isSpecial(activeKey()) ? SPECIAL[activeKey()] : null;
 
-  sections().forEach(L => {
+  sections(!!special).forEach(L => {
     if (!special && activeKey() !== 'all' && activeKey() !== L.key) return;
 
     const rows = L.w.filter(i => matchesFilters(i) && (!special || special(i.key)));
@@ -632,7 +652,8 @@ function render({ animate = true } = {}) {
       h.querySelector('h2').textContent = L.title;
       h.querySelector('.date').textContent = `${L.hint} · ${rows.length} ta`;
     } else {
-      h.querySelector('h2').textContent = filterMode === 'date' ? fmt(L.date) : L.topic;
+      h.querySelector('h2').textContent = (filterMode === 'date' ? fmt(L.date) : L.topic) +
+        (special ? ` · ${LEVELS[L.level].code}` : '');       // Takrorda — qaysi moduldan
       h.querySelector('.date').textContent = filterMode === 'date'
         ? `${rows.length} ta so'z`
         : `${fmt(L.date)} · ${rows.length} ta so'z`;
@@ -696,6 +717,22 @@ function render({ animate = true } = {}) {
       <button id="resetFilterBtn" type="button">Filtrni tozalash</button>
     `;
     list.appendChild(e);
+
+    /* Qidirilgan so'z boshqa modulda bo'lsa — o'sha yerga o'tish taklifi */
+    const other = Object.keys(LEVELS).find(lv => lv !== level);
+    const found = (!isVerbs() && query && !special)
+      ? new Set(ITEMS.filter(i => i.level === other && i.hay.includes(query)).map(i => i.key)).size : 0;
+    if (found) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'on';
+      b.textContent = `${LEVELS[other].name}da ${found} ta topildi →`;
+      b.addEventListener('click', () => {
+        lessonByLevel[other] = 'all';
+        $('levelSeg').querySelector(`[data-v="${other}"]`).click();
+      });
+      e.appendChild(b);
+    }
     $('resetFilterBtn').addEventListener('click', () => {
       $('q').value = '';
       query = '';
@@ -785,7 +822,7 @@ function seg(id, initialVal, cb) {
    'hard' — mashg'ulotda ikki va undan ko'p xato qilingan so'zlar */
 const SPECIAL = { due: isDue, hard: isHard };
 const isSpecial = k => Object.prototype.hasOwnProperty.call(SPECIAL, k);
-const countSpecial = kind => activeItems().filter(i => SPECIAL[kind](i.key)).length;
+const countSpecial = kind => allItems().filter(i => SPECIAL[kind](i.key)).length;   // barcha modullardan
 
 /* ---------- LESSON CHIPS ---------- */
 const lessonsWrap = $('lessons');
@@ -879,7 +916,7 @@ function populateTsSelect(secs) {
   all.value = 'all';
   all.textContent = isVerbs()
     ? `Barcha guruhlar (${TOTAL_VERBS} ta)`
-    : `Barcha darslar (${TOTAL_WORDS} ta)`;
+    : `Barcha darslar (${levelItems().length} ta)`;
   frag.appendChild(all);
 
   secs.forEach(L => {
@@ -1069,7 +1106,7 @@ const tsError         = $('tsError');
 
 /* Bitta matn tuguni sifatida yozamiz — aks holda button'ning flex `gap`i
    qavslar orasiga ortiqcha bo'shliq qo'shib yuboradi */
-$('tsAllBtn').textContent = `Hammasi (${TOTAL_WORDS} ta)`;
+$('tsAllBtn').textContent = `Hammasi (${totalOf()} ta)`;
 
 seg('tsSourceSeg', tsSource, v => {
   tsSource = v;
@@ -1094,7 +1131,7 @@ function buildPool() {
 
   if (tsSource === 'current') {
     const special = isSpecial(activeKey()) ? SPECIAL[activeKey()] : null;
-    secs.forEach(L => {
+    sections(!!special).forEach(L => {
       if (!special && activeKey() !== 'all' && activeKey() !== L.key) return;
       L.w.forEach(item => {
         if (special && !special(item.key)) return;
@@ -1191,7 +1228,7 @@ function visibleItems() {
   const special = isSpecial(activeKey()) ? SPECIAL[activeKey()] : null;
   const seen = new Set(), out = [];
   let total = 0;
-  sections().forEach(L => {
+  sections(!!special).forEach(L => {
     if (!special && activeKey() !== 'all' && activeKey() !== L.key) return;
     L.w.forEach(i => {
       if (!matchesFilters(i) || (special && !special(i.key))) return;
@@ -1207,9 +1244,10 @@ function visibleItems() {
 
 function hubTitle() {
   const k = activeKey();
-  if (k === 'due')  return '🔁 Bugungi takror';
-  if (k === 'hard') return '⚠️ Qiyin so\'zlar';
-  if (k === 'all')  return isVerbs() ? 'Barcha fe\'llar' : 'Barcha so\'zlar';
+  const allLv = isVerbs() ? '' : ' · ' + Object.values(LEVELS).map(l => l.code).join(' + ');
+  if (k === 'due')  return '🔁 Bugungi takror' + allLv;
+  if (k === 'hard') return '⚠️ Qiyin so\'zlar' + allLv;
+  if (k === 'all')  return isVerbs() ? 'Barcha fe\'llar' : `${LEVELS[level].name}: barcha so'zlar`;
   const L = sections().find(x => x.key === k);
   if (!L) return isVerbs() ? 'Fe\'llar' : 'So\'zlar';
   if (isVerbs()) return L.title;
@@ -2117,6 +2155,8 @@ function applyDataset(init) {
 
   /* "Sana / Mavzu" filtri faqat so'zlar lug'atiga tegishli */
   $('modeSeg').closest('.segwrap').hidden = isVerbs();
+  $('levelSeg').hidden = isVerbs();                    // fe'llar ro'yxati modullarga bo'linmagan
+  updateSegPill($('levelSeg'), true);
 
   $('q').placeholder = isVerbs() ? 'Fe’l qidirish…' : 'So‘z qidirish…';
   $('tsAllBtn').textContent = `Hammasi (${totalOf()} ta)`;
@@ -2136,10 +2176,37 @@ $$('#dsSeg button').forEach(b => {
   b.textContent = v ? 'Fe\'llar' : 'So‘zlar';
   const n = document.createElement('span');
   n.className = 'ds-n';                       // mobilda yashiriladi — joy tejash uchun
-  n.textContent = String(v ? TOTAL_VERBS : TOTAL_WORDS);
+  n.id = v ? 'dsNVerbs' : 'dsNWords';
+  n.textContent = String(v ? TOTAL_VERBS : levelItems().length);
   b.appendChild(n);
 });
 seg('dsSeg', dataset, (v, init) => { dataset = v; applyDataset(init); });
+
+/* ---------- MODUL (Elementary / Pre-Intermediate) ---------- */
+function applyLevel(init) {
+  $('dsNWords').textContent = String(levelItems().length);
+  if (!isVerbs()) $('tsAllBtn').textContent = `Hammasi (${totalOf()} ta)`;
+
+  /* Tanlangan dars bu modulda yo'q bo'lsa — "Hammasi" (Takror/Qiyin umumiy, ular qoladi) */
+  const inLevel = k => levelItems().some(i => (filterMode === 'date' ? i.g.date : i.g.topic) === k);
+  if (!isSpecial(activeLesson) && activeLesson !== 'all' && !inLevel(activeLesson)) {
+    activeLesson = 'all';
+  }
+  if (init || isVerbs()) return;
+  stopQueue();
+  buildLessons();
+  render();
+  updatePoolCount();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+seg('levelSeg', level, (v, init) => {
+  if (!init && v !== level) {
+    lessonByLevel[level] = activeLesson;                 // har modul o'z darsini eslab qoladi
+    activeLesson = lessonByLevel[v] || 'all';
+  }
+  level = v;
+  applyLevel(init);
+});
 
 seg('scriptSeg',  script,        (v, init) => { script = v; if (!init) render({ animate: false }); });
 seg('accentSeg',  accent,        (v, init) => { accent = v; if (!init) { stopQueue(); render({ animate: false }); } });

@@ -832,6 +832,21 @@ main {
   font-variant-numeric: tabular-nums;
 }
 
+/* ---------- MODUL (daraja) ---------- */
+.seg-level { flex-shrink: 0; }
+.seg-level button { font-weight: 700; gap: 6px; }
+.lv-code {
+  padding: 1px 5px;
+  border-radius: 5px;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  background: var(--badge-bg);
+  color: var(--muted);
+}
+.seg-level button.on .lv-code { background: rgba(255, 255, 255, 0.22); color: inherit; }
+.lv-short { display: none; }
+
 /* Fe'l kartochkasida uchta ustun bor — biroz kengroq joy kerak */
 body.ds-verbs .grid {
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
@@ -1702,6 +1717,8 @@ body.modal-open .toast-wrap {
   h1 { gap: 8px; }
   /* Status: 4 ta tugma bir qatorga sig'sin — tugmalar nomi o'zi tushunarli */
   .segwrap-status .cap { display: none; }
+  .lv-long  { display: none; }
+  .lv-short { display: inline; }
   #learnedSeg button { padding: 6px 8px; }
   .daily-pill { font-size: 11.5px; padding: 3px 9px; gap: 6px; }
   button { padding: 8px 12px; font-size: 13px; }
