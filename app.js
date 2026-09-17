@@ -62,7 +62,7 @@ function migrate(s) {
 function saveState() {
   try {
     localStorage.setItem(STORE_KEY, JSON.stringify({
-      v: 6,
+      v: 7,
       theme: document.documentElement.getAttribute('data-theme'),
       script, accent, slow, activeLesson, filterMode, mode, learnedFilter, advOpen,
       dataset, activeVerbGroup, daily, level, lessonByLevel,
@@ -94,12 +94,13 @@ let advOpen       = (typeof saved?.advOpen === 'boolean') ? saved.advOpen : fals
 let query         = '';
 
 /* ---------- SRS: INTERVAL TAKRORLASH ----------
-   Har bir so'z uchun yozuv:  { box, due, wrong }
-     box   — 0 dan 5 gacha. 0 = hali yodlanmagan.
+   Har bir so'z uchun yozuv:  { box, due, wrong, st, rev }
+     box   — 0 dan 9 gacha. 0 = hali yodlanmagan.
      due   — keyingi takrorlash sanasi (YYYY-MM-DD).
      wrong — mashg'ulotda necha marta xato qilingani.
-   Qutidan qutiga o'tganda oraliq uzayadi: 1 → 3 → 7 → 21 → 60 kun. */
-const SRS_STEPS = [1, 3, 7, 21, 60];
+     rev   — quti oxirgi marta oshgan kun: bir kunda faqat bir marta oshadi.
+   Qutidan qutiga o'tganda oraliq uzayadi: 1 → 3 → 7 → 15 → 21 → 30 → 45 → 60 → 90 kun. */
+const SRS_STEPS = [1, 3, 7, 15, 21, 30, 45, 60, 90];
 const MAX_BOX   = SRS_STEPS.length;
 const HARD_AT   = 2;   // shuncha xatodan keyin "Qiyin" ro'yxatiga tushadi
 const HARD_OUT  = 3;   // shu qutiga yetgach ro'yxatdan chiqadi (haftalik oraliq)
@@ -118,15 +119,35 @@ const ALL_STAGES = 15;
 const DIR_STAGE = { eng_uzb: 'card', uzb_eng: 'card', mix: 'card', test: 'test', spell: 'spell', dict: 'dict' };
 const stageBit  = id => STAGES.find(s => s.id === id)?.bit || 0;
 
-const today = () => new Date().toISOString().slice(0, 10);
-const addDays = (n) => {
-  const d = new Date();
-  d.setDate(d.getDate() + n);
-  return d.toISOString().slice(0, 10);
-};
+/* Sana — telefonning mahalliy vaqti bo'yicha (UTC emas: aks holda Toshkentda
+   soat 05:00 gacha qilingan mashq kechagi kunga yozilardi) */
+const isoDate  = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const today    = () => isoDate(new Date());
+const addDays  = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return isoDate(d); };
+const shiftDay = (iso, n) => { const [y, m, dd] = iso.split('-').map(Number); return isoDate(new Date(y, m - 1, dd + n)); };
 
 let progWords = migrateProgress(saved?.progressWords, saved?.learnedWords);
 let progVerbs = migrateProgress(saved?.progressVerbs, saved?.learnedVerbs);
+
+/* v6 → v7: takror 9 qadamli bo'ldi.
+   1) Eski qutilar shu oraliqdagi yangi qutiga o'tadi: 21 kun → 5-quti, 60 kun → 8-quti.
+   2) Tuzatish: avval quti bir kunda bir necha marta oshib ketardi (test, yozish, diktant —
+      har biri +1). 16.09.2026 dan keyin 3-qutidan yuqoriga chiqqan so'zlar 2-qutiga
+      qaytadi: takror o'sha kundan 3 kun keyin. */
+function migrateSteps(p) {
+  const OLD_STEPS = [1, 3, 7, 21, 60], OLD_TO_NEW = [0, 1, 2, 3, 5, 8];
+  Object.values(p).forEach(e => {
+    if (!e || !(e.box >= 1)) return;
+    const box  = Math.min(e.box, OLD_STEPS.length);
+    const last = shiftDay(e.due, -OLD_STEPS[box - 1]);      // quti oxirgi oshgan kun
+    if (box >= 3 && last >= '2026-09-16') {
+      Object.assign(e, { box: 2, due: shiftDay(last, SRS_STEPS[1]), rev: last });
+    } else {
+      e.box = OLD_TO_NEW[box];
+    }
+  });
+}
+if ((saved?.v || 0) < 7) { migrateSteps(progWords); migrateSteps(progVerbs); }
 
 /* v3 → v4: eski "yodlangan so'zlar ro'yxati" SRS yozuvlariga aylanadi.
    Ular allaqachon o'rganilgan, shuning uchun 2-qutiga qo'yiladi. */
@@ -147,7 +168,9 @@ function migrateProgress(fresh, legacyList) {
 function withStages(e) {
   const box = e.box || 0;
   const st  = box >= 1 ? ALL_STAGES : (typeof e.st === 'number' ? e.st & ALL_STAGES : 0);
-  return { box, due: e.due || today(), wrong: e.wrong || 0, st };
+  const out = { box, due: e.due || today(), wrong: e.wrong || 0, st };
+  if (e.rev) out.rev = e.rev;
+  return out;
 }
 
 /* Kunlik maqsad va ketma-ket kunlar */
@@ -180,7 +203,8 @@ const isHard     = k => {
            'bad'  — xato,
            'hint' — to'g'ri, lekin harflar ochilgan: hisoblanmaydi (lekin xato ham emas).
    Yodlanmagan so'zda: shu mashq belgilanadi; 4/4 bo'lsa — 1-quti, ya'ni ertaga Takrorda.
-   Takrordagi so'zda: to'g'ri — keyingi quti (oldingidek);
+   Takrordagi so'zda: to'g'ri — keyingi quti, lekin FAQAT muddati kelgan bo'lsa va bugun
+   hali oshmagan bo'lsa (bir kunda bir nechta mashq — bitta qadam; muddatidan oldin — oddiy mashq);
    xato — boshiga qaytadi va FAQAT shu mashq qayta "bajarilmagan" bo'ladi.
    Qaytaradi: true — so'z hozirgina Takrorga o'tdi. */
 function recordAnswer(key, stage, result) {
@@ -196,13 +220,14 @@ function recordAnswer(key, stage, result) {
     return false;
   }
   if (e.box >= 1) {
+    if (e.due > today() || e.rev === today()) return false;   // sana o'zgarmaydi
     const box = Math.min(e.box + 1, MAX_BOX);
-    p[key] = { ...e, box, due: addDays(SRS_STEPS[box - 1]) };
+    p[key] = { ...e, box, due: addDays(SRS_STEPS[box - 1]), rev: today() };
     return false;
   }
   const st = e.st | bit;
   if (st !== ALL_STAGES) { p[key] = { ...e, st }; return false; }
-  p[key] = { box: 1, due: addDays(SRS_STEPS[0]), wrong: e.wrong, st };
+  p[key] = { box: 1, due: addDays(SRS_STEPS[0]), wrong: e.wrong, st, rev: today() };
   return true;
 }
 
@@ -227,7 +252,7 @@ function streakDays() {
   if (!daily.days[today()]) d.setDate(d.getDate() - 1);   // bugun hali boshlanmagan bo'lishi mumkin
   let n = 0;
   for (;;) {
-    const key = d.toISOString().slice(0, 10);
+    const key = isoDate(d);
     if (!daily.days[key]) break;
     n++;
     d.setDate(d.getDate() - 1);

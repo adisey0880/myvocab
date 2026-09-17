@@ -8,7 +8,7 @@
    doim eng yangi nusxa, internet bo'lmasa — keshdagi nusxa.
    ============================================================ */
 
-const VERSION    = 'v15';
+const VERSION    = 'v16';
 const CACHE_NAME = `myvocab-${VERSION}`;
 const NET_TIMEOUT = 3500;   // sekin tarmoqda shuncha kutamiz, keyin keshga o'tamiz
 
