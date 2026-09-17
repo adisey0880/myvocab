@@ -102,6 +102,7 @@ let query         = '';
    Qutidan qutiga o'tganda oraliq uzayadi: 1 → 3 → 7 → 15 → 21 → 30 → 45 → 60 → 90 kun. */
 const SRS_STEPS = [1, 3, 7, 15, 21, 30, 45, 60, 90];
 const MAX_BOX   = SRS_STEPS.length;
+const KEEP_STEP = 30;  // 9-qutiga (90 kun) yetgan so'z keyin har 30 kunda so'raladi
 const HARD_AT   = 2;   // shuncha xatodan keyin "Qiyin" ro'yxatiga tushadi
 const HARD_OUT  = 3;   // shu qutiga yetgach ro'yxatdan chiqadi (haftalik oraliq)
 
@@ -222,7 +223,8 @@ function recordAnswer(key, stage, result) {
   if (e.box >= 1) {
     if (e.due > today() || e.rev === today()) return false;   // sana o'zgarmaydi
     const box = Math.min(e.box + 1, MAX_BOX);
-    p[key] = { ...e, box, due: addDays(SRS_STEPS[box - 1]), rev: today() };
+    const gap = e.box >= MAX_BOX ? KEEP_STEP : SRS_STEPS[box - 1];
+    p[key] = { ...e, box, due: addDays(gap), rev: today() };
     return false;
   }
   const st = e.st | bit;
