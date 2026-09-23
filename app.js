@@ -368,28 +368,36 @@ function highlightWord(sentence, words) {
   const clean = s => s.replace(/\((?:n|v|adj|adv)\)/gi, '').replace(/[()]/g, '').replace(/\s+/g, ' ').trim();
   const cands = expandForms((Array.isArray(words) ? words : [words]).filter(Boolean)
     .flatMap(w => String(w).split('/')).map(clean));
-  for (const word of cands) {
-  const parts = String(word).trim().split(/\s+/);
-  const last  = parts[parts.length - 1];
-  const patterns = [
-    parts.map(flex).join('\\s+'),                              // to'liq ibora
-    parts.length > 1                                           // orada qo'shimcha so'z:
-      ? parts.map(flex).join('\\s+(?:\\w+\\s+){0,2}')          // "have a long conversation"
-      : null,
-    last.length >= 4 && !WILD.test(last)                       // faqat asosiy so'z:
-      ? esc(last).replace(/s$/, '') + '[a-z]{0,3}'             // "do smb a favour" -> favour
-      : null
-  ].filter(Boolean);
+  /* Avval barcha shakllar uchun to'liq ibora, keyin "orada qo'shimcha so'z",
+     eng oxirida — faqat asosiy so'z. Aks holda "go crazy" uchun "went crazy"
+     o'rniga shunchaki "crazy" topilib qolardi. */
+  const patternsOf = (word) => {
+    const parts = String(word).trim().split(/\s+/);
+    const last  = parts[parts.length - 1];
+    return [
+      parts.map(flex).join('\\s+'),                              // to'liq ibora
+      parts.length > 1                                           // orada qo'shimcha so'z:
+        ? parts.map(flex).join('\\s+(?:\\w+\\s+){0,2}')          // "have a long conversation"
+        : null,
+      last.length >= 4 && !WILD.test(last)                       // faqat asosiy so'z:
+        ? esc(last).replace(/s$/, '') + '[a-z]{0,3}'             // "do smb a favour" -> favour
+        : null
+    ];
+  };
 
-  for (const p of patterns) {
-    let m;
-    try { m = new RegExp(`\\b(${p})`, 'i').exec(sentence); } catch (e) { continue; }
-    if (m) {
-      return escapeHtml(sentence.slice(0, m.index)) +
-             '<b>' + escapeHtml(m[0]) + '</b>' +
-             escapeHtml(sentence.slice(m.index + m[0].length));
+  const all = cands.map(patternsOf);
+  for (let lvl = 0; lvl < 3; lvl++) {
+    for (const patterns of all) {
+      const p = patterns[lvl];
+      if (!p) continue;
+      let m;
+      try { m = new RegExp(`\\b(${p})`, 'i').exec(sentence); } catch (e) { continue; }
+      if (m) {
+        return escapeHtml(sentence.slice(0, m.index)) +
+               '<b>' + escapeHtml(m[0]) + '</b>' +
+               escapeHtml(sentence.slice(m.index + m[0].length));
+      }
     }
-  }
   }
   return escapeHtml(sentence);
 }
