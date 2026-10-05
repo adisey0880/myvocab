@@ -365,9 +365,12 @@ function highlightWord(sentence, words) {
   const flex = p => WILD.test(p) ? "[\\w']+"
     : esc(p).replace(/e$/, 'e?') + (/[bdgklmnprt]$/i.test(p) ? esc(p.slice(-1)) + '?' : '') + '[a-z]{0,3}';
 
-  const clean = s => s.replace(/\((?:n|v|adj|adv)\)/gi, '').replace(/[()]/g, '').replace(/\s+/g, ' ').trim();
+  /* Qavsdagi izoh ("Burn (n)", "Swimming trunks (men)") ikki xil ko'rinishda sinaladi:
+     izohsiz va qavslarsiz — gapda qaysi biri uchrasa, o'shasi topiladi. */
+  const noParens = s => s.replace(/\([^)]*\)/g, ' ').replace(/\s+/g, ' ').trim();
+  const clean    = s => s.replace(/[()]/g, '').replace(/\s+/g, ' ').trim();
   const cands = expandForms((Array.isArray(words) ? words : [words]).filter(Boolean)
-    .flatMap(w => String(w).split('/')).map(clean));
+    .flatMap(w => String(w).split('/')).flatMap(w => [noParens(w), clean(w)]).filter(Boolean));
   /* Avval barcha shakllar uchun to'liq ibora, keyin "orada qo'shimcha so'z",
      eng oxirida — faqat asosiy so'z. Aks holda "go crazy" uchun "went crazy"
      o'rniga shunchaki "crazy" topilib qolardi. */
