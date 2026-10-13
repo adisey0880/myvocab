@@ -64,7 +64,7 @@ function saveState() {
     localStorage.setItem(STORE_KEY, JSON.stringify({
       v: 7,
       theme: document.documentElement.getAttribute('data-theme'),
-      script, accent, slow, activeLesson, filterMode, mode, learnedFilter, advOpen,
+      script, accent, slow, activeLesson, mode, learnedFilter, advOpen,
       dataset, activeVerbGroup, daily, level, lessonByLevel,
       progressWords: progWords,
       progressVerbs: progVerbs,
@@ -87,7 +87,8 @@ const LEVELS = {
 };
 let level         = LEVELS[saved?.level] ? saved.level : 'preint';
 let lessonByLevel = saved?.lessonByLevel || {};        // har modulda oxirgi tanlangan dars
-let filterMode    = saved?.filterMode || 'date';       // date | topic
+/* Darslar mavzu bo'yicha guruhlanadi; words.js dagi `date` faqat tartib uchun (ko'rsatilmaydi) */
+const filterMode  = 'topic';
 let mode          = (typeof saved?.mode === 'number') ? saved.mode : 0;
 let learnedFilter = saved?.learnedFilter || 'all';     // all | unlearned | learning | learned
 let advOpen       = (typeof saved?.advOpen === 'boolean') ? saved.advOpen : false;
@@ -484,7 +485,7 @@ function sections() {
 
   const map = new Map();
   levelItems().forEach(item => {
-    const key = filterMode === 'date' ? item.g.date : item.g.topic;
+    const key = item.g.topic;
     let o = map.get(key);
     if (!o) { o = { key, date: item.g.date, topic: item.g.topic, level: item.level, w: [] }; map.set(key, o); }
     o.w.push(item);
@@ -718,10 +719,8 @@ function render({ animate = true } = {}) {
       h.querySelector('h2').textContent = L.title;
       h.querySelector('.date').textContent = `${L.hint} · ${rows.length} ta`;
     } else {
-      h.querySelector('h2').textContent = filterMode === 'date' ? fmt(L.date) : L.topic;
-      h.querySelector('.date').textContent = filterMode === 'date'
-        ? `${rows.length} ta so'z`
-        : `${fmt(L.date)} · ${rows.length} ta so'z`;
+      h.querySelector('h2').textContent = L.topic;
+      h.querySelector('.date').textContent = `${rows.length} ta so'z`;
     }
     frag.appendChild(h);
 
@@ -962,7 +961,7 @@ function buildLessons() {
   if (hardN) mkSpecial('⚠️ Qiyin', 'hard', hardN);
 
   secs.forEach(L => {
-    const label = isVerbs() ? L.title : (filterMode === 'date' ? fmt(L.date) : L.topic);
+    const label = isVerbs() ? L.title : L.topic;
     mk(label, L.key, L.w.length, L.w.filter(i => isLearned(i.key)).length);
   });
 
@@ -1005,7 +1004,7 @@ function populateTsSelect(secs) {
   secs.forEach(L => {
     const opt = document.createElement('option');
     opt.value = L.key;
-    const label = isVerbs() ? L.title : (filterMode === 'date' ? fmt(L.date) : L.topic);
+    const label = isVerbs() ? L.title : L.topic;
     opt.textContent = `${label} (${L.w.length} ${unit()})`;
     frag.appendChild(opt);
   });
@@ -1334,7 +1333,7 @@ function hubTitle() {
   const L = sections().find(x => x.key === k);
   if (!L) return isVerbs() ? 'Fe\'llar' : 'So\'zlar';
   if (isVerbs()) return L.title;
-  return filterMode === 'date' ? [...new Set(L.w.map(i => i.g.topic))].join(', ') : L.topic;
+  return L.topic;
 }
 
 function updateHub(items) {
@@ -1349,7 +1348,6 @@ function updateHub(items) {
   const due = items.filter(i => isDue(i.key)).length;
 
   const parts = [];
-  if (L && !isVerbs()) parts.push(fmt(L.date));
   parts.push(`<b>${items.length}</b> ${unit()}${items.total > items.length ? ' (takrorlarsiz)' : ''}`);
   if (fresh)    parts.push(`${fresh} yangi`);
   if (learning) parts.push(`${learning} o'rganilmoqda`);
@@ -1452,7 +1450,7 @@ function buildTestQuestion(item) {
 
   const answer = textOf(item);
   const used = new Set([normText(answer)]);
-  const sameLesson = it => verb ? it.g === item.g : it.g.date === item.g.date;
+  const sameLesson = it => verb ? it.g === item.g : it.g.topic === item.g.topic;
   const candidates = shuffle([...(session.origin?.source || session.items), ...activeItems()]
     .filter(it => it.key !== item.key));
   candidates.sort((a, b) => (sameLesson(b) ? 1 : 0) - (sameLesson(a) ? 1 : 0));
@@ -2244,7 +2242,6 @@ function applyDataset(init) {
   document.body.classList.toggle('ds-verbs', isVerbs());
 
   /* "Sana / Mavzu" filtri faqat so'zlar lug'atiga tegishli */
-  $('modeSeg').closest('.segwrap').hidden = isVerbs();
   $('levelSeg').hidden = isVerbs();                    // fe'llar ro'yxati modullarga bo'linmagan
   updateSegPill($('levelSeg'), true);
 
@@ -2278,7 +2275,7 @@ function applyLevel(init) {
   if (!isVerbs()) $('tsAllBtn').textContent = `Hammasi (${totalOf()} ta)`;
 
   /* Tanlangan dars bu modulda yo'q bo'lsa — "Hammasi" (Takror/Qiyin umumiy, ular qoladi) */
-  const inLevel = k => levelItems().some(i => (filterMode === 'date' ? i.g.date : i.g.topic) === k);
+  const inLevel = k => levelItems().some(i => i.g.topic === k);
   if (!isSpecial(activeLesson) && activeLesson !== 'all' && !inLevel(activeLesson)) {
     activeLesson = 'all';
   }
@@ -2301,15 +2298,6 @@ seg('levelSeg', level, (v, init) => {
 seg('scriptSeg',  script,        (v, init) => { script = v; if (!init) render({ animate: false }); });
 seg('accentSeg',  accent,        (v, init) => { accent = v; if (!init) { stopQueue(); render({ animate: false }); } });
 seg('learnedSeg', learnedFilter, (v, init) => { learnedFilter = v; if (!init) render(); });
-seg('modeSeg',    filterMode,    (v, init) => {
-  filterMode = v;
-  if (init) return;
-  activeLesson = 'all';
-  stopQueue();
-  buildLessons();
-  render();
-  updatePoolCount();
-});
 
 applyMode(false);
 applyAdv();
