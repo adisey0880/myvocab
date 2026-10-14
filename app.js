@@ -362,7 +362,7 @@ function highlightWord(sentence, words) {
   const esc  = p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   /* har bir qismga qo'shimcha ruxsat: make -> makes, study -> studied */
   /* "smb", "sth" — gapda istalgan so'z: "give smb a call" -> "Give me a call" */
-  const WILD = /^(smb|smn|sb|sth|somebody|someone|something)$/i;
+  const WILD = /^(smb|smn|sb|sth|somebody|someone|something|somewhere|anywhere)$/i;
   const flex = p => WILD.test(p) ? "[\\w']+"
     : esc(p).replace(/e$/, 'e?') + (/[bdgklmnprt]$/i.test(p) ? esc(p.slice(-1)) + '?' : '') + '[a-z]{0,3}';
 
