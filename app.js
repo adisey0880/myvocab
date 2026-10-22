@@ -364,7 +364,7 @@ function highlightWord(sentence, words) {
   const esc  = p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   /* har bir qismga qo'shimcha ruxsat: make -> makes, study -> studied */
   /* "smb", "sth" — gapda istalgan so'z: "give smb a call" -> "Give me a call" */
-  const WILD = /^(smb|smn|sb|sth|somebody|someone|something|somewhere|anywhere)$/i;
+  const WILD = /^(smb|smn|smth|sb|sth|somebody|someone|something|somewhere|anywhere)$/i;
   const flex = p => {
     if (WILD.test(p)) return "[\\w']+";
     let core = esc(p).replace(/e$/, 'e?');
@@ -379,8 +379,12 @@ function highlightWord(sentence, words) {
      izohsiz va qavslarsiz — gapda qaysi biri uchrasa, o'shasi topiladi. */
   const noParens = s => s.replace(/\([^)]*\)/g, ' ').replace(/\s+/g, ' ').trim();
   const clean    = s => s.replace(/[()]/g, '').replace(/\s+/g, ' ').trim();
-  const cands = expandForms((Array.isArray(words) ? words : [words]).filter(Boolean)
-    .flatMap(w => String(w).split('/')).flatMap(w => [noParens(w), clean(w)]).filter(Boolean));
+  /* "To get in touch with smb" — gapda infinitiv "to" bo'lmasligi mumkin:
+     "Please get in touch with me." Shuning uchun "to"siz shakli ham sinaladi. */
+  const base = (Array.isArray(words) ? words : [words]).filter(Boolean)
+    .flatMap(w => String(w).split('/')).flatMap(w => [noParens(w), clean(w)]).filter(Boolean);
+  const cands = expandForms([...base, ...base.filter(w => /^to\s+\S/i.test(w))
+                                           .map(w => w.replace(/^to\s+/i, ''))]);
   /* Avval barcha shakllar uchun to'liq ibora, keyin "orada qo'shimcha so'z",
      eng oxirida — faqat asosiy so'z. Aks holda "go crazy" uchun "went crazy"
      o'rniga shunchaki "crazy" topilib qolardi. */
