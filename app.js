@@ -65,7 +65,7 @@ function saveState() {
       v: 7,
       theme: document.documentElement.getAttribute('data-theme'),
       script, accent, slow, activeLesson, mode, learnedFilter, advOpen,
-      dataset, activeVerbGroup, daily, level, lessonByLevel,
+      dataset, activeVerbGroup, daily, level, lessonByLevel, guideSeen,
       progressWords: progWords,
       progressVerbs: progVerbs,
       tsSource, tsCustomKey, tsCount, tsDir, tsOrder, tsStatus, hubCount, hubOrder
@@ -89,6 +89,7 @@ const LEVELS = {
 };
 let level         = LEVELS[saved?.level] ? saved.level : 'preint';
 let lessonByLevel = saved?.lessonByLevel || {};        // har modulda oxirgi tanlangan dars
+let guideSeen     = !!saved?.guideSeen;                // qo'llanma birinchi kirishda bir marta ochiladi
 /* Darslar mavzu bo'yicha guruhlanadi; words.js dagi `date` faqat tartib uchun (ko'rsatilmaydi) */
 const filterMode  = 'topic';
 let mode          = (typeof saved?.mode === 'number') ? saved.mode : 0;
@@ -1194,6 +1195,25 @@ $('trainSetupModal').addEventListener('mousedown', e => {
   if (e.target === $('trainSetupModal')) closeModal($('trainSetupModal'));
 });
 
+/* ---------- QO'LLANMA ----------
+   Birinchi kirishda o'zi ochiladi (yangi foydalanuvchi 4 ta mashq qoidasini
+   bilmasa, ilovadan noto'g'ri foydalanadi). Keyin "?" tugmasi orqali. */
+const guideModal = $('guideModal');
+
+function openGuide() {
+  guideModal.querySelector('.guide-body').scrollTop = 0;
+  openModal(guideModal, '#guideOkBtn');
+}
+function closeGuide() {
+  closeModal(guideModal);
+  if (!guideSeen) { guideSeen = true; saveState(); }
+}
+
+$('guideBtn').addEventListener('click', openGuide);
+$('closeGuide').addEventListener('click', closeGuide);
+$('guideOkBtn').addEventListener('click', closeGuide);
+guideModal.addEventListener('mousedown', e => { if (e.target === guideModal) closeGuide(); });
+
 /* ---------- TRAINING SETUP ---------- */
 const trainSetupModal = $('trainSetupModal');
 const trainModal      = $('trainModal');
@@ -2105,6 +2125,13 @@ $('tRestartBtn').addEventListener('click', () => {
 
 /* ---------- KEYBOARD ---------- */
 window.addEventListener('keydown', e => {
+  /* 0) Qo'llanma */
+  if (guideModal.classList.contains('open')) {
+    trapFocus(guideModal, e);
+    if (e.key === 'Escape') { e.preventDefault(); closeGuide(); }
+    return;
+  }
+
   /* 1) Mashg'ulot sozlamalari */
   if (trainSetupModal.classList.contains('open')) {
     trapFocus(trainSetupModal, e);
@@ -2330,6 +2357,14 @@ buildLessons();
 render();
 updatePoolCount();
 window.addEventListener('load', () => updateSegs(true));
+
+/* Birinchi kirish — qo'llanmani ko'rsatamiz. Zaxiradan tiklanganda ham
+   progress bor bo'lsa bezovta qilmaymiz: bu odam ilovani allaqachon biladi. */
+if (!guideSeen && !Object.keys(progWords).length && !Object.keys(progVerbs).length) {
+  setTimeout(openGuide, 500);
+} else {
+  guideSeen = true;
+}
 
 /* ---------- SERVICE WORKER ---------- */
 if ('serviceWorker' in navigator) {

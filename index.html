@@ -45,6 +45,10 @@
       <span class="daily-streak" id="dailyStreak">🔥 0</span>
       <span class="daily-count" id="dailyCount">0/20</span>
     </span>
+    <button id="guideBtn" aria-label="Qo'llanma" title="Qanday ishlatiladi">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M9.2 9a2.9 2.9 0 0 1 5.6 1c0 1.9-2.8 2.4-2.8 4"/><circle cx="12" cy="17.6" r="1.05" fill="currentColor" stroke="none"/></svg>
+      <span class="btn-label">Qo'llanma</span>
+    </button>
     <button id="themeBtn" aria-label="Mavzuni o'zgartirish" title="Rejimni almashtirish">
       <svg id="themeIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
       <span class="btn-label">Oq rejim</span>
@@ -218,6 +222,135 @@
     <input type="file" id="importFile" accept="application/json,.json" hidden>
   </div>
 </footer>
+
+<!-- Qo'llanma: birinchi kirishda o'zi ochiladi, keyin "?" tugmasi orqali -->
+<div class="modal-overlay" id="guideModal" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+  <div class="guide-card">
+    <div class="train-header">
+      <h3 class="setup-title" id="guideTitle">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="color:var(--accent)" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        Qanday ishlatiladi
+      </h3>
+      <button class="close-modal" id="closeGuide" aria-label="Yopish">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="guide-body">
+
+      <div class="guide-hero">
+        <b>Bu yerda «bilaman» tugmasi yo‘q.</b>
+        So‘z takrorlash ro‘yxatiga faqat <b>4 ta mashqning hammasidan</b> o‘tgach tushadi.
+        Shuning uchun yodlagan so‘zingiz chinakam yodlangan bo‘ladi.
+      </div>
+
+      <section class="guide-sec">
+        <h4>1 · Nimadan boshlash</h4>
+        <ol class="guide-steps">
+          <li>Yuqoridan <b>bitta daraja</b> tanlang: <span class="gk">A2</span> <span class="gk">B1</span> <span class="gk">B1+</span></li>
+          <li>Darslardan birini bosing</li>
+          <li>Ro‘yxat tepasidagi <b>O‘rganish markazi</b>dan <b>🃏 Kartochka</b> ni bosing</li>
+        </ol>
+        <p class="guide-tip">Boshida <b>«Soni: 10»</b> qilib oling — 10 ta so‘z bilan ishlash qulayroq.</p>
+      </section>
+
+      <section class="guide-sec">
+        <h4>2 · To‘rtta mashq — osondan qiyinga</h4>
+        <div class="guide-modes">
+          <div><span class="gn">1</span> <span class="gi">🃏</span> <b>Kartochka</b><em>ko‘rib va eshitib yodlash</em></div>
+          <div><span class="gn">2</span> <span class="gi">✅</span> <b>Test</b><em>4 variantdan to‘g‘risini tanlash</em></div>
+          <div><span class="gn">3</span> <span class="gi">✍️</span> <b>Yozib mashq</b><em>tarjimadan inglizchasini yozish</em></div>
+          <div><span class="gn">4</span> <span class="gi">🎧</span> <b>Eshitib yozish</b><em>so‘z ko‘rinmaydi, faqat eshitasiz</em></div>
+        </div>
+        <p class="guide-tip">Mashq tugagach <b>→ Keyingi mashq</b> tugmasi chiqadi: o‘sha so‘zlar bilan
+          keyingi darvozaga o‘tasiz. Xato qilsangiz, o‘sha mashqning belgisi o‘chadi — qaytadan ishlaysiz.
+          <b>💡 Yordam</b> ishlatilsa mashq hisobga o‘tmaydi.</p>
+      </section>
+
+      <section class="guide-sec">
+        <h4>3 · Kartochkadagi belgilar</h4>
+        <p>Har bir so‘z ostida shu to‘rtta belgi turadi. Yonig‘i — o‘tilgan mashq:</p>
+        <div class="guide-stages"><span class="stg on">🃏</span><span class="stg on">✅</span><span class="stg">✍️</span><span class="stg">🎧</span>
+          <span class="guide-stg-text">2/4 · qoldi: Yozib mashq, Eshitib yozish</span></div>
+        <p class="guide-tip">To‘rttasi ham yongach yozuv <b>🔁 Takror: 12.11.2026</b> ga aylanadi —
+          so‘z o‘sha kuni yana so‘raladi.</p>
+      </section>
+
+      <section class="guide-sec">
+        <h4>4 · Takrorlash sikli</h4>
+        <p>So‘z unutilishidan bir oz oldin qaytib keladi. Oraliqlar:</p>
+        <div class="guide-srs"><b>1</b><b>3</b><b>7</b><b>15</b><b>21</b><b>30</b><b>45</b><b>60</b><b>90</b><span>kun</span></div>
+        <p class="guide-tip">90 kundan keyin — <b>har 30 kunda</b> bir marta eslatib turiladi.<br>
+          Takrorlashda <b>xato qilsangiz so‘z boshiga qaytadi</b>.<br>
+          Bir kunda necha marta takrorlasangiz ham, oraliq <b>faqat bir marta</b> uzayadi.</p>
+      </section>
+
+      <section class="guide-sec">
+        <h4>5 · 🔁 Takror va ⚠️ Qiyin</h4>
+        <p>Darslar qatorida kerak bo‘lganda ikkita maxsus chip paydo bo‘ladi:</p>
+        <ul class="guide-list">
+          <li><b>🔁 Takror</b> — bugun takrorlash vaqti kelgan so‘zlar. <b>Har kuni shundan boshlang</b>
+            va bo‘shatmaguncha yangi so‘zga o‘tmang.</li>
+          <li><b>⚠️ Qiyin</b> — ikki marta xato qilgan so‘zlaringiz. Ro‘yxat o‘zi to‘ladi va o‘zi bo‘shaydi.</li>
+        </ul>
+      </section>
+
+      <section class="guide-sec">
+        <h4>6 · Uchta daraja — uchta alohida modul</h4>
+        <p>A2, B1 va B1+ ning <b>har birida o‘z progressi, o‘z Takror va Qiyin ro‘yxati</b> bor.
+          Bir so‘z ikki darajada uchrasa ham ular bog‘lanmagan.</p>
+        <p class="guide-tip">Boshqa modul tugmasidagi <b>qizil raqam</b> — u yerda bugun takrorlash
+          kerak bo‘lgan so‘zlar soni. Bittasini tanlab, shuni tugating.</p>
+      </section>
+
+      <section class="guide-sec">
+        <h4>7 · Foydali sozlamalar</h4>
+        <ul class="guide-list guide-list-tight">
+          <li><b>Yashirish</b> — tarjimani yoki so‘zni xiralashtiradi; kartochkani bossangiz ochiladi va o‘qib beradi. O‘zini tekshirishning eng tez usuli.</li>
+          <li><b>▶ Hammasi</b> — ekrandagi barcha so‘zlarni ketma-ket o‘qib beradi (yurganda quloqqa).</li>
+          <li><b>Aksent 🇺🇸/🇬🇧</b> — faqat ovoz emas: transkripsiya va ba’zi so‘zlarning imlosi ham o‘zgaradi.</li>
+          <li><b>Yozuv</b> — talaffuz lotinda yoki kirillda.</li>
+          <li><b>Status</b> — ro‘yxatni holati bo‘yicha filtrlaydi.</li>
+          <li><b>🎯 Mashg‘ulot</b> — o‘zingizga moslab: manba, soni, yo‘nalish, tartib, status.</li>
+        </ul>
+      </section>
+
+      <section class="guide-sec guide-warn">
+        <h4>8 · ⚠️ Zaxira olishni unutmang</h4>
+        <p>Progress <b>faqat shu brauzerda</b> saqlanadi — serverda emas. Brauzer tarixini tozalasangiz
+          yoki telefon almashtirsangiz, hammasi yo‘qoladi.</p>
+        <p>Pastdagi <b>⬇ Zaxira olish</b> tugmasini bosing va faylni o‘zingizga yuborib qo‘ying.
+          <b>Haftada bir marta</b> yetarli. Tiklaganda eski va yangi progress birlashtiriladi.</p>
+      </section>
+
+      <section class="guide-sec">
+        <h4>9 · Har kungi tartib</h4>
+        <ol class="guide-steps">
+          <li><b>🔁 Takror</b> ni bo‘shating</li>
+          <li><b>⚠️ Qiyin</b> bo‘lsa, ko‘rib chiqing</li>
+          <li>Yangi darsdan <b>10 ta</b> so‘z oling va <b>4 ta mashqdan</b> o‘tkazing</li>
+          <li>Kunlik maqsadni bajaring — <b>🔥 seriyani uzmang</b></li>
+        </ol>
+      </section>
+
+      <section class="guide-sec guide-kb">
+        <h4>10 · Klaviatura (kompyuterda)</h4>
+        <div class="guide-keys">
+          <div><span class="gk">/</span> qidiruv</div>
+          <div><span class="gk">Space</span> javobni ko‘rsatish</div>
+          <div><span class="gk">1</span> Qiyin · <span class="gk">2</span> Oson</div>
+          <div><span class="gk">1</span>–<span class="gk">4</span> test varianti</div>
+          <div><span class="gk">Enter</span> tekshirish / keyingisi</div>
+          <div><span class="gk">Esc</span> qidiruvni tozalash</div>
+        </div>
+        <p class="guide-tip">Mashq oynasi <b>faqat ✕ bilan</b> yopiladi — tasodifan yopib yuborilmaydi.</p>
+      </section>
+
+    </div>
+
+    <button class="ts-start-btn" id="guideOkBtn">Tushundim, boshladik</button>
+  </div>
+</div>
 
 <!-- Training Setup Modal -->
 <div class="modal-overlay" id="trainSetupModal" role="dialog" aria-modal="true" aria-labelledby="setupTitle">
