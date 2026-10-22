@@ -846,6 +846,11 @@ main {
 }
 .seg-level button.on .lv-code { background: rgba(255, 255, 255, 0.22); color: inherit; }
 .lv-short { display: none; }
+/* Uchta modulning to'liq nomi tor ekranda qatorga sig'maydi — qisqasi ko'rinadi */
+@media (max-width: 900px) {
+  .lv-long  { display: none; }
+  .lv-short { display: inline; }
+}
 /* Boshqa modulda bugun takrorlanadigan so'zlar soni */
 .lv-due {
   min-width: 17px;

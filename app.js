@@ -79,11 +79,13 @@ let script        = saved?.script || 'lat';            // lat | cyr
 let accent        = saved?.accent || 'us';             // us  | uk
 let slow          = !!saved?.slow;
 let activeLesson  = saved?.activeLesson || 'all';
-/* Modul (daraja). Har biri o'z darslari bilan alohida; so'z holati (SRS) esa umumiy —
-   bir so'z ikkala modulda bo'lsa, statusi bitta. "Takror" va "Qiyin" — barcha modullardan. */
+/* Modul (daraja). Har biri to'liq alohida: o'z darslari, o'z progressi,
+   o'z "Takror" va "Qiyin" ro'yxati. Bitta so'z ikki modulda uchrasa ham
+   ularning holati bog'lanmaydi — kalitlari boshqa-boshqa (pastda, ITEMS). */
 const LEVELS = {
-  elem:   { name: 'Elementary',       code: 'A2' },
-  preint: { name: 'Pre-Intermediate', code: 'B1' }
+  elem:   { name: 'Elementary',       code: 'A2'  },
+  preint: { name: 'Pre-Intermediate', code: 'B1'  },
+  inter:  { name: 'Intermediate',     code: 'B1+' }
 };
 let level         = LEVELS[saved?.level] ? saved.level : 'preint';
 let lessonByLevel = saved?.lessonByLevel || {};        // har modulda oxirgi tanlangan dars
@@ -363,8 +365,15 @@ function highlightWord(sentence, words) {
   /* har bir qismga qo'shimcha ruxsat: make -> makes, study -> studied */
   /* "smb", "sth" — gapda istalgan so'z: "give smb a call" -> "Give me a call" */
   const WILD = /^(smb|smn|sb|sth|somebody|someone|something|somewhere|anywhere)$/i;
-  const flex = p => WILD.test(p) ? "[\\w']+"
-    : esc(p).replace(/e$/, 'e?') + (/[bdgklmnprt]$/i.test(p) ? esc(p.slice(-1)) + '?' : '') + '[a-z]{0,3}';
+  const flex = p => {
+    if (WILD.test(p)) return "[\\w']+";
+    let core = esc(p).replace(/e$/, 'e?');
+    /* undosh + y: carry -> carries/carried, study -> studied */
+    if (/[^aeiou]y$/i.test(p)) core = core.slice(0, -1) + '[yi]';
+    /* oxirgi undosh ikkilanishi: stop -> stopped, plan -> planning */
+    const dbl = /[bdgklmnprt]$/i.test(p) ? esc(p.slice(-1)) + '?' : '';
+    return core + dbl + '[a-z]{0,3}';
+  };
 
   /* Qavsdagi izoh ("Burn (n)", "Swimming trunks (men)") ikki xil ko'rinishda sinaladi:
      izohsiz va qavslarsiz — gapda qaysi biri uchrasa, o'shasi topiladi. */
@@ -782,20 +791,23 @@ function render({ animate = true } = {}) {
     `;
     list.appendChild(e);
 
-    /* Qidirilgan so'z boshqa modulda bo'lsa — o'sha yerga o'tish taklifi */
-    const other = Object.keys(LEVELS).find(lv => lv !== level);
-    const found = (!isVerbs() && query && !special)
-      ? new Set(ITEMS.filter(i => i.level === other && i.hay.includes(query)).map(i => i.key)).size : 0;
-    if (found) {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'on';
-      b.textContent = `${LEVELS[other].name}da ${found} ta topildi →`;
-      b.addEventListener('click', () => {
-        lessonByLevel[other] = 'all';
-        $('levelSeg').querySelector(`[data-v="${other}"]`).click();
+    /* Qidirilgan so'z boshqa modullarda bo'lsa — har biriga o'tish taklifi */
+    if (!isVerbs() && query && !special) {
+      Object.keys(LEVELS).filter(lv => lv !== level).forEach(other => {
+        const found = new Set(
+          ITEMS.filter(i => i.level === other && i.hay.includes(query)).map(i => i.key)
+        ).size;
+        if (!found) return;
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'on';
+        b.textContent = `${LEVELS[other].name}da ${found} ta topildi →`;
+        b.addEventListener('click', () => {
+          lessonByLevel[other] = 'all';
+          $('levelSeg').querySelector(`[data-v="${other}"]`).click();
+        });
+        e.appendChild(b);
       });
-      e.appendChild(b);
     }
     $('resetFilterBtn').addEventListener('click', () => {
       $('q').value = '';
